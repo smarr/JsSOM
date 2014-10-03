@@ -59,12 +59,12 @@ function createTestFunctions(element, index, array) {
     var expectedResultType = element[3];
     BasicInterpreterTests.prototype[
         'test' + '_' + testClass + '_' + testMethod] = function () {
-        assertNotNull("Universe not initialized", window.universe);
+        assertNotNull("Universe not initialized", universe);
 
         universe.setAvoidExit(true);
         universe.setupClassPath("Smalltalk:TestSuite/BasicInterpreterTests");
 
-        var actualResult = universe.interpret(testClass, testMethod);
+        var actualResult = universe.interpretMethodInClass(testClass, testMethod);
         assertEqualsSomValue(expectedResult, expectedResultType, actualResult);
     }
 }
