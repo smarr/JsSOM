@@ -16,33 +16,47 @@ var newSystemClass = function () {
 
     // Setup the metaclass hierarchy
     systemClass.setClass(new SClass(null, 0));
-    systemClass.getClass().setClass(somMetaclassClass);
+    systemClass.getClass().setClass(som.metaclassClass);
 
     // Return the freshly allocated system class
     return systemClass;
 };
 
-window.somNil = new SObject(null, 0);
-window.somMetaclassClass = newMetaclassClass();
+window.som = {};
+window.som.nilObject      = new SObject(null, 0);
+window.som.metaclassClass = newMetaclassClass();
+window.som.objectClass    = newSystemClass();
+window.som.nilClass       = newSystemClass();
+window.som.classClass     = newSystemClass();
+window.som.arrayClass     = newSystemClass();
+window.som.symbolClass    = newSystemClass();
+window.som.methodClass    = newSystemClass();
+window.som.integerClass   = newSystemClass();
+window.som.primitiveClass = newSystemClass();
+window.som.stringClass    = newSystemClass();
+window.som.doubleClass    = newSystemClass();
+window.som.booleanClass   = newSystemClass();
+window.som.trueClass      = newSystemClass();
+window.som.falseClass     = newSystemClass();
+window.som.core_lib       = loadCoreLib();
+Object.freeze(window.som);
 
-window.som = {
-    objectClass:    newSystemClass(),
-    nilClass:       newSystemClass(),
-    classClass:     newSystemClass(),
-    arrayClass:     newSystemClass(),
-    symbolClass:    newSystemClass(),
-    methodClass:    newSystemClass(),
-    integerClass:   newSystemClass(),
-    primitiveClass: newSystemClass(),
-    stringClass:    newSystemClass(),
-    doubleClass:    newSystemClass(),
-    booleanClass:   newSystemClass()
-};
+function Association(keySymbol, valueObj) {
+    var key   = keySymbol,
+        value = valueObj;
+    this.getKey   = function ( ) { return key; };
+    this.getValue = function ( ) { return value; };
+    this.setValue = function (v) { value = v; }
+}
 
 function Universe() {
-    var avoidExit,
+    var avoidExit     = false,
+        classPath     = null,
+        globals       = {},
+        objectSystemInitialized = false,
         pathSeparator = ":",
-        classPath;
+        printAST      = false,
+        symbolTable   = {};
 
     this.setAvoidExit = function (bool) {
         avoidExit = bool;
@@ -90,7 +104,7 @@ function Universe() {
                 if (i + 1 >= args.length) {
                     printUsageAndExit();
                 }
-                setupClassPath(args[i + 1]);
+                universe.setupClassPath(args[i + 1]);
                 ++i; // skip class path
                 gotClasspath = true;
             } else if (args[i] == "-d") {
@@ -118,72 +132,154 @@ function Universe() {
         return remainingArgs;
     }
 
+    function newSymbol(string) {
+        var result = new SSymbol(string);
+        symbolTable[string] = result;
+        return result;
+    }
+
+    this.symbolFor = function (string) {
+        // Lookup the symbol in the symbol table
+        var result = symbolTable[string];
+        if (result != null) { return result; }
+
+        return newSymbol(string);
+    };
+
+    function initializeSystemClass(systemClass, superClass, name) {
+        // Initialize the superclass hierarchy
+        if (superClass != null) {
+            systemClass.setSuperClass(superClass);
+            systemClass.getClass().setSuperClass(superClass.getClass());
+        } else {
+            systemClass.getClass().setSuperClass(som.classClass);
+        }
+
+        // Initialize the array of instance fields
+        systemClass.setInstanceFields([]);
+        systemClass.getClass().setInstanceFields([]);
+
+        // Initialize the array of instance invokables
+        systemClass.setInstanceInvokables([]);
+        systemClass.getClass().setInstanceInvokables([]);
+
+        // Initialize the name of the system class
+        systemClass.setName(universe.symbolFor(name));
+        systemClass.getClass().setName(universe.symbolFor(name + " class"));
+
+        // Insert the system class into the dictionary of globals
+        universe.setGlobal(systemClass.getName(), systemClass);
+    }
+
+    this.loadClass = function (name) {
+        // Check if the requested class is already in the dictionary of globals
+        var result = universe.getGlobal(name);
+        if (result != null) { return result; }
+
+        result = universe.loadClassFor(name, null);
+
+        loadPrimitives(result, false);
+
+        universe.setGlobal(name, result);
+        return result;
+    };
+
+    this.loadClassFor = function(name, systemClass) {
+        // Try loading the class from all different paths
+        classPath.forEach(function (cpEntry) {
+            try {
+                // Load the class from a file and return the loaded class
+                var result = compileClass(cpEntry, name.getString(), // TODO: how to arrange the global/static namespace of SOM??
+                    systemClass, universe);
+                if (printAST) {
+                    dump(result.getClass());  // TODO: how to // TODO: how to arrange the global/static namespace of SOM??
+                    dump(result);
+                }
+                return result;
+            } catch (e) {
+                // Continue trying different paths
+            }
+        });
+
+        // The class could not be found.
+        return null;
+    };
+
+    function loadSystemClass(systemClass) {
+        // Load the system class
+        var result = universe.loadClassFor(systemClass.getName(), systemClass);
+
+        if (result === null) {
+            throw new IllegalStateException(systemClass.getName().getString()
+                + " class could not be loaded. "
+                + "It is likely that the class path has not been initialized properly. "
+                + "Please set system property 'system.class.path' or "
+                + "pass the '-cp' command-line parameter.");
+        }
+        loadPrimitives(result, true);
+    }
+
     function initializeObjectSystem() {
-        // Allocate the nil object
-        som.nilObject = new SObject(null, 0);
+        if (objectSystemInitialized) { return; }
 
         // Setup the class reference for the nil object
         som.nilObject.setClass(som.nilClass);
 
         // Initialize the system classes.
-        initializeSystemClass(som.objectClass,                null, "Object");
-        initializeSystemClass(som.classClass,      som.objectClass, "Class");
-        initializeSystemClass(somMetaclassClass,   som.classClass,  "Metaclass");
-        initializeSystemClass(som.nilClass,        som.objectClass, "Nil");
-        initializeSystemClass(som.arrayClass,      som.objectClass, "Array");
-        initializeSystemClass(som.methodClass,     som.objectClass, "Method");
-        initializeSystemClass(som.symbolClass,     som.objectClass, "Symbol");
-        initializeSystemClass(som.integerClass,    som.objectClass, "Integer");
-        initializeSystemClass(som.primitiveClass,  som.objectClass, "Primitive");
-        initializeSystemClass(som.stringClass,     som.objectClass, "String");
-        initializeSystemClass(som.doubleClass,     som.objectClass, "Double");
-        initializeSystemClass(som.booleanClass,    som.objectClass, "Boolean");
-
-        trueClass  = newSystemClass();
-        falseClass = newSystemClass();
-
-        initializeSystemClass(trueClass,      booleanClass, "True");
-        initializeSystemClass(falseClass,     booleanClass, "False");
+        initializeSystemClass(som.objectClass,               null,  "Object");
+        initializeSystemClass(som.classClass,     som.objectClass,  "Class");
+        initializeSystemClass(som.metaclassClass, som.classClass,   "Metaclass");
+        initializeSystemClass(som.nilClass,       som.objectClass,  "Nil");
+        initializeSystemClass(som.arrayClass,     som.objectClass,  "Array");
+        initializeSystemClass(som.methodClass,    som.objectClass,  "Method");
+        initializeSystemClass(som.symbolClass,    som.objectClass,  "Symbol");
+        initializeSystemClass(som.integerClass,   som.objectClass,  "Integer");
+        initializeSystemClass(som.primitiveClass, som.objectClass,  "Primitive");
+        initializeSystemClass(som.stringClass,    som.objectClass,  "String");
+        initializeSystemClass(som.doubleClass,    som.objectClass,  "Double");
+        initializeSystemClass(som.booleanClass,   som.objectClass,  "Boolean");
+        initializeSystemClass(som.trueClass,      som.booleanClass, "True");
+        initializeSystemClass(som.falseClass,     som.booleanClass, "False");
 
         // Load methods and fields into the system classes
-        loadSystemClass(objectClass);
-        loadSystemClass(classClass);
-        loadSystemClass(metaclassClass);
-        loadSystemClass(nilClass);
-        loadSystemClass(arrayClass);
-        loadSystemClass(methodClass);
-        loadSystemClass(symbolClass);
-        loadSystemClass(integerClass);
-        loadSystemClass(primitiveClass);
-        loadSystemClass(stringClass);
-        loadSystemClass(doubleClass);
-        loadSystemClass(booleanClass);
-        loadSystemClass(trueClass);
-        loadSystemClass(falseClass);
+        loadSystemClass(som.objectClass);
+        loadSystemClass(som.classClass);
+        loadSystemClass(som.metaclassClass);
+        loadSystemClass(som.nilClass);
+        loadSystemClass(som.arrayClass);
+        loadSystemClass(som.methodClass);
+        loadSystemClass(som.symbolClass);
+        loadSystemClass(som.integerClass);
+        loadSystemClass(som.primitiveClass);
+        loadSystemClass(som.stringClass);
+        loadSystemClass(som.doubleClass);
+        loadSystemClass(som.booleanClass);
+        loadSystemClass(som.trueClass);
+        loadSystemClass(som.falseClass);
 
         // Load the generic block class
-        blockClasses[0] = loadClass(symbolFor("Block"));
+        som.blockClasses[0] = loadClass(universe.symbolFor("Block"));
 
         // Setup the true and false objects
-        trueObject  = newInstance(trueClass);
-        falseObject = newInstance(falseClass);
+        som.trueObject  = newInstance(som.trueClass);
+        som.falseObject = newInstance(som.falseClass);
 
         // Load the system class and create an instance of it
-        systemClass  = loadClass(symbolFor("System"));
-        systemObject = newInstance(systemClass);
+        som.systemClass  = loadClass(universe.symbolFor("System"));
+        som.systemObject = newInstance(som.systemClass);
 
         // Put special objects into the dictionary of globals
-        setGlobal("nil",    nilObject);
-        setGlobal("true",   trueObject);
-        setGlobal("false",  falseObject);
-        setGlobal("system", systemObject);
+        setGlobal(symbolFor("nil"),    som.nilObject);
+        setGlobal(symbolFor("true"),   som.trueObject);
+        setGlobal(symbolFor("false"),  som.falseObject);
+        setGlobal(symbolFor("system"), som.systemObject);
 
         // Load the remaining block classes
         loadBlockClass(1);
         loadBlockClass(2);
         loadBlockClass(3);
 
-        if (Globals.trueObject != trueObject) {
+        if (Globals.trueObject != som.trueObject) {
             errorExit("Initialization went wrong for class Globals");
         }
 
@@ -192,6 +288,24 @@ function Universe() {
         }
         objectSystemInitialized = true;
     }
+
+    this.getGlobal = function (name) {
+        var assoc = globals[name];
+        if (assoc == null) {
+            return null;
+        }
+        return assoc.getValue();
+    };
+
+    this.setGlobal = function (nameSymbol, value) {
+        var assoc = globals[nameSymbol];
+        if (assoc == null) {
+            assoc = new Association(nameSymbol, value);
+            globals[nameSymbol] = assoc;
+        } else {
+            assoc.setValue(value);
+        }
+    };
 
     function execute(args) {
         initializeObjectSystem();
@@ -203,13 +317,26 @@ function Universe() {
         }
 
         // Lookup the initialize invokable on the system class
-        var initialize = systemClass.
-            lookupInvokable(symbolFor("initialize:"));
+        var initialize = som.systemClass.
+            lookupInvokable(universe.symbolFor("initialize:"));
 
-        return initialize.invoke([systemObject, args]);
+        return initialize.invoke([som.systemObject, args]);
     }
 
+    this.interpretMethodInClass = function (className, selector) {
+        initializeObjectSystem();
+
+        var clazz = universe.loadClass(universe.symbolFor(className));
+
+        // Lookup the initialize invokable on the system class
+        var initialize = clazz.getClass().
+            lookupInvokable(universe.symbolFor(selector));
+        return initialize.invoke(clazz);
+    };
+
     this.interpret = function (args) {
+        initializeObjectSystem();
+
         // Check for command line switches
         var remainingArgs = handleArguments(args);
 
