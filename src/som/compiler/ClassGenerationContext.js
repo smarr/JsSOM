@@ -9,68 +9,67 @@ function ClassGenerationContext(univ) {
     var instanceMethods = new Array();
     var classFields     = new Array();
     var classMethods    = new Array();
-    Object.freeze(this);
 
-    function setName(symbol) {
+    this.setName = function (symbol) {
         name = symbol;
-    }
+    };
 
-    function getName() {
+    this.getName = function () {
         return name;
-    }
+    };
 
-    function setSuperName(symbol) {
+    this.setSuperName = function (symbol) {
         superName = symbol;
-    }
+    };
 
-    function setInstanceFieldsOfSuper(fieldNames) {
+    this.setInstanceFieldsOfSuper = function (fieldNames) {
         instanceFields = instanceFields.concat(fieldNames);
-    }
+    };
 
-    function setClassFieldsOfSuper(fieldNames) {
+    this.setClassFieldsOfSuper = function (fieldNames) {
         classFields = classFields.concat(fieldNames);
-    }
+    };
 
-    function addInstanceMethod(method) {
+    this.addInstanceMethod = function (method) {
         instanceMethods.push(method);
-    }
+    };
 
-    function setClassSide(bool) {
+    this.setClassSide = function (bool) {
         classSide = bool;
-    }
+    };
 
-    function addClassMethod(method) {
+    this.addClassMethod = function (method) {
         classMethods.push(method);
-    }
+    };
 
-    function addInstanceField(symbol) {
+    this.addInstanceField = function (symbol) {
         instanceFields.push(symbol);
-    }
+    };
 
-    function addClassField(symbol) {
+    this.addClassField = function (symbol) {
         classFields.push(symbol);
-    }
+    };
 
-    function hasField(symbol) {
+    this.hasField = function (symbol) {
         return (classSide ? classFields : instanceFields).
             indexOf(symbol) != -1;
-    }
+    };
 
-    function getFieldIndex(symbol) {
+    this.getFieldIndex = function (symbol) {
         return (classSide ? classFields : instanceFields).
             indexOf(symbol);
-    }
+    };
 
-    function isClassSide() {
+    this.isClassSide = function () {
         return classSide;
-    }
+    };
 
-    function assemble() {
+    this.assemble = function () {
         var ccName = name.getString() + " class";
 
         // Load the super class
         var superClass  = universe.loadClass(superName);
-        var resultClass = universe.newClass(Classes.metaclassClass);
+        var resultClass = universe.newClass(som.metaclassClass);
 
         // Initialize the class of the resulting class
         resultClass.setInstanceFields(classFields.slice());
@@ -90,9 +89,9 @@ function ClassGenerationContext(univ) {
         result.setInstanceInvokables(instanceMethods.slice());
 
         return result;
-    }
+    };
 
-    function assembleSystemClass(systemClass) {
+    this.assembleSystemClass = function (systemClass) {
         systemClass.setInstanceInvokables(instanceMethods.slice());
         systemClass.setInstanceFields(instanceFields.slice());
 
@@ -100,9 +99,11 @@ function ClassGenerationContext(univ) {
         var superMClass = systemClass.getClass();
         superMClass.setInstanceInvokables(classMethods.slice());
         superMClass.setInstanceFields(classFields.slice());
-    }
+    };
 
-    function toString() {
+    this.toString = function () {
         return "ClassGenC(" + name.getString() + ")";
-    }
+    };
+
+    Object.freeze(this);
 }
