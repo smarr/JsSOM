@@ -49,6 +49,10 @@ function Association(keySymbol, valueObj) {
     this.setValue = function (v) { value = v; }
 }
 
+function ExitException(exitCode) {
+    this.getExitCode = function () { return exitCode; }
+}
+
 function Universe() {
     var avoidExit     = false,
         classPath     = null,
@@ -56,7 +60,8 @@ function Universe() {
         objectSystemInitialized = false,
         pathSeparator = ":",
         printAST      = false,
-        symbolTable   = {};
+        symbolTable   = {},
+        lastExitCode  = 0;
 
     this.setAvoidExit = function (bool) {
         avoidExit = bool;
@@ -85,8 +90,8 @@ function Universe() {
             nameParts    = fileName.split('.');
 
         if (nameParts.length > 2) {
-            errorPrintln("Class with . in its name?");
-            exit(1);
+            universe.errorPrintln("Class with . in its name?");
+            universe.exit(1);
         }
 
         return [(parentPath === null) ? "" : parentPath,
@@ -342,6 +347,36 @@ function Universe() {
 
         // Initialize the known universe
         return execute(remainingArgs);
+    };
+
+    this.errorExit = function (message) {
+        universe.errorPrintln("Runtime Error: " + message);
+        universe.exit(1);
+    };
+
+    this.errorPrint = function (msg) {
+        document.write("<span style='color:red';>" + msg + "</span>");
+    };
+
+    this.errorPrintln = function (msg) {
+        document.writeln("<span style='color:red';>" + msg + "</span>");
+    };
+
+    this.print = function (msg) {
+        document.write(msg);
+    };
+
+    this.println = function(msg) {
+        document.writeln(msg);
+    };
+
+    this.exit = function (errorCode) {
+        // Exit from the Java system
+        if (!avoidExit) {
+            throw new ExitException(errorCode);
+        } else {
+            lastExitCode = errorCode;
+        }
     }
 }
 
