@@ -194,15 +194,19 @@ function Universe() {
         classPath.forEach(function (cpEntry) {
             try {
                 // Load the class from a file and return the loaded class
-                var result = compileClass(cpEntry, name.getString(), // TODO: how to arrange the global/static namespace of SOM??
-                    systemClass, universe);
+                var result = compileClassFile(cpEntry, name.getString(), // TODO: how to arrange the global/static namespace of SOM??
+                    systemClass);
                 if (printAST) {
                     dump(result.getClass());  // TODO: how to // TODO: how to arrange the global/static namespace of SOM??
                     dump(result);
                 }
                 return result;
             } catch (e) {
-                // Continue trying different paths
+                if (!(e instanceof FileNotFoundException)) {
+                    throw e;
+                } else {
+                    // Continue trying different paths
+                }
             }
         });
 
