@@ -321,7 +321,7 @@ function Lexer(fileContent) {
     }
 
     function nextWordInBufferIs(text) {
-        if (state.line.indexOf(text, state.linePos) != 0) {
+        if (state.line.indexOf(text, state.linePos) != state.linePos) {
             return false;
         }
         return !isIdentifierChar(bufchar(state.linePos + text.length));
