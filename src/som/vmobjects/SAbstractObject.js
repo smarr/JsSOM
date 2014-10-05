@@ -1,8 +1,10 @@
 'use strict';
 
 function SAbstractObject() {
+    var _this = this;
+
     this.toString = function () {
-        var clazz = getClass();
+        var clazz = _this.getClass();
         if (clazz === null) {
             return "an Object(clazz==null)";
         }
@@ -20,16 +22,16 @@ function SAbstractObject() {
         // Allocate an array to hold the arguments, without receiver
         var argsArray = SArguments.getArgumentsWithoutReceiver(args);
         var dnuArgs = [args[0], selector, argsArray];
-        return send("doesNotUnderstand:arguments:", dnuArgs);
+        return _this.send("doesNotUnderstand:arguments:", dnuArgs);
     };
 
     this.sendUnknownGlobal = function (globalName) {
         var args = [this, globalName];
-        return send("unknownGlobal:", arguments);
+        return _this.send("unknownGlobal:", args);
     };
 
     this.sendEscapedBlock = function (block) {
         var args = [this, block];
-        return send("escapedBlock:", arguments);
+        return _this.send("escapedBlock:", args);
     };
 }
