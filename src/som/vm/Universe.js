@@ -39,6 +39,7 @@ window.som.booleanClass   = newSystemClass();
 window.som.trueClass      = newSystemClass();
 window.som.falseClass     = newSystemClass();
 window.som.core_lib       = loadCoreLib();
+window.som.primitives     = {};
 Object.freeze(window.som);
 
 function Association(keySymbol, valueObj) {
