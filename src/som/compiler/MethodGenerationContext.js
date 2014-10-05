@@ -51,11 +51,10 @@ function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
     };
 
     function getSourceSectionForMethod(ssBody) {
-        var ssMethod = ssBody.getSource().createSection(
+        return new SourceSection(
                 holderGenc.getName().getString() + ">>" + signature.toString(),
-            ssBody.getStartLine(), ssBody.getStartColumn(),
-            ssBody.getCharIndex(), ssBody.getCharLength());
-        return ssMethod;
+                ssBody.startLine(), ssBody.startColumn(),
+                ssBody.charIndex(), ssBody.length());
     }
 
     this.markAsPrimitive = function () {

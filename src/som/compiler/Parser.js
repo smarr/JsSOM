@@ -8,6 +8,13 @@ function printableSymbol(sym) {
     return sym == Sym.Integer || sym == Sym.Double || sym >= Sym.STString;
 }
 
+function SourceSection(startLine, startColumn, charIndex, length) {
+    this.startLine   = function () { return startLine;   };
+    this.startColumn = function () { return startColumn; };
+    this.charIndex   = function () { return charIndex;   };
+    this.length      = function () { return length;      };
+}
+
 function ParseError(message, expected, parser) {
     var sourceCoordinate = parser.getCoordinate(),
         text             = parser.getText(),
@@ -208,9 +215,8 @@ function Parser(fileContent, fileName) {
     }
 
     function getSource(coord) {
-        return source.createSection("method", coord.startLine,
-            coord.startColumn, coord.charIndex,
-                lexer.getNumberOfCharactersRead() - coord.charIndex);
+        return new SourceSection('method', coord.startLine, coord.startColumn,
+            coord.charIndex, lexer.getNumberOfCharactersRead() - coord.charIndex);
     }
 
     function method(mgenc) {
