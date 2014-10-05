@@ -172,7 +172,7 @@ function SClass(_clazz, numberOfFields) {
             som.primitives[name.getString()].installPrimitivesIn(this);
         } else {
             if (displayWarning) {
-                Universe.println("Primitives class " + name.getString() + " not found");
+                universe.println("Primitives class " + name.getString() + " not found");
             }
         }
     };
