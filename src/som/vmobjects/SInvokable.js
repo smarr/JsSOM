@@ -37,6 +37,10 @@ function SMethod(signature, bodyNode) {
         return som.methodClass;
     };
 
+    this.isPrimitive = function () {
+        return false;
+    };
+
     this.toString = function () {
         var holder = _this.getHolder();
         if (holder == null) {
@@ -55,6 +59,10 @@ function SPrimitive(signature, bodyNode) {
 
     this.getClass = function () {
         return som.primitiveClass;
+    };
+
+    this.isPrimitive = function () {
+        return true;
     };
 
     this.toString = function () {
