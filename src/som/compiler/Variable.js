@@ -21,7 +21,11 @@ function Argument(name, index) {
 
     this.isSelf = function () {
         return "self" == name || "$blockSelf" == name;
-    }
+    };
+
+    this.getIndex = function () {
+        return index;
+    };
 }
 
 function Local(name) {
