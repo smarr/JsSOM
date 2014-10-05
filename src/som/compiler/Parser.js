@@ -94,7 +94,7 @@ function Parser(fileContent, fileName) {
 
     this.getSym = function () {
         return sym;
-    }
+    };
 
     this.toString = function () {
         return "Parser(" + source.getName() + ", "
