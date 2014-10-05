@@ -38,7 +38,7 @@ function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
 
     this.assemble = function (body, sourceSection) {
         if (primitive) {
-            return Primitives.constructEmptyPrimitive(signature);
+            return constructEmptyPrimitive(signature);
         }
 
         if (needsToCatchNonLocalReturn) {
