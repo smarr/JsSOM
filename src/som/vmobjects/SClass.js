@@ -168,17 +168,17 @@ function SClass(_clazz, numberOfFields) {
     this.loadPrimitives = function (displayWarning) {
         // Compute the class name of the Java(TM) class containing the
         // primitives
-        if (som.primitives[getName().getString()] !== undefined) {
-            som.primitives[getName().getString()].installPrimitivesIn(this);
+        if (som.primitives[name.getString()] !== undefined) {
+            som.primitives[name.getString()].installPrimitivesIn(this);
         } else {
             if (displayWarning) {
-                Universe.println("Primitives class " + className + " not found");
+                Universe.println("Primitives class " + name.getString() + " not found");
             }
         }
     };
 
     this.toString = function () {
-        return "Class(" + _this.getName().getString() + ")";
+        return "Class(" + name.getString() + ")";
     };
 }
 
