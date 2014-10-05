@@ -7,3 +7,7 @@ function IllegalStateException(msg) {
 function FileNotFoundException(msg) {
     this.getMessage = function () { return msg; }
 }
+
+function RuntimeException(msg) {
+    this.getMessage = function () { return msg; }
+}
