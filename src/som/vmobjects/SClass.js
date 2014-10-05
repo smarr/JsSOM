@@ -1,7 +1,7 @@
 'use strict';
 
-function SClass(clazz, numberOfFields) {
-    SObject.call(this, clazz, numberOfFields);
+function SClass(_clazz, numberOfFields) {
+    SObject.call(this, _clazz, numberOfFields);
 
     var invokablesTable    = {},
         superclass         = null,
@@ -162,7 +162,7 @@ function SClass(clazz, numberOfFields) {
     }
 
     this.hasPrimitives = function () {
-        return includesPrimitives(this) || includesPrimitives(clazz);
+        return includesPrimitives(this) || includesPrimitives(_this.getClass());
     };
 
     this.loadPrimitives = function (displayWarning) {
