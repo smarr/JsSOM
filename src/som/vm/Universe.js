@@ -192,7 +192,8 @@ function Universe() {
 
     this.loadClassFor = function(name, systemClass) {
         // Try loading the class from all different paths
-        classPath.forEach(function (cpEntry) {
+        for (var i = 0; i < classPath.length; i++) {
+            var cpEntry = classPath[i];
             try {
                 // Load the class from a file and return the loaded class
                 var result = compileClassFile(cpEntry, name.getString(), // TODO: how to arrange the global/static namespace of SOM??
@@ -209,7 +210,7 @@ function Universe() {
                     // Continue trying different paths
                 }
             }
-        });
+        }
 
         // The class could not be found.
         return null;
