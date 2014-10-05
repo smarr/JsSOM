@@ -232,7 +232,7 @@ function Lexer(fileContent) {
         return stateAfterPeek.text;
     };
 
-    this.getLine = function () {
+    this.getCurrentLine = function () {
         return state.line;
     };
 
