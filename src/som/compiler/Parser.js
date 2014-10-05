@@ -199,7 +199,7 @@ function Parser(fileContent, fileName) {
         pattern(mgenc);
         expect(Sym.Equal);
         if (sym == Sym.Primitive) {
-            mgenc.setPrimitive(true);
+            mgenc.markAsPrimitive();
             primitiveBlock();
             return null;
         } else {
