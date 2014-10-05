@@ -177,6 +177,16 @@ function Universe() {
         universe.setGlobal(systemClass.getName(), systemClass);
     }
 
+    function loadPrimitives(result, isSystemClass) {
+        if (result == null) { return; }
+
+        // Load primitives if class defines them, or try to load optional
+        // primitives defined for system classes.
+        if (result.hasPrimitives() || isSystemClass) {
+            result.loadPrimitives(!isSystemClass);
+        }
+    }
+
     this.loadClass = function (name) {
         // Check if the requested class is already in the dictionary of globals
         var result = universe.getGlobal(name);
