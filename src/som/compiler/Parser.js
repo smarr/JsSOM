@@ -12,7 +12,7 @@ function ParseError(message, expected, parser) {
     var sourceCoordinate = parser.getCoordinate(),
         text             = parser.getText(),
         currentLine      = parser.getLexer().getCurrentLine(),
-        fileName         = parser.getSource().getName(),
+        fileName         = parser.getFileName(),
         found            = parser.getSym(),
         _this            = this;
 
@@ -70,15 +70,33 @@ function Parser(fileContent, fileName) {
                         Sym.And,  Sym.Or,    Sym.Star,  Sym.Div,   Sym.Mod,
                         Sym.Plus, Sym.Equal, Sym.More,  Sym.Less,  Sym.Comma,
                         Sym.At,   Sym.Per,   Sym.NONE],
-        keywordSelectorSyms = [Sym.Keyword, Sym.KeywordSequence];
+        keywordSelectorSyms = [Sym.Keyword, Sym.KeywordSequence],
+        _this = this;
 
-    this.toString = function () {
-        return "Parser(" + source.getName() + ", " + getCoordinate().toString() + ")";
+    this.getText = function () {
+        return text;
     };
 
-    function getCoordinate() {
-        return lexer.getStartCoordinate();
+    this.getLexer = function () {
+        return lexer;
+    };
+
+    this.getFileName = function () {
+        return fileName;
+    };
+
+    this.getSym = function () {
+        return sym;
     }
+
+    this.toString = function () {
+        return "Parser(" + source.getName() + ", "
+            + _this.getCoordinate().toString() + ")";
+    };
+
+    this.getCoordinate = function () {
+        return lexer.getStartCoordinate();
+    };
 
     this.classdef = function (cgenc) {
         cgenc.setName(universe.symbolFor(text));
@@ -127,7 +145,7 @@ function Parser(fileContent, fileName) {
             var superClass = universe.loadClass(superName);
             if (superClass == null) {
                 throw new ParseError("Super class " + superName.getString() +
-                    " could not be loaded", Sym.NONE, this);
+                    " could not be loaded", Sym.NONE, _this);
             }
 
             cgenc.setInstanceFieldsOfSuper(superClass.getInstanceFields());
@@ -159,14 +177,14 @@ function Parser(fileContent, fileName) {
         if (accept(s)) { return true; }
 
         throw new ParseError("Unexpected symbol. Expected %(expected)s, but found "
-            + "%(found)s", s, this);
+            + "%(found)s", s, _this);
     }
 
     function expectOneOf(ss) {
         if (acceptOneOf(ss)) { return true; }
 
         throw new ParseErrorWithSymbolList("Unexpected symbol. Expected one of " +
-            "%(expected)s, but found %(found)s", ss, this);
+            "%(expected)s, but found %(found)s", ss, _this);
     }
 
     function instanceFields(cgenc) {
@@ -374,7 +392,7 @@ function Parser(fileContent, fileName) {
         if (!isIdentifier(sym)) {
             throw new ParseError("Assignments should always target variables or" +
                     " fields, but found instead a %(found)s",
-                Sym.Identifier, this);
+                Sym.Identifier, _this);
         }
         var variable = assignment();
 
@@ -569,7 +587,7 @@ function Parser(fileContent, fileName) {
         var i = parseInt(text, 10);
         if (i === NaN) {
             throw new ParseError("Could not parse integer. Expected a number " +
-                "but got '" + text + "'", Sym.NONE, this);
+                "but got '" + text + "'", Sym.NONE, _this);
         }
 
         if (isNegative) {
@@ -589,7 +607,7 @@ function Parser(fileContent, fileName) {
         var d = parseFloat(text);
         if (d === NaN) {
             throw new ParseError("Could not parse double. Expected a number " +
-                "but got '" + text + "'", Sym.NONE, this);
+                "but got '" + text + "'", Sym.NONE, _this);
         }
 
         if (isNegative) {
