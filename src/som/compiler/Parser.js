@@ -584,7 +584,7 @@ function Parser(fileContent, fileName) {
 
     function literalInteger(isNegative, coord) {
         var i = parseInt(text, 10);
-        if (i == NaN) {
+        if (isNaN(i)) {
             throw new ParseError("Could not parse integer. Expected a number " +
                 "but got '" + text + "'", Sym.NONE, _this);
         }
@@ -604,7 +604,7 @@ function Parser(fileContent, fileName) {
 
     function literalDouble(isNegative, coord) {
         var d = parseFloat(text);
-        if (d === NaN) {
+        if (isNaN(d)) {
             throw new ParseError("Could not parse double. Expected a number " +
                 "but got '" + text + "'", Sym.NONE, _this);
         }
