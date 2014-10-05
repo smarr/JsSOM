@@ -355,6 +355,30 @@ function Universe() {
         return execute(remainingArgs);
     };
 
+    this.newMethod = function (signature, bodyNode, isPrimitive) {
+        if (isPrimitive) {
+            return new SPrimitive(signature, bodyNode);
+        } else {
+            return new SMethod(signature, bodyNode);
+        }
+    };
+
+    this.newString = function (strValue) {
+        return new SString(strValue);
+    };
+
+    this.newInteger = function (intVal) {
+        return new SInteger(intVal);
+    };
+
+    this.newBiginteger = function (bigIntVal) {
+        return new SBigInteger(bigIntVal);
+    };
+
+    this.newBlock = function (blockMethod, contextFrame) {
+        return new SBlock(blockMethod, contextFrame);
+    };
+
     this.errorExit = function (message) {
         universe.errorPrintln("Runtime Error: " + message);
         universe.exit(1);
