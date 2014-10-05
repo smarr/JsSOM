@@ -7,7 +7,8 @@ function SClass(clazz, numberOfFields) {
         superclass         = null,
         name               = null,
         instanceInvokables = new Array(),
-        instanceFields     = new Array();
+        instanceFields     = new Array(),
+        _this              = this;
 
     this.getSuperClass = function () {
         return superclass;
@@ -177,7 +178,7 @@ function SClass(clazz, numberOfFields) {
     };
 
     this.toString = function () {
-        return "Class(" + getName().getString() + ")";
+        return "Class(" + _this.getName().getString() + ")";
     };
 }
 
