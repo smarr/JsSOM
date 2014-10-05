@@ -42,7 +42,7 @@ function compileClassFile(path, file, systemClass) {
         throw new FileNotFoundException(path + '/' + file + '.som');
     }
 
-    var result = compile(new Parser(source), systemClass);
+    var result = compile(new Parser(source, path + '/' + file + '.som'), systemClass);
 
     var cname  = result.getName();
     var cnameC = cname.getString();
@@ -55,5 +55,5 @@ function compileClassFile(path, file, systemClass) {
 }
 
 function compileClassString(stmt, systemClass) {
-    return compile(new Parser(stmt), systemClass);
+    return compile(new Parser(stmt, '$string'), systemClass);
 }
