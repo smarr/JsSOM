@@ -106,7 +106,7 @@ function Lexer(fileContent) {
         } else if (currentChar() == '.') {
             match(Sym.Period);
         } else if (currentChar() == '-') {
-            if (state.line.indexOf(SEPARATOR, state.linePos) == 0) {
+            if (state.line.indexOf(SEPARATOR, state.linePos) == state.linePos) {
                 state.text = "";
                 while (currentChar() == '-') {
                     state.text += bufchar(state.linePos++);
