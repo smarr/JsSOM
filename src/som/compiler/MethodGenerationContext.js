@@ -41,7 +41,7 @@ function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
             return Primitives.constructEmptyPrimitive(signature);
         }
 
-        if (needsToCatchNonLocalReturn()) {
+        if (needsToCatchNonLocalReturn) {
             body = createCatchNonLocalReturn(body);
         }
 
@@ -114,7 +114,7 @@ function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
 
     this.getContextLevel = function (varName) {
         if (localNames.indexOf(varName) != -1
-            || arguments.indexOf(varName) != -1) {
+            || argNames.indexOf(varName) != -1) {
             return 0;
         }
 

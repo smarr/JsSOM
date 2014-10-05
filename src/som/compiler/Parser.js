@@ -267,7 +267,7 @@ function Parser(fileContent, fileName) {
 
     function methodBlock(mgenc) {
         expect(Sym.NewTerm);
-        var coord = getCoordinate();
+        var coord = _this.getCoordinate();
         var methodBody = blockContents(mgenc);
         lastMethodsSourceSection = getSource(coord);
         expect(Sym.EndTerm);
@@ -328,39 +328,39 @@ function Parser(fileContent, fileName) {
     }
 
     function blockBody(mgenc) {
-        var coord = getCoordinate();
+        var coord = _this.getCoordinate();
         var expressions = [];
 
         while (true) {
             if (accept(Sym.Exit)) {
-                expressions.add(result(mgenc));
+                expressions.push(result(mgenc));
                 return createSequenceNode(coord, expressions);
             } else if (sym == Sym.EndBlock) {
                 return createSequenceNode(coord, expressions);
             } else if (sym == Sym.EndTerm) {
                 // the end of the method has been found (EndTerm) - make it implicitly
                 // return "self"
-                var self = variableRead(mgenc, "self", getSource(getCoordinate()));
-                expressions.add(self);
+                var self = variableRead(mgenc, "self", getSource(_this.getCoordinate()));
+                expressions.push(self);
                 return createSequenceNode(coord, expressions);
             }
 
-            expressions.add(expression(mgenc));
+            expressions.push(expression(mgenc));
             accept(Sym.Period);
         }
     }
 
     function createSequenceNode(coord, expressions) {
-        if (expressions.size() == 0) {
+        if (expressions.length == 0) {
             return createGlobalRead("nil", universe, getSource(coord));
-        } else if (expressions.size() == 1) {
+        } else if (expressions.length == 1) {
             return expressions[0];
         }
-        return new SequenceNode(expressions.slice(), getSource(coord));
+        return createSequence(expressions.slice(), getSource(coord));
     }
 
     function result(mgenc) {
-        var coord = getCoordinate();
+        var coord = _this.getCoordinate();
 
         var exp = expression(mgenc);
         accept(Sym.Period);
@@ -387,7 +387,7 @@ function Parser(fileContent, fileName) {
     }
 
     function assignments(mgenc) {
-        var coord = getCoordinate();
+        var coord = _this.getCoordinate();
 
         if (!isIdentifier(sym)) {
             throw new ParseError("Assignments should always target variables or" +
@@ -427,7 +427,7 @@ function Parser(fileContent, fileName) {
         switch (sym) {
             case Sym.Identifier:
             case Sym.Primitive: {
-                var coord = getCoordinate();
+                var coord = _this.getCoordinate();
                 var v = variable();
                 return variableRead(mgenc, v, getSource(coord));
             }
@@ -435,7 +435,7 @@ function Parser(fileContent, fileName) {
                 return nestedTerm(mgenc);
             }
             case Sym.NewBlock: {
-                var coord = getCoordinate();
+                var coord = _this.getCoordinate();
                 var bgenc = new MethodGenerationContext(mgenc.getHolder(), mgenc);
 
                 var blockBody = nestedBlock(bgenc);
@@ -492,18 +492,17 @@ function Parser(fileContent, fileName) {
     }
 
     function unaryMessage(receiver) {
-        var coord = getCoordinate();
+        var coord = _this.getCoordinate();
         var selector = unarySelector();
-        return MessageSendNode.create(selector, [receiver],
-        getSource(coord));
+        return createMessageSend(selector, [receiver], getSource(coord));
     }
 
     function binaryMessage(mgenc, receiver) {
-        var coord = getCoordinate();
+        var coord = _this.getCoordinate();
         var msg = binarySelector();
         var operand = binaryOperand(mgenc);
 
-        return MessageSendNode.create(msg, [receiver, operand], getSource(coord));
+        return createMessageSend(msg, [receiver, operand], getSource(coord));
     }
 
     function binaryOperand(mgenc) {
@@ -519,7 +518,7 @@ function Parser(fileContent, fileName) {
     }
 
     function keywordMessage(mgenc, receiver) {
-        var coord = getCoordinate();
+        var coord = _this.getCoordinate();
         var args  = [];
         var kw    = "";
 
@@ -561,7 +560,7 @@ function Parser(fileContent, fileName) {
     }
 
     function literalNumber() {
-        var coord = getCoordinate();
+        var coord = _this.getCoordinate();
 
         if (sym == Sym.Minus) {
             return negativeDecimal(coord);
@@ -585,7 +584,7 @@ function Parser(fileContent, fileName) {
 
     function literalInteger(isNegative, coord) {
         var i = parseInt(text, 10);
-        if (i === NaN) {
+        if (i == NaN) {
             throw new ParseError("Could not parse integer. Expected a number " +
                 "but got '" + text + "'", Sym.NONE, _this);
         }
@@ -619,7 +618,7 @@ function Parser(fileContent, fileName) {
     }
 
     function literalSymbol() {
-        var coord = getCoordinate();
+        var coord = _this.getCoordinate();
 
         var symb;
         expect(Sym.Pound);
@@ -634,7 +633,7 @@ function Parser(fileContent, fileName) {
     }
 
     function literalString() {
-        var coord = getCoordinate();
+        var coord = _this.getCoordinate();
         var s = string();
         return new StringLiteralNode(s, getSource(coord));
     }
@@ -663,7 +662,7 @@ function Parser(fileContent, fileName) {
 
     function nestedBlock(mgenc) {
         expect(Sym.NewBlock);
-        var coord = getCoordinate();
+        var coord = _this.getCoordinate();
 
         mgenc.addArgumentIfAbsent("$blockSelf");
 
@@ -704,7 +703,7 @@ function Parser(fileContent, fileName) {
 
     function variableRead(mgenc, variableName, source) {
         // we need to handle super special here
-        if ("super".equals(variableName)) {
+        if ("super" == variableName) {
             return mgenc.getSuperReadNode(source);
         }
 
