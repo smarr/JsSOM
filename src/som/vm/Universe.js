@@ -38,9 +38,12 @@ window.som.doubleClass    = newSystemClass();
 window.som.booleanClass   = newSystemClass();
 window.som.trueClass      = newSystemClass();
 window.som.falseClass     = newSystemClass();
+window.som.blockClasses   = [];
+window.som.trueObject     = null;
+window.som.falseObject    = null;
+window.som.systemObject   = null;
 window.som.core_lib       = loadCoreLib();
 window.som.primitives     = {};
-Object.freeze(window.som);
 
 function Association(keySymbol, valueObj) {
     var key   = keySymbol,
@@ -187,6 +190,24 @@ function Universe() {
         }
     }
 
+    function loadBlockClass(numberOfArguments) {
+        // Compute the name of the block class with the given number of arguments
+        var name = universe.symbolFor("Block" + numberOfArguments);
+        assert(universe.getGlobal(name) == null);
+
+        // Get the block class for blocks with the given number of arguments
+        var result = universe.loadClass(name, null);
+
+        // Add the appropriate value primitive to the block class
+        result.addInstancePrimitive(getBlockEvaluationPrimitive(
+            numberOfArguments, this, result));
+
+        // Insert the block class into the dictionary of globals
+        universe.setGlobal(name, result);
+
+        som.blockClasses[numberOfArguments] = result;
+    }
+
     this.loadClass = function (name) {
         // Check if the requested class is already in the dictionary of globals
         var result = universe.getGlobal(name);
@@ -279,21 +300,21 @@ function Universe() {
         loadSystemClass(som.falseClass);
 
         // Load the generic block class
-        som.blockClasses[0] = loadClass(universe.symbolFor("Block"));
+        som.blockClasses[0] = universe.loadClass(universe.symbolFor("Block"));
 
         // Setup the true and false objects
-        som.trueObject  = newInstance(som.trueClass);
-        som.falseObject = newInstance(som.falseClass);
+        som.trueObject  = universe.newInstance(som.trueClass);
+        som.falseObject = universe.newInstance(som.falseClass);
 
         // Load the system class and create an instance of it
-        som.systemClass  = loadClass(universe.symbolFor("System"));
-        som.systemObject = newInstance(som.systemClass);
+        som.systemClass  = universe.loadClass(universe.symbolFor("System"));
+        som.systemObject = universe.newInstance(som.systemClass);
 
         // Put special objects into the dictionary of globals
-        setGlobal(symbolFor("nil"),    som.nilObject);
-        setGlobal(symbolFor("true"),   som.trueObject);
-        setGlobal(symbolFor("false"),  som.falseObject);
-        setGlobal(symbolFor("system"), som.systemObject);
+        universe.setGlobal(universe.symbolFor("nil"),    som.nilObject);
+        universe.setGlobal(universe.symbolFor("true"),   som.trueObject);
+        universe.setGlobal(universe.symbolFor("false"),  som.falseObject);
+        universe.setGlobal(universe.symbolFor("system"), som.systemObject);
 
         // Load the remaining block classes
         loadBlockClass(1);
@@ -308,6 +329,7 @@ function Universe() {
             errorExit("Initialization went wrong for class Blocks");
         }
         objectSystemInitialized = true;
+        Object.freeze(window.som);
     }
 
     this.getGlobal = function (name) {
@@ -387,6 +409,18 @@ function Universe() {
 
     this.newBlock = function (blockMethod, contextFrame) {
         return new SBlock(blockMethod, contextFrame);
+    };
+
+    this.newClass = function (classClass) {
+        return new SClass(classClass);
+    };
+
+    this.newDouble = function (doubleVal) {
+        return new SDouble(doubleVal);
+    };
+
+    this.newInstance = function (clazz) {
+        return new SObject(clazz);
     };
 
     this.errorExit = function (message) {
