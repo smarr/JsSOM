@@ -1,7 +1,6 @@
 'use strict';
 
-function ClassGenerationContext(univ) {
-    var universe = univ;
+function ClassGenerationContext() {
     var name;
     var superName;
     var classSide       = false;
