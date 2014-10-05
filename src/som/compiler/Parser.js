@@ -447,13 +447,8 @@ function Parser(fileContent, fileName) {
                 var blockBody = nestedBlock(bgenc);
 
                 var blockMethod = bgenc.assemble(blockBody, lastMethodsSourceSection);
-                mgenc.addEmbeddedBlockMethod(blockMethod);
 
-                if (bgenc.requiresContext()) {
-                    return new BlockNodeWithContext(blockMethod, getSource(coord));
-                } else {
-                    return new BlockNode(blockMethod, getSource(coord));
-                }
+                return new BlockNode(blockMethod, getSource(coord));
             }
             default: {
                 return literal();
@@ -602,9 +597,9 @@ function Parser(fileContent, fileName) {
 
         var source = getSource(coord);
         if (i < -2147483647 || i > 2147483647) { // TODO: PUT CONSTANTS SOMEWHERE, move check into function
-            return new BigIntegerLiteralNode(bigInt(i), source);
+            return new LiteralNode(universe.newBiginteger(bigInt(i)), source);
         } else {
-            return new IntegerLiteralNode(i, source);
+            return new LiteralNode(universe.newInteger(i), source);
         }
     }
 
@@ -620,7 +615,7 @@ function Parser(fileContent, fileName) {
         }
         expect(Sym.Double);
         var source = getSource(coord);
-        return new DoubleLiteralNode(d, source);
+        return new LiteralNode(universe.newDouble(d), source);
     }
 
     function literalSymbol() {
@@ -635,13 +630,13 @@ function Parser(fileContent, fileName) {
             symb = selector();
         }
 
-        return new SymbolLiteralNode(symb, getSource(coord));
+        return new LiteralNode(symb, getSource(coord));
     }
 
     function literalString() {
         var coord = _this.getCoordinate();
         var s = string();
-        return new StringLiteralNode(s, getSource(coord));
+        return new LiteralNode(universe.newString(s), getSource(coord));
     }
 
     function selector() {
