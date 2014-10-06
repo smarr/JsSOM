@@ -333,6 +333,14 @@ function Universe() {
         return assoc.getValue();
     };
 
+    this.getGlobalsAssociation = function (name) {
+        return globals[name];
+    };
+
+    this.hasGlobal = function (name) {
+        return globals[name] != undefined;
+    };
+
     this.setGlobal = function (nameSymbol, value) {
         var assoc = globals[nameSymbol];
         if (assoc == null) {
