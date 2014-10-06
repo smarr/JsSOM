@@ -47,7 +47,7 @@ function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
 
         // return the method - the holder field is to be set later on!
         return  universe.newMethod(signature,
-            getSourceSectionForMethod(sourceSection), body);
+            getSourceSectionForMethod(sourceSection), body, locals.length);
     };
 
     function getSourceSectionForMethod(ssBody) {

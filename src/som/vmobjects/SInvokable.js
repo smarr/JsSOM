@@ -23,7 +23,7 @@ function SInvokable(signature, _holder) {
 }
 SInvokable.prototype = Object.create(SAbstractObject.prototype);
 
-function SMethod(signature, bodyNode) {
+function SMethod(signature, sourceSection, bodyNode, numberOfTemps) {
     SInvokable.call(this, signature, null);
     var _this = this;
 
@@ -36,9 +36,8 @@ function SMethod(signature, bodyNode) {
     };
 
     this.invoke = function(frame, args) {
-        assert(false); // TODO: needs to be implemented.
-        // --> need to create a frame etc...
-        return callTarget.call(arguments);
+        var newFrame = new Frame(frame, args, numberOfTemps);
+        return bodyNode.execute(newFrame, args);
     };
 
     this.toString = function () {

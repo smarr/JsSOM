@@ -380,8 +380,8 @@ function Universe() {
         return execute(remainingArgs);
     };
 
-    this.newMethod = function (signature, bodyNode) {
-        return new SMethod(signature, bodyNode);
+    this.newMethod = function (signature, sourceSection, bodyNode, numberOfTemps) {
+        return new SMethod(signature, sourceSection, bodyNode, numberOfTemps);
     };
 
     this.newPrimitive = function (signature, primFun, holder) {
