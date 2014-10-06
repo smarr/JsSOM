@@ -90,7 +90,7 @@ function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
     };
 
     function addLocal(local) {
-        var l = new Local(local);
+        var l = new Local(local, locals.length);
         locals.push(l);
         localNames.push(local);
     }
