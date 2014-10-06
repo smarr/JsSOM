@@ -85,7 +85,7 @@ function SClass(_clazz, numberOfFields) {
 
             // Return the invokable if the signature matches
             if (invokable.getSignature() == selector) {
-                invokablesTable.put(selector, invokable);
+                invokablesTable[selector] = invokable;
                 return invokable;
             }
         }
