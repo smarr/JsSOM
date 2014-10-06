@@ -356,7 +356,7 @@ function Universe() {
         var initialize = som.systemClass.
             lookupInvokable(universe.symbolFor("initialize:"));
 
-        return initialize.invoke([som.systemObject, args]);
+        return initialize.invoke(null, [som.systemObject, args]);
     }
 
     this.interpretMethodInClass = function (className, selector) {
@@ -367,7 +367,7 @@ function Universe() {
         // Lookup the initialize invokable on the system class
         var initialize = clazz.getClass().
             lookupInvokable(universe.symbolFor(selector));
-        return initialize.invoke(clazz);
+        return initialize.invoke(null, [clazz]);
     };
 
     this.interpret = function (args) {
