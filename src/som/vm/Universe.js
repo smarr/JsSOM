@@ -321,13 +321,6 @@ function Universe() {
         loadBlockClass(2);
         loadBlockClass(3);
 
-        if (Globals.trueObject != som.trueObject) {
-            errorExit("Initialization went wrong for class Globals");
-        }
-
-        if (Blocks.blockClass1 != blockClasses[1]) {
-            errorExit("Initialization went wrong for class Blocks");
-        }
         objectSystemInitialized = true;
         Object.freeze(window.som);
     }
