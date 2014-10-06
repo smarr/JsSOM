@@ -387,12 +387,12 @@ function Universe() {
         return execute(remainingArgs);
     };
 
-    this.newMethod = function (signature, bodyNode, isPrimitive) {
-        if (isPrimitive) {
-            return new SPrimitive(signature, bodyNode);
-        } else {
-            return new SMethod(signature, bodyNode);
-        }
+    this.newMethod = function (signature, bodyNode) {
+        return new SMethod(signature, bodyNode);
+    };
+
+    this.newPrimitive = function (signature, primFun, holder) {
+        return new SPrimitive(signature, primFun, holder);
     };
 
     this.newString = function (strValue) {

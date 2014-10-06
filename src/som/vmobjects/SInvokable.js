@@ -1,9 +1,9 @@
 'use strict';
 
 
-function SInvokable(signature, bodyNode) {
+function SInvokable(signature, _holder) {
     SAbstractObject.call(this);
-    var holder = null;
+    var holder = _holder;
 
     this.getHolder = function () {
         return holder;
@@ -20,17 +20,11 @@ function SInvokable(signature, bodyNode) {
     this.getNumberOfArguments = function () {
         return signature.getNumberOfSignatureArguments();
     };
-
-    this.invoke = function(frame, args) {
-        assert(false); // TODO: needs to be implemented.
-        // --> need to create a frame etc...
-        return callTarget.call(arguments);
-    };
 }
 SInvokable.prototype = Object.create(SAbstractObject.prototype);
 
 function SMethod(signature, bodyNode) {
-    SInvokable.call(this, signature, bodyNode);
+    SInvokable.call(this, signature, null);
     var _this = this;
 
     this.getClass = function () {
@@ -39,6 +33,12 @@ function SMethod(signature, bodyNode) {
 
     this.isPrimitive = function () {
         return false;
+    };
+
+    this.invoke = function(frame, args) {
+        assert(false); // TODO: needs to be implemented.
+        // --> need to create a frame etc...
+        return callTarget.call(arguments);
     };
 
     this.toString = function () {
@@ -53,8 +53,8 @@ function SMethod(signature, bodyNode) {
 }
 SMethod.prototype = Object.create(SInvokable.prototype);
 
-function SPrimitive(signature, bodyNode) {
-    SInvokable.call(this, signature, bodyNode);
+function SPrimitive(signature, primFun, _holder) {
+    SInvokable.call(this, signature, _holder);
     var _this = this;
 
     this.getClass = function () {
@@ -63,6 +63,10 @@ function SPrimitive(signature, bodyNode) {
 
     this.isPrimitive = function () {
         return true;
+    };
+
+    this.invoke = function (frame, args) {
+        return primFun(args);
     };
 
     this.toString = function () {
