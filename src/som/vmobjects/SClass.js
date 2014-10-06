@@ -165,8 +165,10 @@ function SClass(_clazz, numberOfFields) {
     this.loadPrimitives = function (displayWarning) {
         // Compute the class name of the Java(TM) class containing the
         // primitives
-        if (som.primitives[name.getString()] !== undefined) {
-            som.primitives[name.getString()].installPrimitivesIn(this);
+        var prims = som.primitives[name.getString()];
+        if (prims !== undefined) {
+            (new prims()).
+                installPrimitivesIn(this);
         } else {
             if (displayWarning) {
                 universe.println("Primitives class " + name.getString() + " not found");
