@@ -10,7 +10,7 @@ function ContextualNode(contextLevel, source) {
     this.determineContext = function (frame) {
         if (contextLevel == 0) { return frame; }
 
-        var self = frame.getSelf();
+        var self = frame.getReceiver();
         var i = contextLevel - 1;
 
         while (i > 0) {
@@ -21,7 +21,7 @@ function ContextualNode(contextLevel, source) {
     };
 
     this.determineOuterSelf = function (frame) {
-        var self = frame.getSelf();
+        var self = frame.getReceiver();
         var i = contextLevel;
         while (i > 0) {
             self = self.getOuterSelf();
