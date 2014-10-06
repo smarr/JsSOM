@@ -67,21 +67,21 @@ function SClass(_clazz, numberOfFields) {
 
         instanceInvokables[index] = value;
 
-        if (invokablesTable.containsKey(value.getSignature())) {
-            invokablesTable.put(value.getSignature(), value);
+        if (invokablesTable[value.getSignature()] == undefined) {
+            invokablesTable[value.getSignature()] = value;
         }
     };
 
     this.lookupInvokable = function (selector) {
         // Lookup invokable and return if found
-        var invokable = invokablesTable.get(selector);
+        var invokable = invokablesTable[selector];
         if (invokable != null) { return invokable; }
 
         // Lookup invokable with given signature in array of instance invokables
-        var num = getNumberOfInstanceInvokables();
+        var num = _this.getNumberOfInstanceInvokables();
         for (var i = 0; i < num; i++) {
             // Get the next invokable in the instance invokable array
-            invokable = getInstanceInvokable(i);
+            invokable = _this.getInstanceInvokable(i);
 
             // Return the invokable if the signature matches
             if (invokable.getSignature() == selector) {
@@ -91,10 +91,10 @@ function SClass(_clazz, numberOfFields) {
         }
 
         // Traverse the super class chain by calling lookup on the super class
-        if (hasSuperClass()) {
-            invokable = getSuperClass().lookupInvokable(selector);
+        if (_this.hasSuperClass()) {
+            invokable = _this.getSuperClass().lookupInvokable(selector);
             if (invokable != null) {
-                invokablesTable.put(selector, invokable);
+                invokablesTable[selector] = invokable;
                 return invokable;
             }
         }
@@ -105,32 +105,29 @@ function SClass(_clazz, numberOfFields) {
 
     this.lookupFieldIndex = function (fieldName) {
         // Lookup field with given name in array of instance fields
-        var num = getNumberOfInstanceFields();
+        var num = _this.getNumberOfInstanceFields();
         for (var i = num - 1; i >= 0; i--) {
             // Return the current index if the name matches
-            if (fieldName == getInstanceFieldName(i)) { return i; }
+            if (fieldName == _this.getInstanceFieldName(i)) { return i; }
         }
         return -1;  // Field not found
     };
 
     function addInstanceInvokable(value) {
         // Add the given invokable to the array of instance invokables
-        var num = getNumberOfInstanceInvokables();
+        var num = _this.getNumberOfInstanceInvokables();
         for (var i = 0; i < num; i++) {
             // Get the next invokable in the instance invokable array
-            var invokable = getInstanceInvokable(i);
+            var invokable = _this.getInstanceInvokable(i);
 
             // Replace the invokable with the given one if the signature matches
             if (invokable.getSignature() == value.getSignature()) {
-                setInstanceInvokable(i, value);
+                _this.setInstanceInvokable(i, value);
                 return false;
             }
         }
 
-        // Append the given method to the array of instance methods
-        var numInvokables = instanceInvokables.length;
-        instanceInvokables = Arrays.copyOf(instanceInvokables, numInvokables + 1);
-        instanceInvokables[numInvokables] = value;
+        instanceInvokables.push(value);
         return true;
     }
 
@@ -138,7 +135,7 @@ function SClass(_clazz, numberOfFields) {
         if (addInstanceInvokable(value)) {
             universe.print("Warning: Primitive " + value.getSignature().getString());
             universe.println(" is not in class definition for class "
-                + getName().getString());
+                + _this.getName().getString());
         }
     };
 
@@ -181,5 +178,4 @@ function SClass(_clazz, numberOfFields) {
         return "Class(" + name.getString() + ")";
     };
 }
-
 SClass.prototype = Object.create(SObject.prototype);
