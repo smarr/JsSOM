@@ -225,26 +225,20 @@ function Universe() {
         // Try loading the class from all different paths
         for (var i = 0; i < classPath.length; i++) {
             var cpEntry = classPath[i];
-            try {
-                // Load the class from a file and return the loaded class
-                var result = compileClassFile(cpEntry, name.getString(), // TODO: how to arrange the global/static namespace of SOM??
-                    systemClass);
-                if (printAST) {
-                    dump(result.getClass());  // TODO: how to // TODO: how to arrange the global/static namespace of SOM??
-                    dump(result);
-                }
-                return result;
-            } catch (e) {
-                if (!(e instanceof FileNotFoundException)) {
-                    throw e;
-                } else {
-                    // Continue trying different paths
-                }
-            }
-        }
 
-        // The class could not be found.
-        return null;
+            // Load the class from a file and return the loaded class
+            var result = compileClassFile(cpEntry, name.getString(), // TODO: how to arrange the global/static namespace of SOM??
+                systemClass);
+            if (result == null) {
+                continue; // continue searching in the class path
+            }
+            if (printAST) {
+                dump(result.getClass());  // TODO: how to // TODO: how to arrange the global/static namespace of SOM??
+                dump(result);
+            }
+            return result;
+        }
+        return null;  // The class could not be found.
     };
 
     function loadSystemClass(systemClass) {

@@ -39,7 +39,7 @@ function compile(parser, systemClass) {
 function compileClassFile(path, file, systemClass) {
     var source = getFile(path, file + ".som");
     if (source == null) {
-        throw new FileNotFoundException(path + '/' + file + '.som');
+        return null;
     }
 
     var result = compile(new Parser(source, path + '/' + file + '.som'), systemClass);
