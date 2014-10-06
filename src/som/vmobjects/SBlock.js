@@ -1,6 +1,11 @@
 'use strict';
 
 function getBlockEvaluationPrimitive(numberOfArguments, rcvrClass) {
+    function _value(args) {
+        var rcvrBlock = args[0];
+        return rcvrBlock.getMethod().invoke(args);
+    }
+
     function computeSignatureString() {
         // Compute the signature string
         var signatureString = "value";
@@ -14,21 +19,8 @@ function getBlockEvaluationPrimitive(numberOfArguments, rcvrClass) {
     }
 
     var sig = universe.symbolFor(computeSignatureString(numberOfArguments));
-
-    switch (numberOfArguments) {
-        case 1: return constructPrimitive(sig,
-            ValueNonePrimFactory.getInstance(), universe, rcvrClass);
-        case 2: return constructPrimitive(sig,
-            ValueOnePrimFactory.getInstance(), universe, rcvrClass);
-        case 3: return constructPrimitive(sig,
-            ValueTwoPrimFactory.getInstance(), universe, rcvrClass);
-        case 4: return constructPrimitive(sig,
-            ValueMorePrimFactory.getInstance(), universe, rcvrClass);
-        default:
-            throw new RuntimeException("Should not reach here. SOM only has blocks with up to 2 arguments.");
-    }
+    return universe.newPrimitive(sig, _value, rcvrClass);
 }
-
 
 function SBlock(blockMethod, context) {
     SAbstractObject.call(this);
