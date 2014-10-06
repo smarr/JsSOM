@@ -14,11 +14,15 @@ function createGlobalRead(name, source) {
 }
 
 function createFieldWrite(self, exp, fieldIndex, source) {
-    return FieldWriteNodeFactory.create(fieldIndex, source, self, exp);
+    return new FieldWriteNode(self, exp, fieldIndex, source);
 }
 
-function createVariableRead(variable, contextLevel, source) {
-    return new UninitializedVariableReadNode(variable, contextLevel, source);
+function createArgumentRead(arg, contextLevel, source) {
+    return new ArgumentReadNode(contextLevel, arg, source);
+}
+
+function createVariableRead(local, contextLevel, source) {
+    return new VariableReadNode(local, contextLevel, source);
 }
 
 function createSuperRead(variable, contextLevel, holderClass, classSide, source) {
@@ -28,7 +32,7 @@ function createSuperRead(variable, contextLevel, holderClass, classSide, source)
 }
 
 function createVariableWrite(variable, contextLevel, exp, source) {
-    return new UninitializedVariableWriteNode(variable, contextLevel, exp, source);
+    return new VariableWriteNode(variable, contextLevel, exp, source);
 }
 
 function createSequence(exps, source) {
