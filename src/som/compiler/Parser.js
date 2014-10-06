@@ -117,7 +117,7 @@ function Parser(fileContent, fileName) {
 
         while (isIdentifier(sym) || sym == Sym.Keyword
             || sym == Sym.OperatorSequence || symIn(binaryOpSyms)) {
-            var mgenc = new MethodGenerationContext(cgenc);
+            var mgenc = new MethodGenerationContext(cgenc, null, false);
             var methodBody = method(mgenc);
             cgenc.addInstanceMethod(
                 mgenc.assemble(methodBody, lastMethodsSourceSection));
@@ -128,7 +128,7 @@ function Parser(fileContent, fileName) {
             classFields(cgenc);
             while (isIdentifier(sym) || sym == Sym.Keyword
                 || sym == Sym.OperatorSequence || symIn(binaryOpSyms)) {
-                var mgenc = new MethodGenerationContext(cgenc);
+                var mgenc = new MethodGenerationContext(cgenc, null, false);
                 var methodBody = method(mgenc);
                 cgenc.addClassMethod(
                     mgenc.assemble(methodBody, lastMethodsSourceSection));
@@ -442,7 +442,7 @@ function Parser(fileContent, fileName) {
             }
             case Sym.NewBlock: {
                 var coord = _this.getCoordinate();
-                var bgenc = new MethodGenerationContext(mgenc.getHolder(), mgenc);
+                var bgenc = new MethodGenerationContext(mgenc.getHolder(), mgenc, true);
 
                 var blockBody = nestedBlock(bgenc);
 
