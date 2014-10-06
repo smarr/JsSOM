@@ -148,6 +148,7 @@ function Universe() {
     }
 
     this.symbolFor = function (string) {
+        assert(typeof string == 'string' || string instanceof String);
         // Lookup the symbol in the symbol table
         var result = symbolTable[string];
         if (result != null) { return result; }

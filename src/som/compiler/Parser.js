@@ -286,7 +286,7 @@ function Parser(fileContent, fileName) {
     }
 
     function binarySelector() {
-        var s = test;
+        var s = text;
 
         if (accept(Sym.Or)) {
         } else if (accept(Sym.Comma)) {
