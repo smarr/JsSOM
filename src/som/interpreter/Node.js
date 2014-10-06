@@ -28,7 +28,8 @@ function Node(source) {
                     var children = parent[prop];
                     for (var i in children) {
                         if (children[i] === _this) {
-                            children[i] = newNode
+                            children[i] = newNode;
+                            replaced = true;
                         }
                     }
                 } else { // just a simple child node
