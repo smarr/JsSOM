@@ -43,6 +43,7 @@ window.som.trueObject     = null;
 window.som.falseObject    = null;
 window.som.systemObject   = null;
 window.som.core_lib       = loadCoreLib();
+window.som.startTime      = performance.now();
 window.som.primitives     = {};
 
 function Association(keySymbol, valueObj) {
@@ -102,7 +103,6 @@ function Universe() {
                 nameParts[0],
                 nameParts.length > 1 ? nameParts[1] : ""];
     }
-
 
     function handleArguments(args) {
         var gotClasspath = false,
