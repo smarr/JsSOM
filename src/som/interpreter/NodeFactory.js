@@ -53,6 +53,6 @@ function createSuperSend(msg, exprs, source) {
             exprs[0].getSuperClass()), source);
 }
 
-function createNonLocalReturn(exp, markerSlot, contextLevel, source) {
-    return new ReturnNonLocalNode(exp, markerSlot, contextLevel, source);
+function createNonLocalReturn(exp, contextLevel, source) {
+    return new ReturnNonLocalNode(exp, contextLevel, source);
 }
