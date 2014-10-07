@@ -54,7 +54,7 @@ function ObjectPrimitives() {
     function _performWithArguments(frame, args) {
         // TODO: need to create a proper SArray, but don't have SArray yet.
         notYetImplemented();
-        var argArr   = args[2].get_indexable_fields();
+        var argArr   = args[2].getIndexableFields();
         var selector = args[1];
         var rcvr     = args[0];
 
