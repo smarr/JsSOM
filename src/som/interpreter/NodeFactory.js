@@ -56,3 +56,7 @@ function createSuperSend(msg, exprs, source) {
 function createNonLocalReturn(exp, contextLevel, source) {
     return new ReturnNonLocalNode(exp, contextLevel, source);
 }
+
+function createLiteralNode(somVal, source) {
+    return new LiteralNode(somVal, source);
+}

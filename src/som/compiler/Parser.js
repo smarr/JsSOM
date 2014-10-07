@@ -448,7 +448,7 @@ function Parser(fileContent, fileName) {
 
                 var blockMethod = bgenc.assemble(blockBody, lastMethodsSourceSection);
 
-                return new BlockNode(blockMethod, getSource(coord));
+                return createBlockNode(blockMethod, getSource(coord));
             }
             default: {
                 return literal();
@@ -597,9 +597,9 @@ function Parser(fileContent, fileName) {
 
         var source = getSource(coord);
         if (isInIntRange(i)) {
-            return new LiteralNode(universe.newInteger(i), source);
+            return createLiteralNode(universe.newInteger(i), source);
         } else {
-            return new LiteralNode(universe.newBiginteger(bigInt(i)), source);
+            return createLiteralNode(universe.newBiginteger(bigInt(i)), source);
         }
     }
 
@@ -615,7 +615,7 @@ function Parser(fileContent, fileName) {
         }
         expect(Sym.Double);
         var source = getSource(coord);
-        return new LiteralNode(universe.newDouble(d), source);
+        return createLiteralNode(universe.newDouble(d), source);
     }
 
     function literalSymbol() {
@@ -630,13 +630,13 @@ function Parser(fileContent, fileName) {
             symb = selector();
         }
 
-        return new LiteralNode(symb, getSource(coord));
+        return createLiteralNode(symb, getSource(coord));
     }
 
     function literalString() {
         var coord = _this.getCoordinate();
         var s = string();
-        return new LiteralNode(universe.newString(s), getSource(coord));
+        return createLiteralNode(universe.newString(s), getSource(coord));
     }
 
     function selector() {
