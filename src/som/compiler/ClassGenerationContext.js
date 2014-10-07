@@ -71,8 +71,10 @@ function ClassGenerationContext() {
         var resultClass = universe.newClass(som.metaclassClass);
 
         // Initialize the class of the resulting class
-        resultClass.setInstanceFields(classFields.slice());
-        resultClass.setInstanceInvokables(classMethods.slice());
+        resultClass.setInstanceFields(
+            universe.newArrayFrom(classFields.slice()));
+        resultClass.setInstanceInvokables(
+            universe.newArrayFrom(classMethods.slice()));
         resultClass.setName(universe.symbolFor(ccName));
 
         var superMClass = superClass.getClass();
@@ -84,20 +86,26 @@ function ClassGenerationContext() {
         // Initialize the resulting class
         result.setName(name);
         result.setSuperClass(superClass);
-        result.setInstanceFields(instanceFields.slice());
-        result.setInstanceInvokables(instanceMethods.slice());
+        result.setInstanceFields(
+            universe.newArrayFrom(instanceFields.slice()));
+        result.setInstanceInvokables(
+            universe.newArrayFrom(instanceMethods.slice()));
 
         return result;
     };
 
     this.assembleSystemClass = function (systemClass) {
-        systemClass.setInstanceInvokables(instanceMethods.slice());
-        systemClass.setInstanceFields(instanceFields.slice());
+        systemClass.setInstanceInvokables(
+            universe.newArrayFrom(instanceMethods.slice()));
+        systemClass.setInstanceFields(
+            universe.newArrayFrom(instanceFields.slice()));
 
         // class-bound == class-instance-bound
         var superMClass = systemClass.getClass();
-        superMClass.setInstanceInvokables(classMethods.slice());
-        superMClass.setInstanceFields(classFields.slice());
+        superMClass.setInstanceInvokables(
+            universe.newArrayFrom(classMethods.slice()));
+        superMClass.setInstanceFields(
+            universe.newArrayFrom(classFields.slice()));
     };
 
     this.toString = function () {

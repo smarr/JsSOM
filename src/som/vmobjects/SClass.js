@@ -6,8 +6,8 @@ function SClass(_clazz, numberOfFields) {
     var invokablesTable    = {},
         superclass         = null,
         name               = null,
-        instanceInvokables = new Array(),
-        instanceFields     = new Array(),
+        instanceInvokables = null,
+        instanceFields     = null,
         _this              = this;
 
     this.getSuperClass = function () {
@@ -35,6 +35,7 @@ function SClass(_clazz, numberOfFields) {
     };
 
     this.setInstanceFields = function (fieldsArray) {
+        assert(fieldsArray instanceof SArray);
         instanceFields = fieldsArray;
     };
 
@@ -44,28 +45,29 @@ function SClass(_clazz, numberOfFields) {
 
     this.getNumberOfInstanceInvokables = function () {
         // Return the number of instance invokables in this class
-        return instanceInvokables.length;
+        return instanceInvokables.getNumberOfIndexableFields();
     };
 
     this.setInstanceInvokables = function (arr) {
+        assert(arr instanceof SArray);
         instanceInvokables = arr;
 
         // Make sure this class is the holder of all invokables in the array
-        var num = this.getNumberOfInstanceInvokables();
+        var num = _this.getNumberOfInstanceInvokables();
         for (var i = 0; i < num; i++) {
-            instanceInvokables[i].setHolder(this);
+            instanceInvokables.getIndexableField(i).setHolder(this);
         }
     };
 
     this.getInstanceInvokable = function (index) {
-        return instanceInvokables[index];
+        return instanceInvokables.getIndexableField(index);
     };
 
     this.setInstanceInvokable = function (index, value) {
         // Set this class as the holder of the given invokable
         value.setHolder(_this);
 
-        instanceInvokables[index] = value;
+        instanceInvokables.setIndexableField(index, value);
 
         if (invokablesTable[value.getSignature()] == undefined) {
             invokablesTable[value.getSignature()] = value;
@@ -127,7 +129,7 @@ function SClass(_clazz, numberOfFields) {
             }
         }
 
-        instanceInvokables.push(value);
+        instanceInvokables.getIndexableFields().push(value);
         return true;
     }
 
@@ -140,11 +142,11 @@ function SClass(_clazz, numberOfFields) {
     };
 
     this.getInstanceFieldName = function (index) {
-        return instanceFields[index];
+        return instanceFields.getIndexableField(index);
     };
 
     this.getNumberOfInstanceFields = function () {
-        return instanceFields.length;
+        return instanceFields.getNumberOfIndexableFields();
     };
 
     function includesPrimitives(clazz) {

@@ -166,12 +166,12 @@ function Universe() {
         }
 
         // Initialize the array of instance fields
-        systemClass.setInstanceFields([]);
-        systemClass.getClass().setInstanceFields([]);
+        systemClass.setInstanceFields(new SArray(0));
+        systemClass.getClass().setInstanceFields(new SArray(0));
 
         // Initialize the array of instance invokables
-        systemClass.setInstanceInvokables([]);
-        systemClass.getClass().setInstanceInvokables([]);
+        systemClass.setInstanceInvokables(new SArray(0));
+        systemClass.getClass().setInstanceInvokables(new SArray(0));
 
         // Initialize the name of the system class
         systemClass.setName(universe.symbolFor(name));
@@ -390,6 +390,10 @@ function Universe() {
             arr.setIndexableField(i, universe.newString(strArr[i]));
         }
         return arr;
+    };
+
+    this.newArrayFrom = function (array) {
+        return new SArray(array.length, array);
     };
 
     this.newArrayWithLength = function (length) {
