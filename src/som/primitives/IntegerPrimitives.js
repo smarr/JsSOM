@@ -68,7 +68,6 @@ function IntegerPrimitives() {
         return universe.newInteger(intVal);
     }
 
-
     function _leftShift(frame, args) {
         var rightObj = args[1];
         var left     = args[0];
