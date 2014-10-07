@@ -1,10 +1,17 @@
 'use strict';
 
-function MessageSendNode(selector, _argumentNodes, _dispatchNode, source) {
+function MessageSendNode(selector, _argumentNodes, source) {
     Node.call(this, source);
     var _this = this;
     _this._children_arguments = _this.adopt(_argumentNodes);
-    _this._child_dispatch     = _this.adopt(_dispatchNode);
+
+    if (_argumentNodes[0].isSuperNode()) {
+        _this._child_dispatch = _this.adopt(new UninitializedSuperDispatchNode(
+            selector, _argumentNodes[0].getHolderClass(),
+            _argumentNodes[0].isClassSide()))
+    } else {
+        _this._child_dispatch = _this.adopt(new GenericDispatchNode(selector));
+    }
 
     this.execute = function (frame) {
         var args = evaluateArguments(frame);

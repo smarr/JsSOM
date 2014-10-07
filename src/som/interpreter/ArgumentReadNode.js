@@ -12,3 +12,20 @@ function ArgumentReadNode(contextLevel, arg, source) {
     };
 }
 ArgumentReadNode.prototype = Object.create(ContextualNode.prototype);
+
+function SuperReadNode(holderClass, classSide, contextLevel, arg, source) {
+    ArgumentReadNode.call(this, contextLevel, arg, source);
+
+    this.getHolderClass = function () {
+        return holderClass;
+    };
+
+    this.isClassSide = function () {
+        return classSide;
+    };
+
+    this.isSuperNode = function () {
+        return true;
+    }
+}
+SuperReadNode.prototype = Object.create(ArgumentReadNode.prototype);

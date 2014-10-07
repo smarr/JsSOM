@@ -1,6 +1,8 @@
 'use strict';
 
 function GenericDispatchNode(selector) {
+    Node.call(this, null);
+
     this.executeDispatch = function (frame, args) {
         var rcvr = args[0];
         var rcvrClass = rcvr.getClass();
@@ -13,8 +15,32 @@ function GenericDispatchNode(selector) {
         }
     };
 }
+GenericDispatchNode.prototype = Object.create(Node.prototype);
 
-function SuperDispatchNode(selector, lookupClass) {
+function UninitializedSuperDispatchNode(selector, holderClass, classSide) {
+    Node.call(this, null);
+    var _this = this;
+    assert(holderClass instanceof SSymbol);
+
+    function getLookupClass() {
+        var clazz = universe.getGlobal(holderClass);
+        if (classSide) {
+            clazz = clazz.getClass();
+        }
+        return clazz.getSuperClass();
+    }
+
+    this.executeDispatch = function (frame, args) {
+        var lookupClass = getLookupClass();
+        return _this.replace(new CachedSuperDispatchNode(selector, lookupClass)).
+            executeDispatch(frame, args);
+    };
+}
+UninitializedSuperDispatchNode.prototype = Object.create(Node.prototype);
+
+function CachedSuperDispatchNode(selector, lookupClass) {
+    Node.call(this, null);
+    assert(lookupClass instanceof SClass);
     var method = lookupClass.lookupInvokable(selector);
 
     if (method == null) {
@@ -25,3 +51,4 @@ function SuperDispatchNode(selector, lookupClass) {
         return method.invoke(frame, arguments);
     };
 }
+CachedSuperDispatchNode.prototype = Object.create(Node.prototype);

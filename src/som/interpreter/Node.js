@@ -45,5 +45,9 @@ function Node(source) {
             debugger; // node was not replaced???
         }
         return newNode;
-    }
+    };
+
+    this.isSuperNode = function () {
+        return false;
+    };
 }

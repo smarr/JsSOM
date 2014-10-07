@@ -27,8 +27,8 @@ function createVariableRead(local, contextLevel, source) {
 
 function createSuperRead(variable, contextLevel, holderClass, classSide, source) {
     assert(holderClass instanceof SSymbol);
-    return new UninitializedSuperReadNode(variable, contextLevel, holderClass,
-        classSide, source);
+    return new SuperReadNode(
+        holderClass, classSide, contextLevel, variable, source);
 }
 
 function createVariableWrite(variable, contextLevel, exp, source) {
@@ -44,13 +44,7 @@ function createBlockNode(blockMethod, source) {
 }
 
 function createMessageSend(msg, exprs, source) {
-    return new MessageSendNode(msg, exprs,
-        new GenericDispatchNode(msg), source);
-}
-
-function createSuperSend(msg, exprs, source) {
-    return new MessageSendNode(msg, exprs, new SuperDispatchNode(msg,
-            exprs[0].getSuperClass()), source);
+    return new MessageSendNode(msg, exprs, source);
 }
 
 function createNonLocalReturn(exp, contextLevel, source) {
