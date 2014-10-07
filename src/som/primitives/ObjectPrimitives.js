@@ -39,7 +39,7 @@ function ObjectPrimitives() {
         var selector = args[1];
         var rcvr     = args[0];
         var invokable = rcvr.getClass().lookupInvokable(selector);
-        return invokable.invoke([rcvr]);
+        return invokable.invoke(frame, [rcvr]);
     }
 
     function _performInSuperclass(frame, args) {
@@ -48,18 +48,17 @@ function ObjectPrimitives() {
         var rcvr     = args[0];
 
         var invokable = clazz.lookupInvokable(selector);
-        return invokable.invoke([rcvr]);
+        return invokable.invoke(frame, [rcvr]);
     }
 
     function _performWithArguments(frame, args) {
-        // TODO: need to create a proper SArray, but don't have SArray yet.
-        notYetImplemented();
-        var argArr   = args[2].getIndexableFields();
+        var directArgs = args[2].getIndexableFields();
         var selector = args[1];
         var rcvr     = args[0];
 
         var invokable = rcvr.getClass().lookupInvokable(selector)
-        return invokable.invoke(rcvr, argArr)
+        var newArgs = [rcvr].concat(directArgs);
+        return invokable.invoke(rcvr, newArgs);
     }
 
     function _instVarAt(frame, args) {
