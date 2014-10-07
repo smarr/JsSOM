@@ -21,7 +21,7 @@ function ObjectPrimitives() {
             hash = Math.round(Math.random() * 2147483647);
             rcvr.hash = hash;
         }
-        return hash;
+        return universe.newInteger(hash);
     }
 
     function _objectSize(frame, args) {
