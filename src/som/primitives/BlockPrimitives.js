@@ -16,3 +16,13 @@ function BlockPrimitives() {
 }
 BlockPrimitives.prototype = Object.create(Primitives.prototype);
 som.primitives["Block"] = BlockPrimitives;
+
+function BlockNPrimitives() {
+    Primitives.call(this);
+    // This is done directly in universe, here just a dummy
+    this.installPrimitives = function () {}
+}
+BlockNPrimitives.prototype = Object.create(Primitives.prototype);
+som.primitives["Block1"] = BlockNPrimitives;
+som.primitives["Block2"] = BlockNPrimitives;
+som.primitives["Block3"] = BlockNPrimitives;
