@@ -1,6 +1,11 @@
 'use strict';
 
+function isInIntRange(val) {
+    return val >= -2147483647 && val <= 2147483647;
+}
+
 function SInteger(intVal) {
+    assert(isInIntRange(intVal) && Math.floor(intVal) == intVal);
     SAbstractObject.call(this);
 
     this.getEmbeddedInteger = function () {

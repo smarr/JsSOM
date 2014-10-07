@@ -596,10 +596,10 @@ function Parser(fileContent, fileName) {
         expect(Sym.Integer);
 
         var source = getSource(coord);
-        if (i < -2147483647 || i > 2147483647) { // TODO: PUT CONSTANTS SOMEWHERE, move check into function
-            return new LiteralNode(universe.newBiginteger(bigInt(i)), source);
-        } else {
+        if (isInIntRange(i)) {
             return new LiteralNode(universe.newInteger(i), source);
+        } else {
+            return new LiteralNode(universe.newBiginteger(bigInt(i)), source);
         }
     }
 
