@@ -12,7 +12,7 @@ function SAbstractObject() {
     };
 
     this.send = function (selectorString, args) {
-        var selector = window.universe.symbolFor(selectorString);
+        var selector = universe.symbolFor(selectorString);
         var invokable = args[0].getClass().lookupInvokable(selector);
         return invokable.invoke(args);
     };
