@@ -23,9 +23,9 @@ function StringPrimitives() {
         var op2 = args[0];
         if (op1 instanceof SString) {
             if (op1.getEmbeddedString() == op2.getEmbeddedString()) {
-                return universe.trueObject;
+                return som.trueObject;
             }
-            return universe.falseObject;
+            return som.falseObject;
         }
     }
 

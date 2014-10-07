@@ -16,7 +16,7 @@ function MethodPrimitives() {
         notYetImplemented(); // TODO: need to make up the right array, with rcvr and args...
 
         var directArgs;
-        if (args[2] === universe.nilObject) {
+        if (args[2] === som.nilObject) {
             directArgs = [];
         } else {
             directArgs = args[1].getIndexableFields();

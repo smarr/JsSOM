@@ -8,9 +8,9 @@ function ObjectPrimitives() {
         var op1 = args[1];
         var op2 = args[0];
         if (op1 === op2) {
-            return universe.trueObject;
+            return som.trueObject;
         } else {
-            return universe.falseObject;
+            return som.falseObject;
         }
     }
 

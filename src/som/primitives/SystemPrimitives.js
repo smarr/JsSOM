@@ -7,7 +7,7 @@ function SystemPrimitives() {
     function _load(frame, args) {
         var symbol = args[1];
         var result = universe.loadClass(symbol);
-        return (result != null) ? result : universe.nilObject;
+        return (result != null) ? result : som.nilObject;
     }
 
     function _exit(frame, args) {
@@ -18,14 +18,14 @@ function SystemPrimitives() {
     function _global(frame, args) {
         var symbol = args[1];
         var result = universe.getGlobal(symbol);
-        return (result != null) ? result : universe.nilObject;
+        return (result != null) ? result : som.nilObject;
     }
 
     function _hasGlobal(frame, args) {
         if (universe.hasGlobal(args[1])) {
-            return universe.trueObject;
+            return som.trueObject;
         } else {
-            return universe.falseObject;
+            return som.falseObject;
         }
     }
 
@@ -59,7 +59,7 @@ function SystemPrimitives() {
 
     function _fullGC(frame, args) {
         /* not general way to do that in JS */
-        return universe.falseObject;
+        return som.falseObject;
     }
 
     this.installPrimitives = function () {
