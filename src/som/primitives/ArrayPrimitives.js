@@ -35,6 +35,7 @@ function ArrayPrimitives() {
         for (var i = 1; i <= length; i++) {  // i is propagated to Smalltalk, so, start with 1
             blockMethod.invoke(frame, [block, universe.newInteger(i)]);
         }
+        return args[0];
     }
 
     function _do(frame, args) {
@@ -46,6 +47,7 @@ function ArrayPrimitives() {
         for (var i = 0; i < length; i++) { // array is zero indexed
             blockMethod.invoke(frame, [block, args[0].getIndexableField(i)]);
         }
+        return args[0];
     }
 
     this.installPrimitives = function () {
