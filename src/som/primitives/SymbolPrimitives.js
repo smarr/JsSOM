@@ -4,7 +4,7 @@ function SymbolPrimitives() {
     Primitives.call(this);
     var _this = this;
 
-    function _asString(args) {
+    function _asString(frame, args) {
         return universe.newString(args[0].getString());
     }
 

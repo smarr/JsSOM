@@ -4,23 +4,23 @@ function ClassPrimitives() {
     Primitives.call(this);
     var _this = this;
 
-    function _new(args) {
+    function _new(frame, args) {
         return universe.newInstance(args[0]);
     }
 
-    function _name(args) {
+    function _name(frame, args) {
         return args[0].getName();
     }
 
-    function _superClass(args) {
+    function _superClass(frame, args) {
         return args[0].getSuperClass();
     }
 
-    function _methods(args) {
+    function _methods(frame, args) {
         return args[0].getInstanceInvokables();
     }
 
-    function _fields(args) {
+    function _fields(frame, args) {
         return args[0].getInstanceFields();
     }
 

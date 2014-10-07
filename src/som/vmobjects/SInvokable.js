@@ -65,7 +65,7 @@ function SPrimitive(signature, primFun, _holder) {
     };
 
     this.invoke = function (frame, args) {
-        return primFun(args);
+        return primFun(frame, args);
     };
 
     this.toString = function () {

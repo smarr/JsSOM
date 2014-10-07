@@ -4,7 +4,7 @@ function ObjectPrimitives() {
     Primitives.call(this);
     var _this = this;
 
-    function _equals(args) {
+    function _equals(frame, args) {
         var op1 = args[1];
         var op2 = args[0];
         if (op1 === op2) {
@@ -14,7 +14,7 @@ function ObjectPrimitives() {
         }
     }
 
-    function _hashcode(args) {
+    function _hashcode(frame, args) {
         var rcvr = args[0];
         var hash = rcvr.hash;
         if (hash === undefined) {
@@ -24,7 +24,7 @@ function ObjectPrimitives() {
         return hash;
     }
 
-    function _objectSize(args) {
+    function _objectSize(frame, args) {
         var size = 0;
         var rcvr = args[0];
         if (rcvr instanceof SObject) {
@@ -35,14 +35,14 @@ function ObjectPrimitives() {
         return universe.newInteger(size);
     }
     
-    function _perform(args) {
+    function _perform(frame, args) {
         var selector = args[1];
         var rcvr     = args[0];
         var invokable = rcvr.getClass().lookupInvokable(selector);
         return invokable.invoke([rcvr]);
     }
 
-    function _performInSuperclass(args) {
+    function _performInSuperclass(frame, args) {
         var clazz    = args[2];
         var selector = args[1];
         var rcvr     = args[0];
@@ -51,7 +51,7 @@ function ObjectPrimitives() {
         return invokable.invoke([rcvr]);
     }
 
-    function _performWithArguments(args) {
+    function _performWithArguments(frame, args) {
         // TODO: need to create a proper SArray, but don't have SArray yet.
         notYetImplemented();
         var argArr   = args[2].get_indexable_fields();
@@ -62,31 +62,31 @@ function ObjectPrimitives() {
         return invokable.invoke(rcvr, argArr)
     }
 
-    function _instVarAt(args) {
+    function _instVarAt(frame, args) {
         var idx = args[1];
         return args[0].getField(idx.getEmbeddedInteger() - 1);
     }
 
-    function _instVarAtPut(args) {
+    function _instVarAtPut(frame, args) {
         var val = args[2];
         var idx = args[1];
         args[0].setField(idx.getEmbeddedInteger() - 1, val);
         return val;
     }
 
-    function _instVarNamed(args) {
+    function _instVarNamed(frame, args) {
         var rcvr = args[0];
         var i = rcvr.getFieldIndex(args[1]);
         return rcvr.getField(i);
     }
 
-    function _halt(args) {
+    function _halt(frame, args) {
         universe.println("BREAKPOINT");
         debugger;
         return args[0];
     }
 
-    function _class(args) {
+    function _class(frame, args) {
         return args[0].getClass();
     }
 

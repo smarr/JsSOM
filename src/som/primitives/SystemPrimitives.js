@@ -4,26 +4,24 @@ function SystemPrimitives() {
     Primitives.call(this);
     var _this = this;
 
-
-
-    function _load(args) {
+    function _load(frame, args) {
         var symbol = args[1];
         var result = universe.loadClass(symbol);
         return (result != null) ? result : universe.nilObject;
     }
 
-    function _exit(args) {
+    function _exit(frame, args) {
         var error = args[1];
         return universe.exit(error.getEmbeddedInteger());
     }
 
-    function _global(args) {
+    function _global(frame, args) {
         var symbol = args[1];
         var result = universe.getGlobal(symbol);
         return (result != null) ? result : universe.nilObject;
     }
 
-    function _hasGlobal(args) {
+    function _hasGlobal(frame, args) {
         if (universe.hasGlobal(args[1])) {
             return universe.trueObject;
         } else {
@@ -31,35 +29,35 @@ function SystemPrimitives() {
         }
     }
 
-    function _globalPut(args) {
+    function _globalPut(frame, args) {
         var value  = args[2];
         var symbol = args[1];
         universe.setGlobal(symbol, value);
         return value;
     }
 
-    function _printString(args) {
+    function _printString(frame, args) {
         var str = args[1];
         universe.print(str.getEmbeddedString());
         return args[0];
     }
 
-    function _printNewline(args) {
+    function _printNewline(frame, args) {
         universe.println("");
         return args[0];
     }
 
-    function _time(args) {
+    function _time(frame, args) {
         var startTime = performance.now() - som.startTime;
         return universe.newInteger(Math.round(startTime));
     }
 
-    function _ticks(args) {
+    function _ticks(frame, args) {
         var startTime = performance.now() - som.startTime;
         return universe.newInteger(Math.round(startTime * 1000));
     }
 
-    function _fullGC(args) {
+    function _fullGC(frame, args) {
         /* not general way to do that in JS */
         return universe.falseObject;
     }
