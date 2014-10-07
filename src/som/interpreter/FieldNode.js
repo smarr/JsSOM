@@ -28,13 +28,5 @@ function FieldWriteNode(_selfExp, _valueExp, fieldIdx, source) {
         self.setField(fieldIdx, value);
         return value;
     };
-
-    this.executeEvaluated = function (args) {
-        notYetImplemented(); // TODO: do we really need these?
-        var self = args[0];
-        var val  = args[1];
-        self.setField(fieldIdx, val);
-        return val;
-    }
 }
 FieldWriteNode.prototype = Object.create(Node.prototype);

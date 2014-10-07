@@ -15,7 +15,7 @@ function MessageSendNode(selector, _argumentNodes, source) {
 
     this.execute = function (frame) {
         var args = evaluateArguments(frame);
-        return _this.doPreEvaluated(frame, args);
+        return _this._child_dispatch.executeDispatch(frame, args);
     };
 
     function evaluateArguments(frame) {
@@ -26,10 +26,6 @@ function MessageSendNode(selector, _argumentNodes, source) {
         }
         return args;
     }
-
-    this.doPreEvaluated = function (frame, args) {
-        return _this._child_dispatch.executeDispatch(frame, args);
-    };
 
     this.toString = function () {
         return "MsgSend(" + selector.getString() + ")";
