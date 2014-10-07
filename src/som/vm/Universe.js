@@ -358,8 +358,9 @@ function Universe() {
         // Lookup the initialize invokable on the system class
         var initialize = som.systemClass.
             lookupInvokable(universe.symbolFor("initialize:"));
+        var somArgs = universe.newArrayWithStrings(args);
 
-        return initialize.invoke(null, [som.systemObject, args]);
+        return initialize.invoke(null, [som.systemObject, somArgs]);
     }
 
     this.interpretMethodInClass = function (className, selector) {
@@ -381,6 +382,18 @@ function Universe() {
 
         // Initialize the known universe
         return execute(remainingArgs);
+    };
+
+    this.newArrayWithStrings = function (strArr) {
+        var arr = universe.newArrayWithLength(strArr.length);
+        for (var i = 0; i < strArr.length; i++) {
+            arr.setIndexableField(i, universe.newString(strArr[i]));
+        }
+        return arr;
+    };
+
+    this.newArrayWithLength = function (length) {
+        return new SArray(length);
     };
 
     this.newMethod = function (signature, sourceSection, bodyNode, numberOfTemps) {
