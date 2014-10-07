@@ -2,7 +2,7 @@
 
 
 function constructEmptyPrimitive(signature) {
-    function _empty(args) {
+    function _empty(frame, args) {
         universe.errorPrintln("Warning: undefined primitive " +
             signature.getString() + " called");
     }
