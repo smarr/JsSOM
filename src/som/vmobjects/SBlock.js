@@ -1,9 +1,9 @@
 'use strict';
 
 function getBlockEvaluationPrimitive(numberOfArguments, rcvrClass) {
-    function _value(args) {
+    function _value(frame, args) {
         var rcvrBlock = args[0];
-        return rcvrBlock.getMethod().invoke(args);
+        return rcvrBlock.getMethod().invoke(frame, args);
     }
 
     function computeSignatureString() {
