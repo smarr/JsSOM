@@ -11,7 +11,7 @@ function SClass(_clazz, numberOfFields) {
         _this              = this;
 
     this.getSuperClass = function () {
-        return superclass;
+        return (superclass == null) ? som.nilObject : superclass;
     };
 
     this.setSuperClass = function (value) {
