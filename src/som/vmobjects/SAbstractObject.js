@@ -20,7 +20,7 @@ function SAbstractObject() {
 
     this.sendDoesNotUnderstand = function (selector, callerFrame, args) {
         // Allocate an array to hold the arguments, without receiver
-        var argsArray = SArguments.getArgumentsWithoutReceiver(args);
+        var argsArray = new SArray(args.length - 1, args.slice(1));
         var dnuArgs = [args[0], selector, argsArray];
         return _this.send("doesNotUnderstand:arguments:", callerFrame, dnuArgs);
     };

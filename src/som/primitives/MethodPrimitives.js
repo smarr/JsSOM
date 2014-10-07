@@ -13,15 +13,19 @@ function MethodPrimitives() {
     }
 
     function _invokeOnWith(frame, args) {
-        notYetImplemented(); // TODO: need to make up the right array, with rcvr and args...
+        var method = args[0];
+        var rcvr   = args[1];
+        var argArr = args[2];
+
 
         var directArgs;
-        if (args[2] === som.nilObject) {
+        if (argArr === som.nilObject) {
             directArgs = [];
         } else {
-            directArgs = args[1].getIndexableFields();
+            directArgs = argArr.getIndexableFields();
         }
-        return args[0].invoke(args[0], direct_args)
+        var newArgs = [rcvr].concat(directArgs);
+        return method.invoke(frame, newArgs);
     }
 
     this.installPrimitives = function () {
