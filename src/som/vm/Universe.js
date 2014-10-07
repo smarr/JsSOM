@@ -200,8 +200,8 @@ function Universe() {
         var result = universe.loadClass(name, null);
 
         // Add the appropriate value primitive to the block class
-        result.addInstancePrimitive(getBlockEvaluationPrimitive(
-            numberOfArguments, this, result));
+        var prim = getBlockEvaluationPrimitive(numberOfArguments, result);
+        result.addInstancePrimitive(prim);
 
         // Insert the block class into the dictionary of globals
         universe.setGlobal(name, result);
