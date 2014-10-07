@@ -447,6 +447,10 @@ function Universe() {
         } else {
             lastExitCode = errorCode;
         }
+    };
+
+    this.getLastExitCode = function () {
+        return lastExitCode;
     }
 }
 
