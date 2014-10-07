@@ -42,19 +42,19 @@ function SClass(_clazz, numberOfFields) {
         return instanceInvokables;
     };
 
+    this.getNumberOfInstanceInvokables = function () {
+        // Return the number of instance invokables in this class
+        return instanceInvokables.length;
+    };
+
     this.setInstanceInvokables = function (arr) {
         instanceInvokables = arr;
 
         // Make sure this class is the holder of all invokables in the array
-        var num = getNumberOfInstanceInvokables();
+        var num = this.getNumberOfInstanceInvokables();
         for (var i = 0; i < num; i++) {
             instanceInvokables[i].setHolder(this);
         }
-    };
-
-    this.getNumberOfInstanceInvokables = function () {
-        // Return the number of instance invokables in this class
-        return instanceInvokables.length;
     };
 
     this.getInstanceInvokable = function (index) {
@@ -63,7 +63,7 @@ function SClass(_clazz, numberOfFields) {
 
     this.setInstanceInvokable = function (index, value) {
         // Set this class as the holder of the given invokable
-        value.setHolder(this);
+        value.setHolder(_this);
 
         instanceInvokables[index] = value;
 
