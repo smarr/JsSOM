@@ -1,6 +1,7 @@
 'use strict';
 
 function SObject(instanceClass, numFields) {
+    SAbstractObject.call(this);
     var clazz = instanceClass,
         objectFields = new Array((instanceClass === null) ?
             numFields : instanceClass.getNumberOfInstanceFields());
