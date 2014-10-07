@@ -23,8 +23,8 @@ function SSymbol(value) {
             var numberOfColons = 0;
 
             // Iterate through every character in the signature string
-            for (var c in string) {
-                if (c == ':') { numberOfColons++; }
+            for (var i = 0; i < string.length; i++) {
+                if (string.charAt(i) == ':') { numberOfColons++; }
             }
 
             // The number of arguments is equal to the number of colons plus one
