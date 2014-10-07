@@ -41,7 +41,7 @@ function Node(source) {
             }
         }
 
-        if (!replaced) {
+        if (!replaced && _this._parent != null) {
             debugger; // node was not replaced???
         }
         return newNode;
