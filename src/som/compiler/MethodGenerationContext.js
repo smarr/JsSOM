@@ -15,11 +15,11 @@ function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
         throwsNonLocalReturn = true;
 
         var ctx = _this.getOuterContext();
-        ctx.needsToCatchNonLocalReturn = true;
+        ctx.markToCatchNonLocalReturn();
     };
 
-    this.requiresContext = function () {
-        return throwsNonLocalReturn || accessesVariablesOfOuterContext;
+    this.markToCatchNonLocalReturn = function () {
+        needsToCatchNonLocalReturn = true;
     };
 
     this.getOuterContext = function () {
@@ -40,7 +40,7 @@ function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
             return constructEmptyPrimitive(signature);
         }
 
-        if (needsToCatchNonLocalReturn) {
+        if (_this.needsToCatchNonLocalReturn()) {
             body = createCatchNonLocalReturn(body);
         }
 
