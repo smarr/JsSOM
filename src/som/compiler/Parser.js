@@ -148,7 +148,7 @@ function Parser(fileContent, fileName) {
         cgenc.setSuperName(superName);
 
         // Load the super class, if it is not nil (break the dependency cycle)
-        if (!superName.getString() == "nil") {
+        if (superName.getString() != "nil") {
             var superClass = universe.loadClass(superName);
             if (superClass == null) {
                 throw new ParseError("Super class " + superName.getString() +
