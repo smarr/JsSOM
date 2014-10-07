@@ -6,7 +6,7 @@ function UninitializedGlobalReadNode(globalName, source) {
 
     function executeUnknownGlobal(frame) {
         var self = frame.getReceiver();
-        return self.sendUnknownGlobal(globalName);
+        return self.sendUnknownGlobal(globalName, frame);
     }
 
     this.execute = function (frame) {

@@ -22,7 +22,7 @@ function ReturnNonLocalNode(exp, contextLevel, source) {
             throw new ReturnException(result, ctx);
         } else {
             var outerReceiver = ctx.getReceiver();
-            return outerReceiver.sendEscapedBlock(frame.getReceiver());
+            return outerReceiver.sendEscapedBlock(frame.getReceiver(), frame);
         }
     }
 }

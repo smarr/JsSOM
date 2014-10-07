@@ -11,7 +11,7 @@ function GenericDispatchNode(selector) {
         if (method != null) {
             return method.invoke(frame, args);
         } else {
-            return rcvr.sendDoesNotUnderstand(selector, args);
+            return rcvr.sendDoesNotUnderstand(selector, frame, args);
         }
     };
 }
@@ -48,7 +48,7 @@ function CachedSuperDispatchNode(selector, lookupClass) {
     }
 
     this.executeDispatch = function (frame, args) {
-        return method.invoke(frame, arguments);
+        return method.invoke(frame, args);
     };
 }
 CachedSuperDispatchNode.prototype = Object.create(Node.prototype);

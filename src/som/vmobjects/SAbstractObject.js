@@ -11,27 +11,27 @@ function SAbstractObject() {
         return "a " + clazz.getName().getString();
     };
 
-    this.send = function (selectorString, args) {
+    this.send = function (selectorString, callerFrame, args) {
         var selector = universe.symbolFor(selectorString);
         var invokable = args[0].getClass().lookupInvokable(selector);
-        return invokable.invoke(args);
+        return invokable.invoke(callerFrame, args);
     };
 
 
-    this.sendDoesNotUnderstand = function (selector, args) {
+    this.sendDoesNotUnderstand = function (selector, callerFrame, args) {
         // Allocate an array to hold the arguments, without receiver
         var argsArray = SArguments.getArgumentsWithoutReceiver(args);
         var dnuArgs = [args[0], selector, argsArray];
-        return _this.send("doesNotUnderstand:arguments:", dnuArgs);
+        return _this.send("doesNotUnderstand:arguments:", callerFrame, dnuArgs);
     };
 
-    this.sendUnknownGlobal = function (globalName) {
+    this.sendUnknownGlobal = function (globalName, callerFrame) {
         var args = [this, globalName];
-        return _this.send("unknownGlobal:", args);
+        return _this.send("unknownGlobal:", callerFrame, args);
     };
 
-    this.sendEscapedBlock = function (block) {
+    this.sendEscapedBlock = function (block, callerFrame) {
         var args = [this, block];
-        return _this.send("escapedBlock:", args);
+        return _this.send("escapedBlock:", callerFrame, args);
     };
 }
