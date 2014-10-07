@@ -133,7 +133,7 @@ function Universe() {
             var split = getPathClassExt(remainingArgs[i]);
 
             if ("" != split[0]) { // there was a path
-                classPath = split[0].concat(classPath);
+                classPath.unshift(split[0]);
             }
             remainingArgs[i] = split[1];
         }
