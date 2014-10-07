@@ -22,7 +22,7 @@ function createArgumentRead(arg, contextLevel, source) {
 }
 
 function createVariableRead(local, contextLevel, source) {
-    return new VariableReadNode(local, contextLevel, source);
+    return new VariableReadNode(contextLevel, local, source);
 }
 
 function createSuperRead(variable, contextLevel, holderClass, classSide, source) {
@@ -32,7 +32,7 @@ function createSuperRead(variable, contextLevel, holderClass, classSide, source)
 }
 
 function createVariableWrite(variable, contextLevel, exp, source) {
-    return new VariableWriteNode(variable, contextLevel, exp, source);
+    return new VariableWriteNode(contextLevel, variable, exp, source);
 }
 
 function createSequence(exps, source) {
