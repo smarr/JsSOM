@@ -5,7 +5,6 @@ function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
         primitive = false,
         needsToCatchNonLocalReturn      = false,
         throwsNonLocalReturn            = false,
-        accessesVariablesOfOuterContext = false,
         args       = [],
         argNames   = [],
         locals     = [],
@@ -135,11 +134,7 @@ function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
         }
 
         if (outerGenc != null) {
-            var outerVar = outerGenc.getVariable(varName);
-            if (outerVar != null) {
-                accessesVariablesOfOuterContext = true;
-            }
-            return outerVar;
+            return outerGenc.getVariable(varName);
         }
         return null;
     };
@@ -168,11 +163,7 @@ function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
         }
 
         if (outerGenc != null) {
-            var outerLocal = outerGenc.getLocal(varName);
-            if (outerLocal != null) {
-                accessesVariablesOfOuterContext = true;
-            }
-            return outerLocal;
+            return outerGenc.getLocal(varName);
         }
         return null;
     };
