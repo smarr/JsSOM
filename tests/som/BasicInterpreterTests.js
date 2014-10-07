@@ -56,7 +56,7 @@ function createTestFunctions(element, index, array) {
     var expectedResult     = element[2];
     var expectedResultType = element[3];
     BasicInterpreterTests.prototype[
-        'test' + '_' + testClass + '_' + testMethod] = function () {
+        'test_' + testClass + '_' + testMethod] = function () {
         assertNotNull("Universe not initialized", universe);
 
         universe.setAvoidExit(true);
