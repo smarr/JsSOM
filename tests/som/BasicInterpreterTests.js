@@ -35,18 +35,16 @@ var test = [
     ["CompilerSimplification", "testGetField",             40,      som.integerClass]];
 
 function assertEqualsSomValue(expectedValue, expectedType, actualValue) {
-    assertEquals(expectedType, actualValue.getClass());
-
     if (expectedType == som.integerClass) {
         assertEquals(expectedValue, actualValue.getEmbeddedInteger());
         return;
     }
     if (expectedType == som.symbolClass) {
-        assertEquals(expectedValue, actualValue.getEmbeddedString());
+        assertEquals(expectedValue, actualValue.getString());
         return;
     }
     if (expectedType == som.classClass) {
-        assertEquals(expectedValue, actualValue.getName().getEmbeddedString());
+        assertEquals(expectedValue, actualValue.getName().getString());
         return;
     }
     fail("SOM Value handler missing");
