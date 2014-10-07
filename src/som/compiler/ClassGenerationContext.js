@@ -22,11 +22,11 @@ function ClassGenerationContext() {
     };
 
     this.setInstanceFieldsOfSuper = function (fieldNames) {
-        instanceFields = instanceFields.concat(fieldNames);
+        instanceFields = instanceFields.concat(fieldNames.getIndexableFields());
     };
 
     this.setClassFieldsOfSuper = function (fieldNames) {
-        classFields = classFields.concat(fieldNames);
+        classFields = classFields.concat(fieldNames.getIndexableFields());
     };
 
     this.addInstanceMethod = function (method) {
