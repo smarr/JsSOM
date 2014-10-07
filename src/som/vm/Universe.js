@@ -374,10 +374,10 @@ function Universe() {
     };
 
     this.interpret = function (args) {
-        initializeObjectSystem();
-
         // Check for command line switches
         var remainingArgs = handleArguments(args);
+
+        initializeObjectSystem();
 
         // Initialize the known universe
         return execute(remainingArgs);
