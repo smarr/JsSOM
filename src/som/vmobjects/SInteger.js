@@ -15,5 +15,9 @@ function SInteger(intVal) {
     this.getClass = function () {
         return som.integerClass;
     };
+
+    this.primAsString = function () {
+        return universe.newString(intVal.toString());
+    };
 }
 SInteger.prototype = Object.create(SAbstractObject.prototype);
