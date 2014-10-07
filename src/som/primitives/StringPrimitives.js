@@ -25,8 +25,8 @@ function StringPrimitives() {
             if (op1.getEmbeddedString() == op2.getEmbeddedString()) {
                 return som.trueObject;
             }
-            return som.falseObject;
         }
+        return som.falseObject;
     }
 
     function _substring(frame, args) {
