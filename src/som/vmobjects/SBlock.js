@@ -1,5 +1,3 @@
-'use strict';
-
 function getBlockEvaluationPrimitive(numberOfArguments, rcvrClass) {
     function _value(frame, args) {
         var rcvrBlock = args[0];

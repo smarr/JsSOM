@@ -1,6 +1,3 @@
-'use strict';
-
-
 function SInvokable(signature, _holder) {
     SAbstractObject.call(this);
     var holder = _holder;

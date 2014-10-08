@@ -1,5 +1,3 @@
-'use strict';
-
 function isIdentifier(sym) {
     return sym == Sym.Identifier || sym == Sym.Primitive;
 }

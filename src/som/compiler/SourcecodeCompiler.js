@@ -1,5 +1,3 @@
-'use strict';
-
 function getFile(path, file) {
     var current = som.core_lib;
 

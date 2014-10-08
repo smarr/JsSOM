@@ -1,5 +1,3 @@
-'use strict';
-
 function ReturnException(result, targetFrame) {
     this.hasReachedTarget = function (current) {
         return current === targetFrame;

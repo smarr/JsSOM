@@ -1,5 +1,3 @@
-'use strict';
-
 function IllegalStateException(msg) {
     this.getMessage = function () { return msg; }
 }

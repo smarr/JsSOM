@@ -1,6 +1,3 @@
-'use strict';
-
-
 function constructEmptyPrimitive(signature) {
     function _empty(frame, args) {
         universe.errorPrintln("Warning: undefined primitive " +

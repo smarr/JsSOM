@@ -1,5 +1,3 @@
-'use strict';
-
 function FieldReadNode(_selfExp, fieldIdx, source) {
     Node.call(this, source);
     assert(fieldIdx >= 0);

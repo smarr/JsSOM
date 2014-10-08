@@ -1,5 +1,3 @@
-'use strict';
-
 var Sym = {
     NONE             :  0,
     Integer          :  1,

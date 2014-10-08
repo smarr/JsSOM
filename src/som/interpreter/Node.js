@@ -1,5 +1,3 @@
-'use strict';
-
 function Node(source) {
     var _this = this;
 

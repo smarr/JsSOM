@@ -1,5 +1,3 @@
-'use strict';
-
 function BlockNode(blockMethod, source) {
     Node.call(this, source);
 

@@ -1,5 +1,3 @@
-'use strict';
-
 function SObject(instanceClass, numFields) {
     SAbstractObject.call(this);
     var clazz = instanceClass,

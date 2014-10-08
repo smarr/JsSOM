@@ -1,5 +1,3 @@
-'use strict';
-
 function SBigInteger(bigintVal) {
     SAbstractObject.call(this);
 

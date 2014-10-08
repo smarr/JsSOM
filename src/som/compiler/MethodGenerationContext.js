@@ -1,5 +1,3 @@
-'use strict';
-
 function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
     var signature = null,
         primitive = false,

@@ -1,5 +1,3 @@
-'use strict';
-
 function UninitializedGlobalReadNode(globalName, source) {
     Node.call(this, source);
     var _this = this;

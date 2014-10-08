@@ -1,5 +1,3 @@
-'use strict';
-
 function SDouble(doubleVal) {
     SAbstractObject.call(this);
 

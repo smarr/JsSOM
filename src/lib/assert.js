@@ -1,5 +1,3 @@
-'use strict';
-
 function AssertionFailedException() {}
 
 function assert(bool) {

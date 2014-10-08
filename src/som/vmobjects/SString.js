@@ -1,5 +1,3 @@
-'use strict';
-
 function SString(value) {
     SAbstractObject.call(this);
 

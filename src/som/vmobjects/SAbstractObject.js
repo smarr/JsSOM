@@ -1,5 +1,3 @@
-'use strict';
-
 function SAbstractObject() {
     var _this = this;
 

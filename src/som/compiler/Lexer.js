@@ -1,5 +1,3 @@
-'use strict';
-
 function makeLexerState() {
     return {
         lineNumber :    0,

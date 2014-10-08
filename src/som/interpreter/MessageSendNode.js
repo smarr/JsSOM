@@ -1,5 +1,3 @@
-'use strict';
-
 function MessageSendNode(selector, _argumentNodes, source) {
     Node.call(this, source);
     var _this = this;

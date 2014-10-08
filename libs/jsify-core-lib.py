@@ -31,4 +31,4 @@ for root, dirs, files in os.walk('core-lib'):
                 content = f.read()
             add_to_lib(core_lib, file_name, content)
 
-print "'use strict'; window.loadCoreLib = function () { return %s; };" % json.dumps(core_lib['core-lib'])
+print "loadCoreLib = function () { return %s; };" % json.dumps(core_lib['core-lib'])

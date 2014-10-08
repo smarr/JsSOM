@@ -1,5 +1,3 @@
-'use strict';
-
 function GenericDispatchNode(selector) {
     Node.call(this, null);
 

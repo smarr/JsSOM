@@ -1,5 +1,3 @@
-'use strict';
-
 function SSymbol(value) {
     SAbstractObject.call(this);
     var string = value,

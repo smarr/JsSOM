@@ -1,5 +1,3 @@
-'use strict';
-
 function SymbolPrimitives() {
     Primitives.call(this);
     var _this = this;

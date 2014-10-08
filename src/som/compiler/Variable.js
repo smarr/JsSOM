@@ -1,5 +1,3 @@
-'use strict';
-
 function Argument(name, index) {
     var _this = this;
 

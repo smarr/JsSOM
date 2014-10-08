@@ -1,5 +1,3 @@
-'use strict';
-
 var newMetaclassClass = function () {
     // Allocate the metaclass classes
     var result = new SClass(null, 0);

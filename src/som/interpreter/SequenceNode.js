@@ -1,5 +1,3 @@
-'use strict';
-
 function SequenceNode(_expressions, source) {
     Node.call(this, source);
     var _this = this;

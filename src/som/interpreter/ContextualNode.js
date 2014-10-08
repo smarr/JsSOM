@@ -1,5 +1,3 @@
-'use strict';
-
 function ContextualNode(contextLevel, source) {
     Node.call(this, source);
 

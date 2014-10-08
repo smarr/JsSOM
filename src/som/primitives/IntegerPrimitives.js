@@ -1,5 +1,3 @@
-'use strict';
-
 function IntegerPrimitives() {
     Primitives.call(this);
     var _this = this;

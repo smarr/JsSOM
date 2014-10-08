@@ -1,5 +1,3 @@
-'use strict';
-
 function VariableReadNode(contextLevel, local, source) {
     ContextualNode.call(this, contextLevel, source);
     var _this = this;

@@ -1,5 +1,3 @@
-'use strict';
-
 function createCatchNonLocalReturn(methodBody) {
     return new CatchNonLocalReturnNode(methodBody);
 }

@@ -1,5 +1,3 @@
-'use strict';
-
 function Frame(callerFrame, args, numTemps) {
     var isOnStack = true,
         temps     = new Array(numTemps);

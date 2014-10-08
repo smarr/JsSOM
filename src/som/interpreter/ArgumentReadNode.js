@@ -1,5 +1,3 @@
-'use strict';
-
 function ArgumentReadNode(contextLevel, arg, source) {
     ContextualNode.call(this, contextLevel, source);
     var _this = this;

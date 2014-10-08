@@ -1,5 +1,3 @@
-'use strict';
-
 function SClass(_clazz, numberOfFields) {
     SObject.call(this, _clazz, numberOfFields);
 

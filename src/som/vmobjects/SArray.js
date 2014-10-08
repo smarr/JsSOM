@@ -1,5 +1,3 @@
-'use strict';
-
 function SArray(length, values) {
     SAbstractObject.call(this);
     var indexableFields = (values != null) ? values : new Array(length);

@@ -1,5 +1,3 @@
-'use strict';
-
 function isInIntRange(val) {
     return val >= -2147483647 && val <= 2147483647;
 }

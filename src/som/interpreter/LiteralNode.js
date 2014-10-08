@@ -1,5 +1,3 @@
-'use strict';
-
 function LiteralNode(value, source) {
     Node.call(this, source);
 

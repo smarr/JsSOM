@@ -1,5 +1,3 @@
-'use strict';
-
 function SystemPrimitives() {
     Primitives.call(this);
     var _this = this;

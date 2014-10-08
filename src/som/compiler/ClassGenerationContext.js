@@ -1,5 +1,3 @@
-'use strict';
-
 function ClassGenerationContext() {
     var name;
     var superName;
