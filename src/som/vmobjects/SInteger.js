@@ -111,7 +111,11 @@ function SInteger(intVal) {
         } else if (right instanceof SDouble) {
             return toDouble(intVal).primModulo(right);
         } else {
-            var result = Math.floor(intVal % right.getEmbeddedInteger());
+            var r = right.getEmbeddedInteger();
+            var result = Math.floor(intVal % r);
+            if (intVal > 0 && r < 0) {
+                result += r;
+            }
             return universe.newInteger(result);
         }
     };
