@@ -10,6 +10,7 @@ var tests = [
     "CompilerReturn",
     "Double"        ,
     "DoesNotUnderstand",
+    "Global"        ,
     "Empty"         ,
     "Hash"          ,
     "Integer"       ,
