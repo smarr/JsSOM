@@ -2,6 +2,14 @@ function isInIntRange(val) {
     return val >= -2147483647 && val <= 2147483647;
 }
 
+function intOrBigInt(val) {
+    if (isInIntRange(val)) {
+        return universe.newInteger(val | 0);
+    } else {
+        return universe.newBiginteger(bigInt(val));
+    }
+}
+
 function SInteger(intVal) {
     assert(isInIntRange(intVal) && Math.floor(intVal) == intVal);
     SAbstractObject.call(this);
@@ -29,14 +37,6 @@ function SInteger(intVal) {
         }
         return (result) ? som.trueObject : som.falseObject;
     };
-
-    function intOrBigInt(val) {
-        if (isInIntRange(val)) {
-            return universe.newInteger(val);
-        } else {
-            return universe.newBiginteger(bigInt(val));
-        }
-    }
     
     this.primAsString = function () {
         return universe.newString(intVal.toString());
