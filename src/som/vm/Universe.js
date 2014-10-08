@@ -20,29 +20,29 @@ var newSystemClass = function () {
     return systemClass;
 };
 
-window.som = {};
-window.som.nilObject      = new SObject(null, 0);
-window.som.metaclassClass = newMetaclassClass();
-window.som.objectClass    = newSystemClass();
-window.som.nilClass       = newSystemClass();
-window.som.classClass     = newSystemClass();
-window.som.arrayClass     = newSystemClass();
-window.som.symbolClass    = newSystemClass();
-window.som.methodClass    = newSystemClass();
-window.som.integerClass   = newSystemClass();
-window.som.primitiveClass = newSystemClass();
-window.som.stringClass    = newSystemClass();
-window.som.doubleClass    = newSystemClass();
-window.som.booleanClass   = newSystemClass();
-window.som.trueClass      = newSystemClass();
-window.som.falseClass     = newSystemClass();
-window.som.blockClasses   = [];
-window.som.trueObject     = null;
-window.som.falseObject    = null;
-window.som.systemObject   = null;
-window.som.core_lib       = loadCoreLib();
-window.som.primitives     = {};
+som = {};
+som.nilObject      = new SObject(null, 0);
+som.metaclassClass = newMetaclassClass();
+som.objectClass    = newSystemClass();
+som.nilClass       = newSystemClass();
+som.classClass     = newSystemClass();
+som.arrayClass     = newSystemClass();
+som.symbolClass    = newSystemClass();
+som.methodClass    = newSystemClass();
+som.integerClass   = newSystemClass();
+som.primitiveClass = newSystemClass();
+som.stringClass    = newSystemClass();
+som.doubleClass    = newSystemClass();
+som.booleanClass   = newSystemClass();
+som.trueClass      = newSystemClass();
+som.falseClass     = newSystemClass();
+som.blockClasses   = [];
+som.trueObject     = null;
+som.falseObject    = null;
+som.systemObject   = null;
+som.core_lib       = loadCoreLib();
 som.startTime      = getMillisecondTicks();
+som.primitives     = {};
 
 function Association(keySymbol, valueObj) {
     var key   = keySymbol,
@@ -315,7 +315,7 @@ function Universe() {
         loadBlockClass(3);
 
         objectSystemInitialized = true;
-        Object.freeze(window.som);
+        Object.freeze(som);
     }
 
     this.getGlobal = function (name) {
@@ -469,4 +469,4 @@ function Universe() {
     }
 }
 
-window.universe = new Universe();
+universe = new Universe();
