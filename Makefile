@@ -7,6 +7,9 @@ all: build/som.min.js build/node.min.js
 src_gen:
 	mkdir src_gen
 
+test: build/node.min.js
+	./som.sh -cp Smalltalk TestSuite/TestHarness.som
+
 build:
 	mkdir build
 
