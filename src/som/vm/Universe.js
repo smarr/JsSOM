@@ -41,8 +41,8 @@ window.som.trueObject     = null;
 window.som.falseObject    = null;
 window.som.systemObject   = null;
 window.som.core_lib       = loadCoreLib();
-window.som.startTime      = performance.now();
 window.som.primitives     = {};
+som.startTime      = getMillisecondTicks();
 
 function Association(keySymbol, valueObj) {
     var key   = keySymbol,
@@ -440,19 +440,19 @@ function Universe() {
     };
 
     this.errorPrint = function (msg) {
-        document.write("<span style='color:red';>" + msg + "</span>");
+        stderr(msg);
     };
 
     this.errorPrintln = function (msg) {
-        document.writeln("<span style='color:red';>" + msg + "</span>");
+        stderrnl(msg);
     };
 
     this.print = function (msg) {
-        document.write(msg);
+        stdout(msg);
     };
 
     this.println = function(msg) {
-        document.writeln(msg);
+        stdoutnl(msg);
     };
 
     this.exit = function (errorCode) {

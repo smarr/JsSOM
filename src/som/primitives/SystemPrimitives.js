@@ -46,13 +46,13 @@ function SystemPrimitives() {
     }
 
     function _time(frame, args) {
-        var startTime = performance.now() - som.startTime;
-        return universe.newInteger(Math.round(startTime));
+        var diff = getMillisecondTicks() - som.startTime;
+        return intOrBigInt(diff);
     }
 
     function _ticks(frame, args) {
-        var startTime = performance.now() - som.startTime;
-        return universe.newInteger(Math.round(startTime * 1000));
+        var diff = getMillisecondTicks() - som.startTime;
+        return intOrBigInt(diff * 1000);
     }
 
     function _fullGC(frame, args) {
