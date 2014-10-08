@@ -36,7 +36,7 @@ JsSOM's tests can be executed with:
    
 A simple Hello World program is executed with:
 
-    $ ./som.sh -cp Smalltalk Examples/Hello/Hello.som
+    $ ./som.sh -cp Smalltalk Examples/Hello.som
 
 This code is distributed under the MIT License. Please see the LICENSE file for
 details. JsSOM uses [BigInteger.js][big-int] to support arbitrary-length
