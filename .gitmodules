@@ -3,4 +3,4 @@
 	url = https://github.com/SOM-st/SOM.git
 [submodule "libs/big-integer"]
 	path = libs/big-integer
-	url = https://github.com/peterolson/BigInteger.js.git
+	url = https://github.com/smarr/BigInteger.js.git
