@@ -369,17 +369,32 @@ function Universe() {
         // Lookup the initialize invokable on the system class
         var initialize = clazz.getClass().
             lookupInvokable(universe.symbolFor(selector));
-        return initialize.invoke(null, [clazz]);
+
+        try {
+            return initialize.invoke(null, [clazz]);
+        } catch (e) {
+            if (e instanceof ExitException) {
+                return;
+            } else {
+                throw e;
+            }
+        }
     };
 
     this.interpret = function (args) {
-        // Check for command line switches
+        // Check for command line switches first
         var remainingArgs = handleArguments(args);
-
         initializeObjectSystem();
 
-        // Initialize the known universe
-        return execute(remainingArgs);
+        try {
+            return execute(remainingArgs);
+        } catch (e) {
+            if (e instanceof ExitException) {
+                return;
+            } else {
+                throw e;
+            }
+        }
     };
 
     this.newArrayWithStrings = function (strArr) {
@@ -457,16 +472,16 @@ function Universe() {
 
     this.exit = function (errorCode) {
         // Exit from the Java system
+        lastExitCode = errorCode;
         if (!avoidExit) {
-            throw new ExitException(errorCode);
-        } else {
-            lastExitCode = errorCode;
+            exitInterpreter(errorCode);
         }
+        throw new ExitException(errorCode);
     };
 
     this.getLastExitCode = function () {
         return lastExitCode;
-    }
+    };
 }
 
 universe = new Universe();
