@@ -1,12 +1,25 @@
 #!/usr/bin/env make -f
 
-all: minify
+JS_SRC=$(shell libs/deps.py)
 
-minify: src_gen/core_lib.js
-	echo TODO
+all: build/som.min.js build/node.min.js
 
 src_gen:
 	mkdir src_gen
+
+build:
+	mkdir build
+
+build/closure-compiler: build
+	mkdir build/closure-compiler
+	wget http://dl.google.com/closure-compiler/compiler-latest.zip -O build/closure-compiler/compiler-latest.zip
+	unzip build/closure-compiler/compiler-latest.zip -d build/closure-compiler/
+
+build/som.min.js: build $(JS_SRC) build/closure-compiler
+	java -jar build/closure-compiler/compiler.jar --language_in=ECMASCRIPT5 --js_output_file=$@ $(JS_SRC)
+
+build/node.min.js: build $(JS_SRC) src/som/vm/Shell.js src/node.js
+	java -jar build/closure-compiler/compiler.jar --language_in=ECMASCRIPT5 --js_output_file=$@ $(JS_SRC) src/som/vm/Shell.js src/node.js
 
 src_gen/core_lib.js: core-lib src_gen
 	libs/jsify-core-lib.py > $@
@@ -14,3 +27,7 @@ src_gen/core_lib.js: core-lib src_gen
 core-lib:
 	git submodules init
 	git submodules update
+
+clean:
+	@rm -Rf build
+	@rm -Rf src_gen
