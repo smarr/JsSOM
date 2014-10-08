@@ -61,7 +61,7 @@ function IntegerPrimitives() {
 
     function _fromString(frame, args) {
         var param = args[1];
-        if (param instanceof SString) {
+        if (!(param instanceof SString)) {
             return som.nilObject;
         }
         var intVal = parseInt(param.getEmbeddedString());
