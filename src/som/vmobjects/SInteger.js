@@ -118,7 +118,7 @@ function SInteger(intVal) {
 
     this.primAnd = function (right) {
         if (right instanceof SInteger) {
-            return universe.newInteger(intVal & right.getEmbeddedInteger);
+            return universe.newInteger(intVal & right.getEmbeddedInteger());
         }
         notYetImplemented(); // not supported by the library and, not sure what semantics should be
     };
