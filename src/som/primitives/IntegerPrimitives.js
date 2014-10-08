@@ -75,14 +75,11 @@ function IntegerPrimitives() {
         var l = left.getEmbeddedInteger();
         var r = rightObj.getEmbeddedInteger();
 
-
-        if (r >= 32) {
-            notYetImplemented(); // currently not supported by bigInt lib
-        }
-
         var result = l << r;
-        if (Math.floor(l) != l) {
-            notYetImplemented(); // this is indicating an overflow, I think, not supported yet
+        if (Math.floor(l) != l || !isInIntRange(result) || !isInIntRange(l * Math.pow(2, r))) {
+            var big = bigInt(l);
+            big = big.multiply(Math.pow(2, r));
+            return universe.newBiginteger(big);
         }
         return universe.newInteger(result);
     }
