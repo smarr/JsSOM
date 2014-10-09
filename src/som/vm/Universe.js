@@ -382,6 +382,11 @@ function Universe() {
         return initialize.invoke(null, [som.systemObject, somArgs]);
     }
 
+    this.initializeForStandardRepl = function () {
+        classPath = ['Smalltalk', 'TestSuite', 'Examples', 'Examples/Benchmarks', 'SUnit'];
+        initializeObjectSystem();
+    };
+
     this.interpretMethodInClass = function (className, selector) {
         initializeObjectSystem();
 
