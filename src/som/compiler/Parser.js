@@ -742,7 +742,7 @@ function Parser(fileContent, fileName) {
         }
 
         // and finally assume it is a global
-        return mgenc.getGlobalRead(varName, universe, source);
+        return mgenc.getGlobalRead(varName, source);
     }
 
     function variableWrite(mgenc, variableName, exp, source) {
@@ -752,7 +752,7 @@ function Parser(fileContent, fileName) {
         }
 
         var fieldName = universe.symbolFor(variableName);
-        var fieldWrite = mgenc.getObjectFieldWrite(fieldName, exp, universe, source);
+        var fieldWrite = mgenc.getObjectFieldWrite(fieldName, exp, source);
 
         if (fieldWrite != null) {
             return fieldWrite;
