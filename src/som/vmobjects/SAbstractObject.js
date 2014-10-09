@@ -36,7 +36,6 @@ function SAbstractObject() {
         return invokable.invoke(callerFrame, args);
     };
 
-
     this.sendDoesNotUnderstand = function (selector, callerFrame, args) {
         // Allocate an array to hold the arguments, without receiver
         var argsArray = new SArray(args.length - 1, args.slice(1));
@@ -45,12 +44,12 @@ function SAbstractObject() {
     };
 
     this.sendUnknownGlobal = function (globalName, callerFrame) {
-        var args = [this, globalName];
+        var args = [_this, globalName];
         return _this.send("unknownGlobal:", callerFrame, args);
     };
 
     this.sendEscapedBlock = function (block, callerFrame) {
-        var args = [this, block];
+        var args = [_this, block];
         return _this.send("escapedBlock:", callerFrame, args);
     };
 }
