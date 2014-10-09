@@ -40,7 +40,7 @@ A simple Hello World program is executed with:
 
 This code is distributed under the MIT License. Please see the LICENSE file for
 details. JsSOM uses [BigInteger.js][big-int] to support arbitrary-length
-integer operations.
+integer operations. To build JsSOM, you'll further need PyYAML.
 
 Build Status
 ------------
