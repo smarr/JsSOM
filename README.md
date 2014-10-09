@@ -29,6 +29,11 @@ syntax tree interpreter. It isn't optimized or tuned for performance. However,
 some aspects were easier to implement by doing node-replacement in a
 self-optimizing interpreter style.
 
+To clone the repository, please use the `--recursive` option to load all 
+submodules:
+
+    $ git clone --recursive https://github.com/SOM-st/JsSOM.git
+
 JsSOM's tests can be executed with:
 
     $ make  # note, it will download the Google Closure compiler
