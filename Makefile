@@ -27,7 +27,13 @@ build/node.min.js: build $(JS_SRC) src/som/vm/Shell.js src/node.js
 src_gen/core_lib.js: core-lib src_gen
 	libs/jsify-core-lib.py > $@
 
-core-lib:
+core-lib: core-lib/Smalltalk
+
+core-lib/Smalltalk:
+	git submodules init
+	git submodules update
+
+libs/big-integer/BigInteger.js:
 	git submodules init
 	git submodules update
 
