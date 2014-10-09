@@ -207,7 +207,7 @@ function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
     };
 
     this.getGlobalRead = function (varName, source) {
-        return createGlobalRead(varName, universe, source);
+        return createGlobalRead(varName, source);
     };
 
     this.getObjectFieldWrite = function (fieldName, exp, source) {

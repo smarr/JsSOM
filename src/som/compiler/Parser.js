@@ -377,7 +377,7 @@ function Parser(fileContent, fileName) {
 
     function createSequenceNode(coord, expressions) {
         if (expressions.length == 0) {
-            return createGlobalRead("nil", universe, getSource(coord));
+            return createGlobalRead(universe.symbolFor("nil"), getSource(coord));
         } else if (expressions.length == 1) {
             return expressions[0];
         }
