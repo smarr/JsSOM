@@ -21,9 +21,15 @@
 */
 if (typeof global === "undefined") {
     // this seems to be a browser environment
-    getMillisecondTicks = function () {
-        return performance.now();
-    };
+    if (typeof performance === "undefined" || performance.now == undefined) {
+        getMillisecondTicks = function () {
+            return Date.now();
+        };
+    } else {
+        getMillisecondTicks = function () {
+            return performance.now();
+        };
+    }
 
     stdout = function (msg) {
         document.write(msg);
