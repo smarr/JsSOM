@@ -3,7 +3,7 @@
 JS_SRC=$(shell libs/deps.py)
 CLOJURE_JAR=build/closure-compiler/compiler.jar
 
-all: build/som.min.js build/node.min.js build/som.full.js
+all: build/som.min.js build/node.min.js build/som.full.js build/som-repl.min.js build/som-repl.full.js
 
 src_gen:
 	mkdir src_gen
@@ -24,6 +24,12 @@ build/node.min.js: $(JS_SRC) src/som/vm/Shell.js src/node.js
 
 build/som.full.js: $(JS_SRC)
 	cat $(JS_SRC) > $@
+
+build/som-repl.full.js: $(JS_SRC) src/web-repl.js
+	cat $(JS_SRC) src/web-repl.js > $@
+
+build/som-repl.min.js: $(JS_SRC) src/web-repl.js $(CLOJURE_JAR)
+	java -jar $(CLOJURE_JAR) --language_in=ECMASCRIPT5 --js_output_file=$@ $(JS_SRC) src/web-repl.js
 
 src_gen/core_lib.js: core-lib src_gen
 	libs/jsify-core-lib.py > $@
