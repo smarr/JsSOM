@@ -21,10 +21,10 @@ $(CLOJURE_JAR):
 	mv build/closure-compiler/closure-compiler-*.jar build/closure-compiler/compiler.jar
 
 build/som.min.js: $(JS_SRC) $(CLOJURE_JAR)
-	java -jar $(CLOJURE_JAR) --language_in=ECMASCRIPT5 --js_output_file=$@ $(JS_SRC)
+	java -jar $(CLOJURE_JAR) --language_in=ECMASCRIPT6_STRICT --js_output_file=$@ $(JS_SRC)
 
 build/node.min.js: $(JS_SRC) src/som/vm/Shell.js src/node.js
-	java -jar $(CLOJURE_JAR) --language_in=ECMASCRIPT5 --js_output_file=$@ $(JS_SRC) src/som/vm/Shell.js src/node.js
+	java -jar $(CLOJURE_JAR) --language_in=ECMASCRIPT6_STRICT --js_output_file=$@ $(JS_SRC) src/som/vm/Shell.js src/node.js
 
 build/som.full.js: $(JS_SRC)
 	cat $(JS_SRC) > $@
@@ -33,7 +33,7 @@ build/som-repl.full.js: $(JS_SRC) src/web-repl.js
 	cat $(JS_SRC) src/web-repl.js > $@
 
 build/som-repl.min.js: $(JS_SRC) src/web-repl.js $(CLOJURE_JAR)
-	java -jar $(CLOJURE_JAR) --language_in=ECMASCRIPT5 --js_output_file=$@ $(JS_SRC) src/web-repl.js
+	java -jar $(CLOJURE_JAR) --language_in=ECMASCRIPT6_STRICT --js_output_file=$@ $(JS_SRC) src/web-repl.js
 
 src_gen/core_lib.js: core-lib src_gen
 	libs/jsify-core-lib.py > $@
