@@ -18,6 +18,7 @@ $(CLOJURE_JAR):
 	-mkdir -p build/closure-compiler
 	wget http://dl.google.com/closure-compiler/compiler-latest.zip -O build/closure-compiler/compiler-latest.zip
 	unzip build/closure-compiler/compiler-latest.zip -d build/closure-compiler/
+	mv build/closure-compiler/closure-compiler-*.jar build/closure-compiler/compiler.jar
 
 build/som.min.js: $(JS_SRC) $(CLOJURE_JAR)
 	java -jar $(CLOJURE_JAR) --language_in=ECMASCRIPT5 --js_output_file=$@ $(JS_SRC)
