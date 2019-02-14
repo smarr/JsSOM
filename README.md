@@ -29,7 +29,7 @@ syntax tree interpreter. It isn't optimized or tuned for performance. However,
 some aspects were easier to implement by doing node-replacement in a
 self-optimizing interpreter style.
 
-To clone the repository, please use the `--recursive` option to load all 
+To clone the repository, please use the `--recursive` option to load all
 submodules:
 
     $ git clone --recursive https://github.com/SOM-st/JsSOM.git
@@ -38,14 +38,13 @@ JsSOM's tests can be executed with:
 
     $ make  # note, it will download the Google Closure compiler
     $ ./som.sh -cp Smalltalk TestSuite/TestHarness.som
-   
+
 A simple Hello World program is executed with:
 
     $ ./som.sh -cp Smalltalk Examples/Hello.som
 
 This code is distributed under the MIT License. Please see the LICENSE file for
-details. JsSOM uses [BigInteger.js][big-int] to support arbitrary-length
-integer operations. To build JsSOM, you'll further need PyYAML.
+details. To build JsSOM, you'll further need PyYAML.
 
 Build Status
 ------------

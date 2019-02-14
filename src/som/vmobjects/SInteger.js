@@ -1,16 +1,16 @@
 /*
 * Copyright (c) 2014 Stefan Marr, mail@stefan-marr.de
-* 
+*
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
 * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 * copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,7 +27,7 @@ function intOrBigInt(val) {
     if (isInIntRange(val)) {
         return universe.newInteger(val | 0);
     } else {
-        return universe.newBiginteger(bigInt(val));
+        return universe.newBigInteger(BigInt(val));
     }
 }
 
@@ -46,11 +46,11 @@ function SInteger(intVal) {
     function toDouble() {
         return universe.newDouble(intVal); // JS numbers are always doubles...
     }
-    
+
     this.primLessThan = function (right) {
         var result;
         if (right instanceof SBigInteger) {
-            result = bigInt(intVal).lesser(right.getEmbeddedBigInteger());
+            result = BigInt(intVal).lesser(right.getEmbeddedBigInteger());
         } else if (right instanceof SDouble) {
             return toDouble.primLessThan(right);
         } else {
@@ -58,14 +58,14 @@ function SInteger(intVal) {
         }
         return (result) ? som.trueObject : som.falseObject;
     };
-    
+
     this.primAsString = function () {
         return universe.newString(intVal.toString());
     };
 
     this.primAdd = function (right) {
         if (right instanceof SBigInteger) {
-            return universe.newBiginteger(
+            return universe.newBigInteger(
                 right.getEmbeddedBigInteger().add(intVal));
         } else if (right instanceof SDouble) {
             return toDouble().primAdd(right);
@@ -77,7 +77,7 @@ function SInteger(intVal) {
 
     this.primSubtract = function (right) {
         if (right instanceof SBigInteger) {
-            return universe.newBiginteger(
+            return universe.newBigInteger(
                 right.getEmbeddedBigInteger().subtract(intVal));
         } else if (right instanceof SDouble) {
             return toDouble().primSubtract(right);
@@ -89,7 +89,7 @@ function SInteger(intVal) {
 
     this.primMultiply = function (right) {
         if (right instanceof SBigInteger) {
-            return universe.newBiginteger(
+            return universe.newBigInteger(
                 right.getEmbeddedBigInteger().multiply(intVal));
         } else if (right instanceof SDouble) {
             return toDouble().primMultiply(right);
@@ -113,8 +113,8 @@ function SInteger(intVal) {
 
     this.primIntDiv = function (right) {
         if (right instanceof SBigInteger) {
-            var result = bigInt(intVal).divide(right.getEmbeddedBigInteger());
-            return universe.newBiginteger(result);
+            var result = BigInt(intVal).divide(right.getEmbeddedBigInteger());
+            return universe.newBigInteger(result);
         } else if (right instanceof SDouble) {
             return toDouble(intVal).primIntDiv(right);
         } else {
@@ -125,8 +125,8 @@ function SInteger(intVal) {
 
     this.primModulo = function (right) {
         if (right instanceof SBigInteger) {
-            var result = bigInt(intVal).mod(right.getEmbeddedBigInteger());
-            return universe.newBiginteger(result);
+            var result = BigInt(intVal).mod(right.getEmbeddedBigInteger());
+            return universe.newBigInteger(result);
         } else if (right instanceof SDouble) {
             return toDouble(intVal).primModulo(right);
         } else {
@@ -149,7 +149,7 @@ function SInteger(intVal) {
     this.primEquals = function (right) {
         var result;
         if (right instanceof SBigInteger) {
-            result = bigInt(intVal).equals(right.getEmbeddedBigInteger());
+            result = BigInt(intVal).equals(right.getEmbeddedBigInteger());
         } else if (right instanceof SDouble) {
             result = intVal == right.getEmbeddedDouble();
         } else if (right instanceof SInteger) {

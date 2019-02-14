@@ -44,10 +44,6 @@ core-lib/Smalltalk:
 	git submodules init
 	git submodules update
 
-libs/big-integer/BigInteger.js:
-	git submodules init
-	git submodules update
-
 clean:
 	@rm -Rf build
 	@rm -Rf src_gen
