@@ -181,15 +181,43 @@ function Lexer(fileContent) {
         } while (/\d/.test(currentChar()));
     }
 
+    function lexEscapeChar() {
+        const current = currentChar();
+
+        switch (current) {
+            case 't':  state.text += "\t"; break;
+            case 'b':  state.text += "\b"; break;
+            case 'n':  state.text += "\n"; break;
+            case 'r':  state.text += "\r"; break;
+            case 'f':  state.text += "\f"; break;
+            case '\'': state.text += "'"; break;
+            case '\\': state.text += "\\"; break;
+        }
+        state.linePos++;
+    }
+
+    function lexStringChar() {
+        if (currentChar() === '\\') {
+            state.linePos++;
+            lexEscapeChar();
+        } else {
+            state.text += currentChar();
+            state.linePos++;
+        }
+    }
+
     function lexString() {
         state.set(Sym.STString, "");
+        state.linePos++
 
-        do {
-            state.text += bufchar(++state.linePos);
+        while (currentChar() != '\'') {
+            lexStringChar();
+            while (endOfLine()) {
+                if (!readNextLine()) { return; }
+                state.text += "\n";
+            }
         }
-        while (currentChar() != '\'');
 
-        state.text = state.text.slice(0, -1);
         state.linePos++;
     }
 
