@@ -3,6 +3,7 @@ node_js:
   - "7"
 
 before_install:
+  - pip install pyyaml
   - make travis_deps
 
 script:
