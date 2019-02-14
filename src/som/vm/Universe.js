@@ -288,10 +288,10 @@ function Universe() {
         initializeSystemClass(som.nilClass,       som.objectClass,  "Nil");
         initializeSystemClass(som.arrayClass,     som.objectClass,  "Array");
         initializeSystemClass(som.methodClass,    som.objectClass,  "Method");
-        initializeSystemClass(som.symbolClass,    som.objectClass,  "Symbol");
         initializeSystemClass(som.integerClass,   som.objectClass,  "Integer");
         initializeSystemClass(som.primitiveClass, som.objectClass,  "Primitive");
         initializeSystemClass(som.stringClass,    som.objectClass,  "String");
+        initializeSystemClass(som.symbolClass,    som.stringClass,  "Symbol");
         initializeSystemClass(som.doubleClass,    som.objectClass,  "Double");
         initializeSystemClass(som.booleanClass,   som.objectClass,  "Boolean");
         initializeSystemClass(som.trueClass,      som.booleanClass, "True");
