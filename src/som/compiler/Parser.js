@@ -43,16 +43,16 @@ function ParseError(message, expected, parser) {
         _this            = this;
 
     this.expectedSymbolAsString = function () {
-        return expected.toString();
+        return Sym.toString(expected);
     };
 
     this.toString = function () {
         var msg = "%(file)s:%(line)d:%(column)d: error: " + message;
         var foundStr;
         if (printableSymbol(found)) {
-            foundStr = found + " (" + text + ")";
+            foundStr = Sym.toString(found) + " (" + text + ")";
         } else {
-            foundStr = found.toString();
+            foundStr = Sym.toString(found);
         }
         msg += ": " + currentLine;
         var expectedStr = _this.expectedSymbolAsString();
