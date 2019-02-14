@@ -79,6 +79,10 @@ function Lexer(fileContent) {
         return state.startCoord;
     };
 
+    this.getPeekDone = function () {
+        return peekDone;
+    }
+
     this.getSym = function () {
         if (peekDone) {
             peekDone = false;
