@@ -746,7 +746,7 @@ function Parser(fileContent, fileName) {
     }
 
     function variableWrite(mgenc, variableName, exp, source) {
-        var variable = mgenc.getLocal(variableName);
+        var variable = mgenc.getVariable(variableName);
         if (variable != null) {
             return mgenc.getLocalWriteNode(variableName, exp, source);
         }
