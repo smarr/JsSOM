@@ -131,10 +131,9 @@ function SInteger(intVal) {
             return toDouble(intVal).primModulo(right);
         } else {
             var r = right.getEmbeddedInteger();
-            var result = Math.floor(intVal % r);
-            if (intVal > 0 && r < 0) {
-                result += r;
-            }
+            // Java has Math.floorMod, JavaScript can use this
+            // but it is likely to be very inefficient
+            var result = Math.floor(((intVal % r) + r) % r);
             return universe.newInteger(result);
         }
     };
@@ -159,5 +158,15 @@ function SInteger(intVal) {
         }
         return (result) ? som.trueObject : som.falseObject;
     };
+
+    this.prim32BitUnsignedValue = function () {
+        var arr = new Uint32Array(1);
+        arr[0] = intVal;
+        return intOrBigInt(arr[0]);
+    }
+
+    this.prim32BitSignedValue = function () {
+        return universe.newInteger(intVal | 0);
+    }
 }
 SInteger.prototype = Object.create(SAbstractObject.prototype);

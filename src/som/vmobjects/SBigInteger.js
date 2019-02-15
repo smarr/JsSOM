@@ -133,5 +133,15 @@ function SBigInteger(bigintVal) {
         }
         return (result) ? som.trueObject : som.falseObject;
     };
+
+    this.prim32BitUnsignedValue = function () {
+        var val = Number(bigintVal) >>> 0;
+        return intOrBigInt(val);
+    }
+
+    this.prim32BitSignedValue = function () {
+        var val = Number(bigintVal) >> 0;
+        return intOrBigInt(val);
+    }
 }
 SBigInteger.prototype = Object.create(SAbstractObject.prototype);

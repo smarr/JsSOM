@@ -110,6 +110,28 @@ function IntegerPrimitives() {
             ^ right.getEmbeddedInteger())
     }
 
+    function _rem(frame, args) {
+        var right = args[1];
+        var left  = args[0];
+        return universe.newInteger(left.getEmbeddedInteger()
+            % right.getEmbeddedInteger())
+    }
+
+    function _as32BitUnsignedValue(frame, args) {
+        return args[0].prim32BitUnsignedValue();
+    }
+
+    function _as32BitSignedValue(frame, args) {
+        return args[0].prim32BitSignedValue();
+    }
+
+    function _unsignedRightShift(frame, args) {
+        var right = args[1];
+        var left  = args[0];
+        return universe.newInteger(
+            left.getEmbeddedInteger() >>> right.getEmbeddedInteger());
+    }
+
     this.installPrimitives = function () {
         _this.installInstancePrimitive("asString", _asString);
         _this.installInstancePrimitive("sqrt",     _sqrt);
@@ -125,6 +147,11 @@ function IntegerPrimitives() {
         _this.installInstancePrimitive("<",        _lessThan);
         _this.installInstancePrimitive("<<",       _leftShift);
         _this.installInstancePrimitive("bitXor:",  _bitXor);
+        _this.installInstancePrimitive("rem:",     _rem);
+        _this.installInstancePrimitive(">>>",      _unsignedRightShift);
+
+        _this.installInstancePrimitive("as32BitUnsignedValue", _as32BitUnsignedValue);
+        _this.installInstancePrimitive("as32BitSignedValue",   _as32BitSignedValue);
 
         _this.installClassPrimitive("fromString:", _fromString);
     }
