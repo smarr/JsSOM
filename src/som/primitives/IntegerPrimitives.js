@@ -74,6 +74,10 @@ function IntegerPrimitives() {
         return args[0].primEquals(args[1]);
     }
 
+    function _equalsEquals(frame, args) {
+        return args[0].primEquals(args[1]);
+    }
+
     function _lessThan(frame, args) {
         return args[0].primLessThan(args[1]);
     }
@@ -144,6 +148,7 @@ function IntegerPrimitives() {
         _this.installInstancePrimitive("%",        _mod);
         _this.installInstancePrimitive("&",        _and);
         _this.installInstancePrimitive("=",        _equals);
+        _this.installInstancePrimitive("==",       _equalsEquals, true);
         _this.installInstancePrimitive("<",        _lessThan);
         _this.installInstancePrimitive("<<",       _leftShift);
         _this.installInstancePrimitive("bitXor:",  _bitXor);
