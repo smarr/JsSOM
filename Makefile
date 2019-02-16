@@ -3,6 +3,8 @@
 JS_SRC=$(shell libs/deps.py)
 CLOJURE_JAR=build/closure-compiler/compiler.jar
 
+SOM_SRC=$(wildcard core-lib/**/*.som)
+
 all: build/som.min.js build/node.min.js build/som.full.js build/som-repl.min.js build/som-repl.full.js
 
 src_gen:
@@ -35,7 +37,7 @@ build/som-repl.full.js: $(JS_SRC) src/web-repl.js
 build/som-repl.min.js: $(JS_SRC) src/web-repl.js $(CLOJURE_JAR)
 	java -jar $(CLOJURE_JAR) --language_in=ECMASCRIPT6_STRICT --js_output_file=$@ $(JS_SRC) src/web-repl.js
 
-src_gen/core_lib.js: core-lib src_gen
+src_gen/core_lib.js: core-lib src_gen $(SOM_SRC)
 	libs/jsify-core-lib.py > $@
 
 core-lib: core-lib/Smalltalk
@@ -44,10 +46,10 @@ core-lib/Smalltalk:
 	git submodules init
 	git submodules update
 
-libs/big-integer/BigInteger.js:
-	git submodules init
-	git submodules update
-
 clean:
+	@rm -Rf build/*.js
+	@rm -Rf src_gen/*.js
+
+clobber:
 	@rm -Rf build
 	@rm -Rf src_gen

@@ -1,16 +1,16 @@
 /*
 * Copyright (c) 2014 Stefan Marr, mail@stefan-marr.de
-* 
+*
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
 * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 * copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -43,16 +43,16 @@ function ParseError(message, expected, parser) {
         _this            = this;
 
     this.expectedSymbolAsString = function () {
-        return expected.toString();
+        return Sym.toString(expected);
     };
 
     this.toString = function () {
         var msg = "%(file)s:%(line)d:%(column)d: error: " + message;
         var foundStr;
         if (printableSymbol(found)) {
-            foundStr = found + " (" + text + ")";
+            foundStr = Sym.toString(found) + " (" + text + ")";
         } else {
-            foundStr = found.toString();
+            foundStr = Sym.toString(found);
         }
         msg += ": " + currentLine;
         var expectedStr = _this.expectedSymbolAsString();
@@ -572,37 +572,63 @@ function Parser(fileContent, fileName) {
     }
 
     function literal() {
+        var coord = _this.getCoordinate();
+        var value;
         switch (sym) {
-            case Sym.Pound:     return literalSymbol();
-            case Sym.STString:  return literalString();
-            default:            return literalNumber();
+            case Sym.Pound: {
+                peekForNextSymbolFromLexerIfNecessary();
+
+                if (nextSym == Sym.NewTerm) {
+                    value = literalArray();
+                } else {
+                    value = literalSymbol();
+                }
+                break;
+            }
+            case Sym.STString: {
+                value = literalString();
+                break;
+            }
+            default: {
+                value = literalNumber();
+                break;
+            }
         }
+        var source = getSource(coord);
+        return createLiteralNode(value, source);
     }
 
     function literalNumber() {
-        var coord = _this.getCoordinate();
-
         if (sym == Sym.Minus) {
-            return negativeDecimal(coord);
+            return negativeDecimal();
         } else {
-            return literalDecimal(false, coord);
+            return literalDecimal(false);
         }
     }
 
-    function literalDecimal(isNegative, coord) {
+    function literalDecimal(isNegative) {
         if (sym == Sym.Integer) {
-            return literalInteger(isNegative, coord);
+            return literalInteger(isNegative);
         } else {
-            return literalDouble(isNegative, coord);
+            return literalDouble(isNegative);
         }
     }
 
-    function negativeDecimal(coord) {
+    function negativeDecimal() {
         expect(Sym.Minus);
-        return literalDecimal(true, coord);
+        return literalDecimal(true);
     }
 
-    function literalInteger(isNegative, coord) {
+    function isNegativeNumber() {
+        var isNegative  = false;
+        if (sym === Sym.Minus) {
+            expect(Sym.Minus);
+            _this.isNegative = true;
+        }
+        return isNegative;
+    }
+
+    function literalInteger(isNegative) {
         var i = parseInt(text, 10);
         if (isNaN(i)) {
             throw new ParseError("Could not parse integer. Expected a number " +
@@ -614,15 +640,14 @@ function Parser(fileContent, fileName) {
         }
         expect(Sym.Integer);
 
-        var source = getSource(coord);
         if (isInIntRange(i)) {
-            return createLiteralNode(universe.newInteger(i), source);
+            return universe.newInteger(i);
         } else {
-            return createLiteralNode(universe.newBiginteger(bigInt(i)), source);
+            return universe.newBigInteger(BigInt(i));
         }
     }
 
-    function literalDouble(isNegative, coord) {
+    function literalDouble(isNegative) {
         var d = parseFloat(text);
         if (isNaN(d)) {
             throw new ParseError("Could not parse double. Expected a number " +
@@ -633,29 +658,62 @@ function Parser(fileContent, fileName) {
             d = 0.0 - d;
         }
         expect(Sym.Double);
-        var source = getSource(coord);
-        return createLiteralNode(universe.newDouble(d), source);
+        return universe.newDouble(d);
     }
 
     function literalSymbol() {
-        var coord = _this.getCoordinate();
-
-        var symb;
         expect(Sym.Pound);
         if (sym == Sym.STString) {
             var s = string();
-            symb = universe.symbolFor(s);
+            return universe.symbolFor(s);
         } else {
-            symb = selector();
+            return selector();
         }
-
-        return createLiteralNode(symb, getSource(coord));
     }
 
     function literalString() {
-        var coord = _this.getCoordinate();
         var s = string();
-        return createLiteralNode(universe.newString(s), getSource(coord));
+        return universe.newString(s);
+    }
+
+    function literalArray() {
+        const literals = [];
+        expect(Sym.Pound);
+        expect(Sym.NewTerm);
+
+        while (sym != Sym.EndTerm) {
+            literals.push(getObjectForCurrentLiteral());
+        }
+
+        expect(Sym.EndTerm);
+        return universe.newArrayFrom(literals);
+    }
+
+    function getObjectForCurrentLiteral() {
+        var coord = _this.getCoordinate();
+
+        switch (sym) {
+            case Sym.Pound: {
+                peekForNextSymbolFromLexerIfNecessary();
+
+                if (nextSym == Sym.NewTerm) {
+                    return literalArray();
+                } else {
+                    return literalSymbol();
+                }
+            }
+            case Sym.STString:
+                return literalString();
+            case Sym.Integer:
+                return literalInteger(isNegativeNumber(), coord);
+            case Sym.Double:
+                return literalDouble(isNegativeNumber(), coord);
+            case Sym.Identifier:
+                expect(Sym.Identifier);
+                return universe.getGlobal(universe.symbolFor(new String(text)));
+            default:
+                throw new ParseError("Could not parse literal array value", Sym.NONE, this);
+        }
     }
 
     function selector() {
@@ -746,7 +804,7 @@ function Parser(fileContent, fileName) {
     }
 
     function variableWrite(mgenc, variableName, exp, source) {
-        var variable = mgenc.getLocal(variableName);
+        var variable = mgenc.getVariable(variableName);
         if (variable != null) {
             return mgenc.getLocalWriteNode(variableName, exp, source);
         }
@@ -770,6 +828,12 @@ function Parser(fileContent, fileName) {
 
     function peekForNextSymbolFromLexer() {
         nextSym = lexer.peek();
+    }
+
+    function peekForNextSymbolFromLexerIfNecessary() {
+        if (!lexer.getPeekDone()) {
+            peekForNextSymbolFromLexer();
+        }
     }
 
     // init...

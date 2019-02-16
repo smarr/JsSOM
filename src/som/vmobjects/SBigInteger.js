@@ -1,16 +1,16 @@
 /*
 * Copyright (c) 2014 Stefan Marr, mail@stefan-marr.de
-* 
+*
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
 * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 * copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -35,9 +35,9 @@ function SBigInteger(bigintVal) {
         if (right instanceof SDouble) {
             result = bigintVal.toJSNumber() < right;
         } else if (right instanceof SInteger) {
-            result = bigintVal.lesser(right.getEmbeddedInteger());
+            result = bigintVal < right.getEmbeddedInteger();
         } else {
-            result = bigintVal.lesser(right.getEmbeddedBigInteger());
+            result = bigintVal < right.getEmbeddedBigInteger();
         }
         return (result) ? som.trueObject : som.falseObject;
     };
@@ -48,36 +48,36 @@ function SBigInteger(bigintVal) {
 
     this.primAdd = function (right) {
         if (right instanceof SBigInteger) {
-            return universe.newBiginteger(right.getEmbeddedBigInteger().add(bigintVal));
+            return universe.newBigInteger(right.getEmbeddedBigInteger() + bigintVal);
         } else if (right instanceof SDouble) {
             return universe.newDouble(bigintVal.toJSNumber() + right.getEmbeddedDouble());
         } else {
-            return universe.newBiginteger(bigintVal.add(right.getEmbeddedInteger()))
+            return universe.newBigInteger(bigintVal + right.getEmbeddedInteger())
         }
     };
 
     this.primSubtract = function (right) {
         var result;
         if (right instanceof SBigInteger) {
-            result = bigintVal.subtract(right.getEmbeddedBigInteger());
+            result = bigintVal - right.getEmbeddedBigInteger();
         } else if (right instanceof SDouble) {
             return universe.newDouble(bigintVal.toJSNumber() - right.getEmbeddedDouble());
         } else {
-            result = bigintVal.subtract(right.getEmbeddedInteger())
+            result = bigintVal - right.getEmbeddedInteger()
         }
-        return universe.newBiginteger(result);
+        return universe.newBigInteger(result);
     };
 
     this.primMultiply = function (right) {
         var result;
         if (right instanceof SBigInteger) {
-            result = bigintVal.multiply(right.getEmbeddedBigInteger());
+            result = bigintVal * right.getEmbeddedBigInteger();
         } else if (right instanceof SDouble) {
             return universe.newDouble(bigintVal.toJSNumber() * right.getEmbeddedDouble());
         } else {
-            result = bigintVal.multiply(right.getEmbeddedInteger())
+            result = bigintVal * right.getEmbeddedInteger()
         }
-        return universe.newBiginteger(result);
+        return universe.newBigInteger(result);
     };
 
     this.primDoubleDiv = function (right) {
@@ -95,25 +95,25 @@ function SBigInteger(bigintVal) {
     this.primIntDiv = function (right) {
         var result;
         if (right instanceof SBigInteger) {
-            result = bigintVal.divide(right.getEmbeddedBigInteger());
+            result = bigintVal / right.getEmbeddedBigInteger();
         } else if (right instanceof SDouble) {
             return universe.newDouble(bigintVal.toJSNumber()).primIntDiv(right);
         } else {
-            result = bigintVal.divide(right.getEmbeddedInteger());
+            result = bigintVal / right.getEmbeddedInteger();
         }
-        return universe.newBiginteger(result);
+        return universe.newBigInteger(result);
     };
 
     this.primModulo = function (right) {
         var result;
         if (right instanceof SBigInteger) {
-            result = bigintVal.mod(right.getEmbeddedBigInteger());
+            result = bigintVal % right.getEmbeddedBigInteger();
         } else if (right instanceof SDouble) {
             return universe.newDouble(bigintVal.toJSNumber()).primModulo(right);
         } else {
-            result = bigintVal.mod(right.getEmbeddedInteger());
+            result = bigintVal % right.getEmbeddedInteger();
         }
-        return universe.newBiginteger(result);
+        return universe.newBigInteger(result);
     };
 
     this.primAnd = function (right) {
@@ -123,15 +123,25 @@ function SBigInteger(bigintVal) {
     this.primEquals = function (right) {
         var result;
         if (right instanceof SBigInteger) {
-            result = bigintVal.equals(right.getEmbeddedBigInteger());
+            result = bigintVal == right.getEmbeddedBigInteger();
         } else if (right instanceof SDouble) {
             result = bigintVal.toJSNumber() == right.getEmbeddedDouble();
         } else if (right instanceof SInteger) {
-            result = bigintVal.equals(right.getEmbeddedInteger());
+            result = bigintVal == right.getEmbeddedInteger();
         } else {
             result = false;
         }
         return (result) ? som.trueObject : som.falseObject;
     };
+
+    this.prim32BitUnsignedValue = function () {
+        var val = Number(bigintVal) >>> 0;
+        return intOrBigInt(val);
+    }
+
+    this.prim32BitSignedValue = function () {
+        var val = Number(bigintVal) >> 0;
+        return intOrBigInt(val);
+    }
 }
 SBigInteger.prototype = Object.create(SAbstractObject.prototype);

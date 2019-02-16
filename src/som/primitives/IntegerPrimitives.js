@@ -1,16 +1,16 @@
 /*
 * Copyright (c) 2014 Stefan Marr, mail@stefan-marr.de
-* 
+*
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
 * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 * copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -74,6 +74,10 @@ function IntegerPrimitives() {
         return args[0].primEquals(args[1]);
     }
 
+    function _equalsEquals(frame, args) {
+        return args[0].primEquals(args[1]);
+    }
+
     function _lessThan(frame, args) {
         return args[0].primLessThan(args[1]);
     }
@@ -96,9 +100,9 @@ function IntegerPrimitives() {
 
         var result = l << r;
         if (Math.floor(l) != l || !isInIntRange(result) || !isInIntRange(l * Math.pow(2, r))) {
-            var big = bigInt(l);
-            big = big.multiply(Math.pow(2, r));
-            return universe.newBiginteger(big);
+            var big = BigInt(l);
+            big = big * BigInt(Math.pow(2, r));
+            return universe.newBigInteger(big);
         }
         return universe.newInteger(result);
     }
@@ -108,6 +112,28 @@ function IntegerPrimitives() {
         var left  = args[0];
         return universe.newInteger(left.getEmbeddedInteger()
             ^ right.getEmbeddedInteger())
+    }
+
+    function _rem(frame, args) {
+        var right = args[1];
+        var left  = args[0];
+        return universe.newInteger(left.getEmbeddedInteger()
+            % right.getEmbeddedInteger())
+    }
+
+    function _as32BitUnsignedValue(frame, args) {
+        return args[0].prim32BitUnsignedValue();
+    }
+
+    function _as32BitSignedValue(frame, args) {
+        return args[0].prim32BitSignedValue();
+    }
+
+    function _unsignedRightShift(frame, args) {
+        var right = args[1];
+        var left  = args[0];
+        return universe.newInteger(
+            left.getEmbeddedInteger() >>> right.getEmbeddedInteger());
     }
 
     this.installPrimitives = function () {
@@ -122,9 +148,15 @@ function IntegerPrimitives() {
         _this.installInstancePrimitive("%",        _mod);
         _this.installInstancePrimitive("&",        _and);
         _this.installInstancePrimitive("=",        _equals);
+        _this.installInstancePrimitive("==",       _equalsEquals, true);
         _this.installInstancePrimitive("<",        _lessThan);
         _this.installInstancePrimitive("<<",       _leftShift);
         _this.installInstancePrimitive("bitXor:",  _bitXor);
+        _this.installInstancePrimitive("rem:",     _rem);
+        _this.installInstancePrimitive(">>>",      _unsignedRightShift);
+
+        _this.installInstancePrimitive("as32BitUnsignedValue", _as32BitUnsignedValue);
+        _this.installInstancePrimitive("as32BitSignedValue",   _as32BitSignedValue);
 
         _this.installClassPrimitive("fromString:", _fromString);
     }

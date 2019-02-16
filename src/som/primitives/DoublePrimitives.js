@@ -1,16 +1,16 @@
 /*
 * Copyright (c) 2014 Stefan Marr, mail@stefan-marr.de
-* 
+*
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
 * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 * copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,8 +30,12 @@ function DoublePrimitives() {
         if (obj instanceof SInteger) {
             return universe.newDouble(obj.getEmbeddedInteger());
         }
-        throw IllegalStateException("Cannot coerce " + obj.toSource()
+        throw new IllegalStateException("Cannot coerce " + obj.toSource()
             + " to Double!");
+    }
+
+    function _asInteger(frame, args) {
+        return args[0].primAsInteger();
     }
 
     function _asString(frame, args) {
@@ -76,7 +80,22 @@ function DoublePrimitives() {
         return universe.newInteger(intVal);
     }
 
+    function _sin(frame, args) {
+        var val = Math.sin(args[0].getEmbeddedDouble());
+        return universe.newDouble(val);
+    }
+
+    function _cos(frame, args) {
+        var val = Math.cos(args[0].getEmbeddedDouble());
+        return universe.newDouble(val);
+    }
+
+    function _positiveInfinity(frame, args) {
+        return universe.newDouble(Number.POSITIVE_INFINITY);
+    }
+
     this.installPrimitives = function () {
+        _this.installInstancePrimitive("asInteger", _asInteger);
         _this.installInstancePrimitive("asString",  _asString);
         _this.installInstancePrimitive("round",     _round);
         _this.installInstancePrimitive("sqrt",      _sqrt);
@@ -87,6 +106,10 @@ function DoublePrimitives() {
         _this.installInstancePrimitive("%",         _mod);
         _this.installInstancePrimitive("=",         _equals);
         _this.installInstancePrimitive("<",         _lessThan);
+        _this.installInstancePrimitive("sin",       _sin);
+        _this.installInstancePrimitive("cos",       _cos);
+
+        _this.installClassPrimitive("PositiveInfinity", _positiveInfinity);
     }
 }
 DoublePrimitives.prototype = Object.create(Primitives.prototype);
