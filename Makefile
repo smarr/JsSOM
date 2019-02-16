@@ -13,9 +13,6 @@ src_gen:
 test: build/node.min.js
 	./som.sh -cp Smalltalk TestSuite/TestHarness.som
 
-travis_deps:
-	sudo apt-get install -qq python-yaml
-
 $(CLOJURE_JAR):
 	-mkdir -p build/closure-compiler
 	wget http://dl.google.com/closure-compiler/compiler-latest.zip -O build/closure-compiler/compiler-latest.zip
@@ -43,8 +40,7 @@ src_gen/core_lib.js: core-lib src_gen $(SOM_SRC)
 core-lib: core-lib/Smalltalk
 
 core-lib/Smalltalk:
-	git submodules init
-	git submodules update
+	git submodule update --init --recursive
 
 clean:
 	@rm -Rf build/*.js
