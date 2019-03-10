@@ -7,6 +7,7 @@
 
 import json
 import os
+import sys
 
 core_lib = {}
 
@@ -22,13 +23,9 @@ def add_to_lib(lib, file_name, content):
         current = current[p]
     current[file] = content
     
+for file_name in sys.argv[1:]:
+    with open(file_name, 'r') as f:
+        content = f.read()
+    add_to_lib(core_lib, file_name, content)
 
-for root, dirs, files in os.walk('core-lib'):
-    for file in files:
-        if file.endswith('.som'):
-            file_name = os.path.join(root, file)
-            with open(file_name, 'r') as f:
-                content = f.read()
-            add_to_lib(core_lib, file_name, content)
-
-print "loadCoreLib = function () { return %s; };" % json.dumps(core_lib['core-lib'])
+print("loadCoreLib = function () { return %s; };" % json.dumps(core_lib))

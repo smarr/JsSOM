@@ -3,6 +3,9 @@
 JS_SRC=$(shell libs/deps.py)
 CLOJURE_JAR=build/closure-compiler/compiler.jar
 
+AWFY_ROOT?=../../benchmarks/SOM
+AWFY_SRC=$(wildcard $(AWFY_ROOT)/*.som) $(wildcard $(AWFY_ROOT)/**/*.som)
+
 SOM_SRC=$(wildcard core-lib/**/*.som)
 
 all: build/som.min.js build/node.min.js build/som.full.js build/som-repl.min.js build/som-repl.full.js
@@ -34,8 +37,8 @@ build/som-repl.full.js: $(JS_SRC) src/web-repl.js
 build/som-repl.min.js: $(JS_SRC) src/web-repl.js $(CLOJURE_JAR)
 	java -jar $(CLOJURE_JAR) --language_in=ECMASCRIPT6_STRICT --js_output_file=$@ $(JS_SRC) src/web-repl.js
 
-src_gen/core_lib.js: core-lib src_gen $(SOM_SRC)
-	libs/jsify-core-lib.py > $@
+src_gen/core_lib.js: core-lib src_gen $(SOM_SRC) $(AWFY_SRC)
+	libs/jsify-core-lib.py $(SOM_SRC) $(AWFY_SRC) > $@
 
 core-lib: core-lib/Smalltalk
 
