@@ -1,2 +1,2 @@
 #!/bin/sh
-exec node build/node.min.js "$@"
+exec node src/node.js "$@"

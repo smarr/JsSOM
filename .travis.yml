@@ -1,10 +1,11 @@
 language: node_js
 node_js:
-  - 11
+  - 12
 
 before_install:
   - pip install pyyaml
 
 script:
+  - ./som.sh -cp core-lib/Smalltalk core-lib/TestSuite/TestHarness.som
   - make
   - make test
