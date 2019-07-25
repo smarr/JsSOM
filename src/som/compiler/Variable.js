@@ -19,6 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+const factory = require('../interpreter/NodeFactory');
+
 function Argument(name, index) {
     var _this = this;
 
@@ -31,15 +33,15 @@ function Argument(name, index) {
     };
 
     this.getReadNode = function (contextLevel, source) {
-        return createArgumentRead(_this, contextLevel, source);
+        return factory.createArgumentRead(_this, contextLevel, source);
     };
 
     this.getWriteNode = function (contextLevel, valueExpr, source) {
-        return createArgumentWrite(this, contextLevel, valueExpr, source);
+        return factory.createArgumentWrite(this, contextLevel, valueExpr, source);
     }
 
     this.getSuperReadNode = function (contextLevel, holderClass, classSide, source) {
-        return createSuperRead(
+        return factory.createSuperRead(
             _this, contextLevel, holderClass, classSide, source);
     };
 
@@ -60,10 +62,13 @@ function Local(name, index) {
     };
 
     this.getReadNode = function (contextLevel, source) {
-        return createVariableRead(_this, contextLevel, source);
+        return factory.createVariableRead(_this, contextLevel, source);
     };
 
     this.getWriteNode = function (contextLevel, valueExpr, source) {
-        return createVariableWrite(this, contextLevel, valueExpr, source);
+        return factory.createVariableWrite(this, contextLevel, valueExpr, source);
     }
 }
+
+exports.Argument = Argument;
+exports.Local = Local;

@@ -19,6 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+const Sym = require('./Symbol').Sym;
+
 function makeLexerState() {
     return {
         lineNumber :    0,
@@ -379,3 +381,5 @@ function Lexer(fileContent) {
         return !isIdentifierChar(bufchar(state.linePos + text.length));
     }
 }
+
+exports.Lexer = Lexer;

@@ -19,6 +19,18 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+const u = require('../vm/Universe');
+
+const Variable = require('./Variable');
+const Local = Variable.Local;
+const Argument = Variable.Argument;
+
+const factory = require('../interpreter/NodeFactory');
+
+const SourceSection = require('./SourceSection').SourceSection;
+
+const constructEmptyPrimitive = require('../primitives/Primitives').constructEmptyPrimitive;
+
 function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
     var signature = null,
         primitive = false,
@@ -60,11 +72,11 @@ function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
         }
 
         if (_this.needsToCatchNonLocalReturn()) {
-            body = createCatchNonLocalReturn(body);
+            body = factory.createCatchNonLocalReturn(body);
         }
 
         // return the method - the holder field is to be set later on!
-        return  universe.newMethod(signature,
+        return  u.universe.newMethod(signature,
             getSourceSectionForMethod(sourceSection), body, locals.length);
     };
 
@@ -177,7 +189,7 @@ function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
 
     this.getNonLocalReturn = function (expr, source) {
         _this.makeCatchNonLocalReturn();
-        return createNonLocalReturn(expr, _this.getOuterSelfContextLevel(),
+        return factory.createNonLocalReturn(expr, _this.getOuterSelfContextLevel(),
             source);
     };
 
@@ -190,12 +202,12 @@ function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
         if (!holderGenc.hasField(fieldName)) {
             return null;
         }
-        return createFieldRead(getSelfRead(source),
+        return factory.createFieldRead(getSelfRead(source),
             holderGenc.getFieldIndex(fieldName), source);
     };
 
     this.getGlobalRead = function (varName, source) {
-        return createGlobalRead(varName, source);
+        return factory.createGlobalRead(varName, source);
     };
 
     this.getObjectFieldWrite = function (fieldName, exp, source) {
@@ -203,7 +215,7 @@ function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
             return null;
         }
 
-        return createFieldWrite(getSelfRead(source), exp,
+        return factory.createFieldWrite(getSelfRead(source), exp,
             holderGenc.getFieldIndex(fieldName), source);
     };
 
@@ -223,3 +235,5 @@ function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
         return "MethodGenC(" + holderGenc.getName().getString() + ">>" + signature.toString() + ")";
     };
 }
+
+exports.MethodGenerationContext = MethodGenerationContext;

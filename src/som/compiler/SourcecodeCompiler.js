@@ -19,7 +19,13 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-function getFile(path, file) {
+const fs = require('fs');
+
+const ClassGenerationContext = require('./ClassGenerationContext').ClassGenerationContext;
+
+const Parser = require('./Parser').Parser;
+
+function getFile_from_json(path, file) {
     var current = som.core_lib;
 
     path.split("/").forEach(function (e) {
@@ -34,6 +40,14 @@ function getFile(path, file) {
     } else {
         return current[file];
     }
+}
+
+function getFile(path, file) {
+    const name = path + '/' + file;
+    if (!fs.existsSync(name)) {
+        return null;
+    }
+    return fs.readFileSync(name, {encoding: 'utf-8'});
 }
 
 function compile(parser, systemClass) {
@@ -58,11 +72,7 @@ function compile(parser, systemClass) {
 function compileClassFile(path, file, systemClass) {
     var source = getFile(path, file + ".som");
     if (source == null) {
-        // retry with "core-lib" prepended
-        source = getFile("core-lib/" + path, file + ".som");
-        if (source == null) {
-            return null;
-        }
+        return null;
     }
 
     var result = compile(new Parser(source, path + '/' + file + '.som'), systemClass);
@@ -80,3 +90,5 @@ function compileClassFile(path, file, systemClass) {
 function compileClassString(stmt, systemClass) {
     return compile(new Parser(stmt, '$string'), systemClass);
 }
+
+exports.compileClassFile = compileClassFile;

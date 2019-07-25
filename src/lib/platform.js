@@ -1,16 +1,16 @@
 /*
 * Copyright (c) 2014 Stefan Marr, mail@stefan-marr.de
-* 
+*
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
 * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 * copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,57 +22,62 @@
 if (typeof global === "undefined") {
     // this seems to be a browser environment
     if (typeof performance === "undefined" || performance.now == undefined) {
-        getMillisecondTicks = function () {
+        exports.getMillisecondTicks = function () {
             return Date.now();
         };
     } else {
-        getMillisecondTicks = function () {
+        exports.getMillisecondTicks = function () {
             return performance.now();
         };
     }
 
-    stdout = function (msg) {
+    exports.stdout = function (msg) {
         document.write(msg);
     };
 
-    stdoutnl = function (msg) {
+    exports.stdoutnl = function (msg) {
         document.writeln(msg + "<br/>");
     };
 
-    stderr = function (msg) {
+    exports.stderr = function (msg) {
         document.write("<span style='color:red';>" + msg + "</span>");
     };
 
-    stderrnl = function (msg) {
+    exports.stderrnl = function (msg) {
         document.writeln("<span style='color:red';>" + msg + "<br/></span>")
     };
 
-    exitInterpreter = function (errorCode) {};
+    exports.exitInterpreter = function (errorCode) {};
 } else {
     // this seems to be node.js
-    getMillisecondTicks = function () {
+    exports.getMillisecondTicks = function () {
         var timeTuple = process.hrtime();
         return timeTuple[0] * 1000 + timeTuple[1]/1000000;
     };
 
-    stdout = function (msg) {
+    exports.stdout = function (msg) {
         process.stdout.write(msg);
     };
 
-    stdoutnl = function (msg) {
+    exports.stdoutnl = function (msg) {
         process.stdout.write(msg + "\n");
     };
 
-    stderr = function (msg) {
+    exports.stderr = function (msg) {
         process.stderr.write(msg);
     };
 
-    stderrnl = function (msg) {
+    exports.stderrnl = function (msg) {
         process.stderr.write(msg + "\n");
     };
 
-    exitInterpreter = function (errorCode) {
+    exports.exitInterpreter = function (errorCode) {
         process.exit(errorCode);
     };
 }
 
+function isInIntRange(val) {
+    return val >= -2147483647 && val <= 2147483647;
+}
+
+exports.isInIntRange = isInIntRange;

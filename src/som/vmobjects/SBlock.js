@@ -1,16 +1,16 @@
 /*
 * Copyright (c) 2014 Stefan Marr, mail@stefan-marr.de
-* 
+*
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
 * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 * copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,6 +19,12 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+const assert = require('../../lib/assert').assert;
+
+const SAbstractObject = require('./SAbstractObject').SAbstractObject;
+
+const u = require('../vm/Universe');
+
 function getBlockEvaluationPrimitive(numberOfArguments, rcvrClass) {
     function _value(frame, args) {
         var rcvrBlock = args[0];
@@ -37,13 +43,13 @@ function getBlockEvaluationPrimitive(numberOfArguments, rcvrClass) {
         return signatureString;
     }
 
-    var sig = universe.symbolFor(computeSignatureString(numberOfArguments));
-    return universe.newPrimitive(sig, _value, rcvrClass);
+    var sig = u.universe.symbolFor(computeSignatureString(numberOfArguments));
+    return u.universe.newPrimitive(sig, _value, rcvrClass);
 }
 
 function SBlock(blockMethod, context) {
     SAbstractObject.call(this);
-    var blockClass = som.blockClasses[blockMethod.getNumberOfArguments()];
+    const blockClass = u.blockClasses[blockMethod.getNumberOfArguments()];
 
     this.getClass = function () {
         return blockClass;
@@ -63,3 +69,6 @@ function SBlock(blockMethod, context) {
     };
 }
 SBlock.prototype = Object.create(SAbstractObject.prototype);
+
+exports.SBlock = SBlock;
+exports.getBlockEvaluationPrimitive = getBlockEvaluationPrimitive;

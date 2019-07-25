@@ -1,16 +1,16 @@
 /*
 * Copyright (c) 2014 Stefan Marr, mail@stefan-marr.de
-* 
+*
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
 * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 * copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,6 +19,10 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+const Primitives = require('./Primitives').Primitives;
+
+const u = require('../vm/Universe');
+
 function BlockPrimitives() {
     Primitives.call(this);
     var _this = this;
@@ -35,12 +39,12 @@ function BlockPrimitives() {
 
         var cond = conditionBlock.getMethod().invoke(frame, [conditionBlock]);
 
-        while (cond == som.trueObject) {
+        while (cond == u.trueObject) {
             bodyBlock.getMethod().invoke(frame, [bodyBlock]);
             cond = conditionBlock.getMethod().invoke(frame, [conditionBlock]);
         }
 
-        return som.nilObject;
+        return u.nilObject;
     }
 
     this.installPrimitives = function () {
@@ -49,14 +53,4 @@ function BlockPrimitives() {
     }
 }
 BlockPrimitives.prototype = Object.create(Primitives.prototype);
-som.primitives["Block"] = BlockPrimitives;
-
-function BlockNPrimitives() {
-    Primitives.call(this);
-    // This is done directly in universe, here just a dummy
-    this.installPrimitives = function () {}
-}
-BlockNPrimitives.prototype = Object.create(Primitives.prototype);
-som.primitives["Block1"] = BlockNPrimitives;
-som.primitives["Block2"] = BlockNPrimitives;
-som.primitives["Block3"] = BlockNPrimitives;
+exports.prims = BlockPrimitives;

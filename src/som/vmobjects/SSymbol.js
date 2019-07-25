@@ -19,13 +19,16 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+const SString = require('./SString').SString;
+const u = require('../vm/Universe');
+
 function SSymbol(value) {
     SString.call(this, value);
     var string = value,
         numberOfSignatureArguments = determineNumberOfSignatureArguments();
 
     this.getClass = function () {
-        return som.symbolClass;
+        return u.symbolClass;
     };
 
     this.getString = function () {
@@ -73,3 +76,5 @@ function SSymbol(value) {
 }
 
 SSymbol.prototype = Object.create(SString.prototype);
+
+exports.SSymbol = SSymbol;

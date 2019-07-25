@@ -19,6 +19,10 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+const assert = require('../../lib/assert').assert;
+
+const ContextualNode = require('./ContextualNode').ContextualNode;
+
 function ArgumentReadNode(contextLevel, arg, source) {
     ContextualNode.call(this, contextLevel, source);
     var _this = this;
@@ -65,3 +69,7 @@ function SuperReadNode(holderClass, classSide, contextLevel, arg, source) {
     }
 }
 SuperReadNode.prototype = Object.create(ArgumentReadNode.prototype);
+
+exports.ArgumentReadNode = ArgumentReadNode;
+exports.ArgumentWriteNode = ArgumentWriteNode;
+exports.SuperReadNode = SuperReadNode;

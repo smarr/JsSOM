@@ -19,6 +19,12 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+const assert = require('../../lib/assert').assert;
+const SObject = require('./SObject').SObject;
+const SArray = require('./SArray').SArray;
+
+const u = require('../vm/Universe');
+
 function SClass(_clazz, numberOfFields) {
     SObject.call(this, _clazz, numberOfFields);
 
@@ -30,7 +36,7 @@ function SClass(_clazz, numberOfFields) {
         _this              = this;
 
     this.getSuperClass = function () {
-        return (superclass == null) ? som.nilObject : superclass;
+        return (superclass == null) ? u.nilObject : superclass;
     };
 
     this.setSuperClass = function (value) {
@@ -154,8 +160,8 @@ function SClass(_clazz, numberOfFields) {
 
     this.addInstancePrimitive = function (value, suppressWarning) {
         if (addInstanceInvokable(value) && suppressWarning !== true) {
-            universe.print("Warning: Primitive " + value.getSignature().getString());
-            universe.println(" is not in class definition for class "
+            u.universe.print("Warning: Primitive " + value.getSignature().getString());
+            u.universe.println(" is not in class definition for class "
                 + _this.getName().getString());
         }
     };
@@ -184,16 +190,21 @@ function SClass(_clazz, numberOfFields) {
     };
 
     this.loadPrimitives = function (displayWarning) {
-        // Compute the class name of the Java(TM) class containing the
-        // primitives
-        var prims = som.primitives[name.getString()];
-        if (prims !== undefined) {
-            (new prims()).
-                installPrimitivesIn(this);
-        } else {
-            if (displayWarning) {
-                universe.println("Primitives class " + name.getString() + " not found");
+        const primModuleName = "../primitives/" + name.getString() + "Primitives"
+
+        try {
+            const prims = require(primModuleName).prims;
+
+            if (prims !== undefined) {
+                (new prims()).
+                    installPrimitivesIn(this);
+            } else {
+                if (displayWarning) {
+                    u.universe.println("Primitives class " + name.getString() + " not found");
+                }
             }
+        } catch (Error) {
+            // NO OP, class does not have primitive
         }
     };
 
@@ -202,3 +213,5 @@ function SClass(_clazz, numberOfFields) {
     };
 }
 SClass.prototype = Object.create(SObject.prototype);
+
+exports.SClass = SClass;
