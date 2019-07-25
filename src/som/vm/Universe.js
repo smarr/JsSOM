@@ -443,7 +443,9 @@ function Universe() {
             if (e instanceof ExitException) {
                 return;
             } else {
-                console.error(e.getMessage());
+                if ('getMessage' in e) {
+                    console.error(e.getMessage());
+                }
                 throw e;
             }
         }
