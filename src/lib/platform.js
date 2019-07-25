@@ -19,7 +19,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-if (typeof global === "undefined") {
+if (typeof global === "undefined" || process.browser) {
     // this seems to be a browser environment
     if (typeof performance === "undefined" || performance.now == undefined) {
         exports.getMillisecondTicks = function () {
@@ -48,6 +48,8 @@ if (typeof global === "undefined") {
     };
 
     exports.exitInterpreter = function (errorCode) {};
+
+    exports.isBrowser = true;
 } else {
     // this seems to be node.js
     exports.getMillisecondTicks = function () {
@@ -74,6 +76,8 @@ if (typeof global === "undefined") {
     exports.exitInterpreter = function (errorCode) {
         process.exit(errorCode);
     };
+
+    exports.isBrowser = false;
 }
 
 function isInIntRange(val) {

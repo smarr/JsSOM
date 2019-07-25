@@ -21,13 +21,21 @@
 */
 const fs = require('fs');
 const IllegalStateException = require('../../lib/exceptions').IllegalStateException;
+const isBrowser = require('../../lib/platform').isBrowser;
 
 const ClassGenerationContext = require('./ClassGenerationContext').ClassGenerationContext;
 
 const Parser = require('./Parser').Parser;
 
-function getFile_from_json(path, file) {
-    var current = som.core_lib;
+let somCoreLib = null;
+
+if (isBrowser) {
+    const loadCoreLib = require('../../../build/som').loadCoreLib;
+    somCoreLib = loadCoreLib();
+}
+
+function getFileFromJson(path, file) {
+    var current = somCoreLib;
 
     path.split("/").forEach(function (e) {
         if (current == undefined) {
@@ -44,6 +52,10 @@ function getFile_from_json(path, file) {
 }
 
 function getFile(path, file) {
+    if (isBrowser) {
+        return getFileFromJson(path, file);
+    }
+
     const name = path + '/' + file;
     if (!fs.existsSync(name)) {
         return null;
@@ -93,3 +105,4 @@ function compileClassString(stmt, systemClass) {
 }
 
 exports.compileClassFile = compileClassFile;
+exports.compileClassString = compileClassString;

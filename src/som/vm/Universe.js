@@ -115,6 +115,9 @@ function Universe() {
     };
 
     function getDefaultClassPath() {
+        if (platform.isBrowser) {
+            return ['core-lib/Smalltalk', 'core-lib/Examples', 'core-lib/TestSuite'];
+        }
         return ['.'];
     }
 

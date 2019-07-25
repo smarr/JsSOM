@@ -20,10 +20,16 @@
 * THE SOFTWARE.
 */
 const assert = require('../../lib/assert').assert;
+const isBrowser = require('../../lib/platform').isBrowser;
 const SObject = require('./SObject').SObject;
 const SArray = require('./SArray').SArray;
 
 const u = require('../vm/Universe');
+
+let browserPrimitives = null;
+if (isBrowser) {
+    browserPrimitives = require('../primitives/in-browser');
+}
 
 function SClass(_clazz, numberOfFields) {
     SObject.call(this, _clazz, numberOfFields);
@@ -190,10 +196,15 @@ function SClass(_clazz, numberOfFields) {
     };
 
     this.loadPrimitives = function (displayWarning) {
-        const primModuleName = "../primitives/" + name.getString() + "Primitives"
+        const primModuleName = "../primitives/" + name.getString() + "Primitives";
 
         try {
-            const prims = require(primModuleName).prims;
+            let prims = null;
+            if (isBrowser) {
+                prims = browserPrimitives[name.getString()].prims;
+            } else {
+                prims = require(primModuleName).prims;
+            }
 
             if (prims !== undefined) {
                 (new prims()).
