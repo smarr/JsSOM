@@ -1,0 +1,29 @@
+{
+  "name": "jssom",
+  "displayName": "JsSOM",
+  "version": "0.1.0",
+  "description": "A JavaScript implementation of the SOM (Simple Object Machine",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SOM-st/JsSOM.git"
+  },
+  "author": {
+    "name": "Stefan Marr",
+    "email": "git@stefan-marr.de"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "browserify": "^16.3.0",
+    "tinyify": "^2.5.1"
+  },
+  "scripts": {
+    "browserify": "mkdir -p build && npm run core-lib && npm run browserify:som-core && npm run browserify:main && npm run browserify:test",
+    "_re-add": "--plugin tinyify",
+    "browserify:test": "browserify tests/browserify.js -o build/test.js",
+    "browserify:main": "browserify src/node.js -o build/node.js",
+    "browserify:som-core": "./libs/jsify-core-lib.py core-lib > build/som.js",
+    "clean": "rm -Rf build/*.js",
+    "clobber": "rm -Rf build/",
+    "core-lib": "git submodule update --init --recursive",
+  }
+}
