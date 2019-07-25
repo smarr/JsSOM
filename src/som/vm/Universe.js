@@ -20,6 +20,8 @@
 * THE SOFTWARE.
 */
 const assert = require('../../lib/assert').assert;
+const IllegalStateException = require('../../lib/exceptions').IllegalStateException;
+
 const platform = require('../../lib/platform');
 
 const Shell = require('./Shell').Shell;
@@ -430,14 +432,15 @@ function Universe() {
     this.interpret = function (args) {
         // Check for command line switches first
         var remainingArgs = handleArguments(args);
-        initializeObjectSystem();
 
         try {
+            initializeObjectSystem();
             return execute(remainingArgs);
         } catch (e) {
             if (e instanceof ExitException) {
                 return;
             } else {
+                console.error(e.getMessage());
                 throw e;
             }
         }

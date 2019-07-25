@@ -19,6 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+const IllegalStateException = require('../../lib/exceptions').IllegalStateException;
+
 const Primitives = require('./Primitives').Primitives;
 const u = require('../vm/Universe');
 

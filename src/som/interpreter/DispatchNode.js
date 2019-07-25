@@ -19,6 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+const RuntimeException = require('../../lib/exceptions').RuntimeException;
+
 const assert = require('../../lib/assert').assert;
 
 const Node = require('./Node').Node;

@@ -20,6 +20,7 @@
 * THE SOFTWARE.
 */
 const fs = require('fs');
+const IllegalStateException = require('../../lib/exceptions').IllegalStateException;
 
 const ClassGenerationContext = require('./ClassGenerationContext').ClassGenerationContext;
 

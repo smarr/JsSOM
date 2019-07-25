@@ -19,6 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+const RuntimeException = require('../../lib/exceptions').RuntimeException;
+
 const Lexer = require('./Lexer').Lexer;
 const Sym = require('./Symbol').Sym;
 const MethodGenerationContext = require('./MethodGenerationContext').MethodGenerationContext;

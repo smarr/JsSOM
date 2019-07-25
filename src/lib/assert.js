@@ -19,7 +19,13 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-function AssertionFailedException() {}
+function AssertionFailedException() {
+    // Use V8's native method if available, otherwise fallback
+    if ("captureStackTrace" in Error)
+        Error.captureStackTrace(this, AssertionFailedException);
+    else
+        this.stack = (new Error()).stack;
+}
 
 function assert(bool) {
     if (!bool) {

@@ -20,6 +20,7 @@
 * THE SOFTWARE.
 */
 const Sym = require('./Symbol').Sym;
+const IllegalStateException = require('../../lib/exceptions').IllegalStateException;
 
 function makeLexerState() {
     return {
