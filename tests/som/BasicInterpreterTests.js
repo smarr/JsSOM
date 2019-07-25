@@ -1,16 +1,16 @@
 /*
 * Copyright (c) 2014 Stefan Marr, mail@stefan-marr.de
-* 
+*
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
 * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 * copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,72 +19,79 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-BasicInterpreterTests = TestCase("BasicInterpreterTests");
+const u = require("../../src/som/vm/Universe");
+const universe = u.universe;
 
-var test = [
-    ["MethodCall",     "test",  42, som.integerClass],
-    ["MethodCall",     "test2", 42, som.integerClass],
+const expect = require('chai').expect;
 
-    ["NonLocalReturn", "test",  "NonLocalReturn", som.classClass],
-    ["NonLocalReturn", "test1", 42, som.integerClass],
-    ["NonLocalReturn", "test2", 43, som.integerClass],
-    ["NonLocalReturn", "test3",  3, som.integerClass],
-    ["NonLocalReturn", "test4", 42, som.integerClass],
-    ["NonLocalReturn", "test5", 22, som.integerClass],
 
-    ["Blocks", "arg1",          42, som.integerClass],
-    ["Blocks", "arg2",          77, som.integerClass],
-    ["Blocks", "argAndLocal",    8, som.integerClass],
-    ["Blocks", "argAndContext",  8, som.integerClass],
+var tests = [
+    ["MethodCall",     "test",  42, u.integerClass],
+    ["MethodCall",     "test2", 42, u.integerClass],
 
-    ["Return", "returnSelf",           "Return", som.classClass],
-    ["Return", "returnSelfImplicitly", "Return", som.classClass],
-    ["Return", "noReturnReturnsSelf",  "Return", som.classClass],
-    ["Return", "blockReturnsImplicitlyLastValue", 4, som.integerClass],
+    ["NonLocalReturn", "test",  "NonLocalReturn", u.classClass],
+    ["NonLocalReturn", "test1", 42, u.integerClass],
+    ["NonLocalReturn", "test2", 43, u.integerClass],
+    ["NonLocalReturn", "test3",  3, u.integerClass],
+    ["NonLocalReturn", "test4", 42, u.integerClass],
+    ["NonLocalReturn", "test5", 22, u.integerClass],
 
-    ["IfTrueIfFalse", "test",  42, som.integerClass],
-    ["IfTrueIfFalse", "test2", 33, som.integerClass],
-    ["IfTrueIfFalse", "test3",  4, som.integerClass],
+    ["Blocks", "arg1",          42, u.integerClass],
+    ["Blocks", "arg2",          77, u.integerClass],
+    ["Blocks", "argAndLocal",    8, u.integerClass],
+    ["Blocks", "argAndContext",  8, u.integerClass],
 
-    ["CompilerSimplification", "returnConstantSymbol",  "constant", som.symbolClass],
-    ["CompilerSimplification", "returnConstantInt",        42,      som.integerClass],
-    ["CompilerSimplification", "returnSelf",            "CompilerSimplification", som.classClass],
-    ["CompilerSimplification", "returnSelfImplicitly",  "CompilerSimplification", som.classClass],
-    ["CompilerSimplification", "testReturnArgumentN",      55,      som.integerClass],
-    ["CompilerSimplification", "testReturnArgumentA",      44,      som.integerClass],
-    ["CompilerSimplification", "testSetField",          "foo",      som.symbolClass],
-    ["CompilerSimplification", "testGetField",             40,      som.integerClass]];
+    ["Return", "returnSelf",           "Return", u.classClass],
+    ["Return", "returnSelfImplicitly", "Return", u.classClass],
+    ["Return", "noReturnReturnsSelf",  "Return", u.classClass],
+    ["Return", "blockReturnsImplicitlyLastValue", 4, u.integerClass],
+
+    ["IfTrueIfFalse", "test",  42, u.integerClass],
+    ["IfTrueIfFalse", "test2", 33, u.integerClass],
+    ["IfTrueIfFalse", "test3",  4, u.integerClass],
+
+    ["CompilerSimplification", "returnConstantSymbol",  "constant", u.symbolClass],
+    ["CompilerSimplification", "returnConstantInt",        42,      u.integerClass],
+    ["CompilerSimplification", "returnSelf",            "CompilerSimplification", u.classClass],
+    ["CompilerSimplification", "returnSelfImplicitly",  "CompilerSimplification", u.classClass],
+    ["CompilerSimplification", "testReturnArgumentN",      55,      u.integerClass],
+    ["CompilerSimplification", "testReturnArgumentA",      44,      u.integerClass],
+    ["CompilerSimplification", "testSetField",          "foo",      u.symbolClass],
+    ["CompilerSimplification", "testGetField",             40,      u.integerClass]];
 
 function assertEqualsSomValue(expectedValue, expectedType, actualValue) {
-    if (expectedType == som.integerClass) {
-        assertEquals(expectedValue, actualValue.getEmbeddedInteger());
+    if (expectedType == u.integerClass) {
+        expect(actualValue.getEmbeddedInteger()).to.equal(expectedValue);
         return;
     }
-    if (expectedType == som.symbolClass) {
-        assertEquals(expectedValue, actualValue.getString());
+    if (expectedType == u.symbolClass) {
+        expect(actualValue.getString()).to.equal(expectedValue);
         return;
     }
-    if (expectedType == som.classClass) {
-        assertEquals(expectedValue, actualValue.getName().getString());
+    if (expectedType == u.classClass) {
+        expect(actualValue.getName().getString()).to.equal(expectedValue);
         return;
     }
     fail("SOM Value handler missing");
 }
 
-function createTestFunctions(element, index, array) {
-    var testClass          = element[0];
-    var testMethod         = element[1];
-    var expectedResult     = element[2];
-    var expectedResultType = element[3];
-    BasicInterpreterTests.prototype[
-        'test_' + testClass + '_' + testMethod] = function () {
-        assertNotNull("Universe not initialized", universe);
+describe("BasicInterpreterTests", function() {
+    for (const test of tests) {
+        var testClass          = test[0];
+        var testMethod         = test[1];
+        var expectedResult     = test[2];
+        var expectedResultType = test[3];
 
-        universe.setAvoidExit(true);
-        universe.setupClassPath("Smalltalk:TestSuite/BasicInterpreterTests");
+        it ("should pass " + testClass + ">>#" + testMethod, function () {
+            expect(universe).not.to.be.null;
 
-        var actualResult = universe.interpretMethodInClass(testClass, testMethod);
-        assertEqualsSomValue(expectedResult, expectedResultType, actualResult);
+            universe.setAvoidExit(true);
+            universe.setupClassPath("core-lib/Smalltalk:core-lib/TestSuite/BasicInterpreterTests");
+
+            var actualResult = universe.interpretMethodInClass(testClass, testMethod);
+            assertEqualsSomValue(expectedResult, expectedResultType, actualResult);
+        });
     }
-}
-test.forEach(createTestFunctions);
+});
+
+

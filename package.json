@@ -14,6 +14,8 @@
   "license": "MIT",
   "devDependencies": {
     "browserify": "^16.3.0",
+    "chai": "^4.2.0",
+    "mocha": "^6.2.0",
     "tinyify": "^2.5.1"
   },
   "scripts": {
@@ -25,5 +27,6 @@
     "clean": "rm -Rf build/*.js",
     "clobber": "rm -Rf build/",
     "core-lib": "git submodule update --init --recursive",
+    "test": "mocha -t 3000 -u bdd ./tests/som/"
   }
 }
