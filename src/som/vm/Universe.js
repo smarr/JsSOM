@@ -541,4 +541,7 @@ function Universe() {
 exports.Universe = Universe;
 exports.universe = new Universe();
 exports.SArray = SArray;
+exports.SObject = SObject;
 exports.SString = SString;
+exports.SDouble = SDouble;
+exports.SInteger = SInteger;

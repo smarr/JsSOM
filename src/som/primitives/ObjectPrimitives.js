@@ -49,9 +49,9 @@ function ObjectPrimitives() {
     function _objectSize(frame, args) {
         var size = 0;
         var rcvr = args[0];
-        if (rcvr instanceof SObject) {
+        if (rcvr instanceof u.SObject) {
             size = rcvr.getNumberOfFields();
-        } else if (rcvr instanceof SArray) {
+        } else if (rcvr instanceof u.SArray) {
             size = rcvr.getNumberOfIndexableFields();
         }
         return u.universe.newInteger(size);

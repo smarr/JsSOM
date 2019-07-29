@@ -22,6 +22,7 @@
 const RuntimeException = require('../../lib/exceptions').RuntimeException;
 
 const assert = require('../../lib/assert').assert;
+const notYetImplemented = require('../../lib/assert').notYetImplemented;
 const isInIntRange = require('../../lib/platform').isInIntRange;
 
 const SAbstractObject = require('./SAbstractObject').SAbstractObject;
@@ -370,3 +371,4 @@ exports.SInteger = SInteger;
 exports.SDouble = SDouble;
 
 exports.isInIntRange = isInIntRange;
+exports.intOrBigInt = intOrBigInt;

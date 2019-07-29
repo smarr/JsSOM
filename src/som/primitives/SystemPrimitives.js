@@ -21,6 +21,8 @@
 */
 const Primitives = require('./Primitives').Primitives;
 const u = require('../vm/Universe');
+const platform = require('../../lib/platform');
+const intOrBigInt = require('../vmobjects/numbers').intOrBigInt;
 
 function SystemPrimitives() {
     Primitives.call(this);
@@ -69,13 +71,13 @@ function SystemPrimitives() {
         return args[0];
     }
 
-        var diff = getMillisecondTicks() - u.startTime;
     function _time(_frame, _args) {
+        var diff = platform.getMillisecondTicks() - u.startTime;
         return intOrBigInt(diff);
     }
 
-        var diff = getMillisecondTicks() - u.startTime;
     function _ticks(_frame, _args) {
+        var diff = platform.getMillisecondTicks() - u.startTime;
         return intOrBigInt(diff * 1000);
     }
 

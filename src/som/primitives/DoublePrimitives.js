@@ -29,10 +29,10 @@ function DoublePrimitives() {
     var _this = this;
 
     function _coerce_to_double(obj) {
-        if (obj instanceof SDouble) {
+        if (obj instanceof u.SDouble) {
             return obj;
         }
-        if (obj instanceof SInteger) {
+        if (obj instanceof u.SInteger) {
             return u.universe.newDouble(obj.getEmbeddedInteger());
         }
         throw new IllegalStateException("Cannot coerce " + obj.toSource()
