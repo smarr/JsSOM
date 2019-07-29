@@ -19,8 +19,23 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-function getFile(path, file) {
-    var current = som.core_lib;
+const fs = require('fs');
+const IllegalStateException = require('../../lib/exceptions').IllegalStateException;
+const isBrowser = require('../../lib/platform').isBrowser;
+
+const ClassGenerationContext = require('./ClassGenerationContext').ClassGenerationContext;
+
+const Parser = require('./Parser').Parser;
+
+let somCoreLib = null;
+
+if (isBrowser) {
+    const loadCoreLib = require('../../../build/som').loadCoreLib;
+    somCoreLib = loadCoreLib();
+}
+
+function getFileFromJson(path, file) {
+    var current = somCoreLib;
 
     path.split("/").forEach(function (e) {
         if (current == undefined) {
@@ -34,6 +49,18 @@ function getFile(path, file) {
     } else {
         return current[file];
     }
+}
+
+function getFile(path, file) {
+    if (isBrowser) {
+        return getFileFromJson(path, file);
+    }
+
+    const name = path + '/' + file;
+    if (!fs.existsSync(name)) {
+        return null;
+    }
+    return fs.readFileSync(name, {encoding: 'utf-8'});
 }
 
 function compile(parser, systemClass) {
@@ -58,11 +85,7 @@ function compile(parser, systemClass) {
 function compileClassFile(path, file, systemClass) {
     var source = getFile(path, file + ".som");
     if (source == null) {
-        // retry with "core-lib" prepended
-        source = getFile("core-lib/" + path, file + ".som");
-        if (source == null) {
-            return null;
-        }
+        return null;
     }
 
     var result = compile(new Parser(source, path + '/' + file + '.som'), systemClass);
@@ -80,3 +103,6 @@ function compileClassFile(path, file, systemClass) {
 function compileClassString(stmt, systemClass) {
     return compile(new Parser(stmt, '$string'), systemClass);
 }
+
+exports.compileClassFile = compileClassFile;
+exports.compileClassString = compileClassString;

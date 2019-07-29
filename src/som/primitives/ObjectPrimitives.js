@@ -1,16 +1,16 @@
 /*
 * Copyright (c) 2014 Stefan Marr, mail@stefan-marr.de
-* 
+*
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
 * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 * copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,6 +19,9 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+const Primitives = require('./Primitives').Primitives;
+const u = require('../vm/Universe');
+
 function ObjectPrimitives() {
     Primitives.call(this);
     var _this = this;
@@ -27,9 +30,9 @@ function ObjectPrimitives() {
         var op1 = args[1];
         var op2 = args[0];
         if (op1 === op2) {
-            return som.trueObject;
+            return u.trueObject;
         } else {
-            return som.falseObject;
+            return u.falseObject;
         }
     }
 
@@ -40,20 +43,20 @@ function ObjectPrimitives() {
             hash = Math.round(Math.random() * 2147483647);
             rcvr.hash = hash;
         }
-        return universe.newInteger(hash);
+        return u.universe.newInteger(hash);
     }
 
     function _objectSize(frame, args) {
         var size = 0;
         var rcvr = args[0];
-        if (rcvr instanceof SObject) {
+        if (rcvr instanceof u.SObject) {
             size = rcvr.getNumberOfFields();
-        } else if (rcvr instanceof SArray) {
+        } else if (rcvr instanceof u.SArray) {
             size = rcvr.getNumberOfIndexableFields();
         }
-        return universe.newInteger(size);
+        return u.universe.newInteger(size);
     }
-    
+
     function _perform(frame, args) {
         var selector = args[1];
         var rcvr     = args[0];
@@ -99,7 +102,8 @@ function ObjectPrimitives() {
     }
 
     function _halt(frame, args) {
-        universe.println("BREAKPOINT");
+        u.universe.println("BREAKPOINT");
+        // eslint-disable-next-line no-debugger
         debugger;
         return args[0];
     }
@@ -124,4 +128,4 @@ function ObjectPrimitives() {
     }
 }
 ObjectPrimitives.prototype = Object.create(Primitives.prototype);
-som.primitives["Object"] = ObjectPrimitives;
+exports.prims = ObjectPrimitives;

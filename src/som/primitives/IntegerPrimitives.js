@@ -19,6 +19,12 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+const isInIntRange = require('../../lib/platform').isInIntRange;
+
+const Primitives = require('./Primitives').Primitives;
+
+const u = require('../vm/Universe');
+
 function IntegerPrimitives() {
     Primitives.call(this);
     var _this = this;
@@ -30,14 +36,14 @@ function IntegerPrimitives() {
     function _sqrt(frame, args) {
         var res = Math.sqrt(args[0].getEmbeddedInteger());
         if (res == Math.floor(res)) {
-            return universe.newInteger(Math.floor(res));
+            return u.universe.newInteger(Math.floor(res));
         } else {
-            return universe.newDouble(res);
+            return u.universe.newDouble(res);
         }
     }
 
     function _atRandom(frame, args) {
-        return universe.newInteger(Math.floor(args[0].getEmbeddedInteger()
+        return u.universe.newInteger(Math.floor(args[0].getEmbeddedInteger()
             * Math.random()));
     }
 
@@ -84,11 +90,11 @@ function IntegerPrimitives() {
 
     function _fromString(frame, args) {
         var param = args[1];
-        if (!(param instanceof SString)) {
-            return som.nilObject;
+        if (!(param instanceof u.SString)) {
+            return u.nilObject;
         }
         var intVal = parseInt(param.getEmbeddedString());
-        return universe.newInteger(intVal);
+        return u.universe.newInteger(intVal);
     }
 
     function _leftShift(frame, args) {
@@ -102,22 +108,22 @@ function IntegerPrimitives() {
         if (Math.floor(l) != l || !isInIntRange(result) || !isInIntRange(l * Math.pow(2, r))) {
             var big = BigInt(l);
             big = big * BigInt(Math.pow(2, r));
-            return universe.newBigInteger(big);
+            return u.universe.newBigInteger(big);
         }
-        return universe.newInteger(result);
+        return u.universe.newInteger(result);
     }
 
     function _bitXor(frame, args) {
         var right = args[1];
         var left  = args[0];
-        return universe.newInteger(left.getEmbeddedInteger()
+        return u.universe.newInteger(left.getEmbeddedInteger()
             ^ right.getEmbeddedInteger())
     }
 
     function _rem(frame, args) {
         var right = args[1];
         var left  = args[0];
-        return universe.newInteger(left.getEmbeddedInteger()
+        return u.universe.newInteger(left.getEmbeddedInteger()
             % right.getEmbeddedInteger())
     }
 
@@ -132,7 +138,7 @@ function IntegerPrimitives() {
     function _unsignedRightShift(frame, args) {
         var right = args[1];
         var left  = args[0];
-        return universe.newInteger(
+        return u.universe.newInteger(
             left.getEmbeddedInteger() >>> right.getEmbeddedInteger());
     }
 
@@ -162,4 +168,4 @@ function IntegerPrimitives() {
     }
 }
 IntegerPrimitives.prototype = Object.create(Primitives.prototype);
-som.primitives["Integer"] = IntegerPrimitives;
+exports.prims = IntegerPrimitives;

@@ -19,6 +19,25 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+const assert = require('../../lib/assert').assert;
+
+const ArgumentReadNode = require('./ArgumentNode').ArgumentReadNode;
+const ArgumentWriteNode = require('./ArgumentNode').ArgumentWriteNode;
+const SuperReadNode = require('./ArgumentNode').SuperReadNode;
+const BlockNode = require('./BlockNode').BlockNode;
+const MessageSendNode = require('./MessageSendNode').MessageSendNode;
+const UninitializedGlobalReadNode = require('./GlobalReadNode').UninitializedGlobalReadNode;
+const LiteralNode = require('./LiteralNode').LiteralNode;
+const ReturnNonLocalNode = require('./ReturnNonLocalNode').ReturnNonLocalNode;
+const CatchNonLocalReturnNode = require('./ReturnNonLocalNode').CatchNonLocalReturnNode;
+const SequenceNode = require('./SequenceNode').SequenceNode;
+const FieldReadNode = require('./FieldNode').FieldReadNode;
+const FieldWriteNode = require('./FieldNode').FieldWriteNode;
+const VariableReadNode = require('./VariableNode').VariableReadNode;
+const VariableWriteNode = require('./VariableNode').VariableWriteNode;
+
+const SSymbol = require('../vmobjects/SSymbol').SSymbol;
+
 function createCatchNonLocalReturn(methodBody) {
     return new CatchNonLocalReturnNode(methodBody);
 }
@@ -77,3 +96,19 @@ function createNonLocalReturn(exp, contextLevel, source) {
 function createLiteralNode(somVal, source) {
     return new LiteralNode(somVal, source);
 }
+
+exports.createArgumentRead = createArgumentRead;
+exports.createCatchNonLocalReturn = createCatchNonLocalReturn;
+exports.createFieldRead = createFieldRead;
+exports.createFieldWrite = createFieldWrite;
+exports.createGlobalRead = createGlobalRead;
+exports.createArgumentWrite = createArgumentWrite;
+exports.createSuperRead = createSuperRead;
+exports.createVariableRead = createVariableRead;
+exports.createVariableWrite = createVariableWrite;
+exports.createSequence = createSequence;
+exports.createBlockNode = createBlockNode;
+exports.createMessageSend = createMessageSend;
+exports.createNonLocalReturn = createNonLocalReturn;
+exports.createLiteralNode = createLiteralNode;
+

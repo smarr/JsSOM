@@ -92,3 +92,5 @@ Sym.toString = function(sym) {
     "OperatorSequence"];
   return arr[sym];
 }
+
+exports.Sym = Sym;

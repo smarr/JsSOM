@@ -1,16 +1,16 @@
 /*
 * Copyright (c) 2014 Stefan Marr, mail@stefan-marr.de
-* 
+*
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
 * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 * copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,6 +19,9 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+const u = require('../vm/Universe');
+const Primitives = require('./Primitives').Primitives;
+
 function ArrayPrimitives() {
     Primitives.call(this);
     var _this = this;
@@ -37,13 +40,13 @@ function ArrayPrimitives() {
     }
 
     function _length(frame, args) {
-        return universe.newInteger(
+        return u.universe.newInteger(
             args[0].getNumberOfIndexableFields());
     }
 
     function _new(frame, args) {
         var length = args[1];
-        return universe.newArrayWithLength(length.getEmbeddedInteger())
+        return u.universe.newArrayWithLength(length.getEmbeddedInteger())
     }
 
     function _doIndexes(frame, args) {
@@ -52,7 +55,7 @@ function ArrayPrimitives() {
 
         var length = args[0].getNumberOfIndexableFields();
         for (var i = 1; i <= length; i++) {  // i is propagated to Smalltalk, so, start with 1
-            blockMethod.invoke(frame, [block, universe.newInteger(i)]);
+            blockMethod.invoke(frame, [block, u.universe.newInteger(i)]);
         }
         return args[0];
     }
@@ -80,4 +83,5 @@ function ArrayPrimitives() {
     }
 }
 ArrayPrimitives.prototype = Object.create(Primitives.prototype);
-som.primitives["Array"] = ArrayPrimitives;
+
+exports.prims = ArrayPrimitives;

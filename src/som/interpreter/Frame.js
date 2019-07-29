@@ -19,12 +19,14 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+const universe = require('../vm/Universe');
+
 function Frame(callerFrame, args, numTemps) {
     var isOnStack = true,
         temps     = new Array(numTemps);
 
     for (var i = 0; i < numTemps; i++) {
-        temps[i] = som.nilObject;
+        temps[i] = universe.nilObject;
     }
 
     this.getReceiver = function () {
@@ -55,3 +57,5 @@ function Frame(callerFrame, args, numTemps) {
         isOnStack = false;
     };
 }
+
+exports.Frame = Frame;

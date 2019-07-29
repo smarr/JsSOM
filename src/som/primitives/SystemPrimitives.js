@@ -1,16 +1,16 @@
 /*
 * Copyright (c) 2014 Stefan Marr, mail@stefan-marr.de
-* 
+*
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
 * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 * copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,66 +19,71 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+const Primitives = require('./Primitives').Primitives;
+const u = require('../vm/Universe');
+const platform = require('../../lib/platform');
+const intOrBigInt = require('../vmobjects/numbers').intOrBigInt;
+
 function SystemPrimitives() {
     Primitives.call(this);
     var _this = this;
 
     function _load(frame, args) {
         var symbol = args[1];
-        var result = universe.loadClass(symbol);
-        return (result != null) ? result : som.nilObject;
+        var result = u.universe.loadClass(symbol);
+        return (result != null) ? result : u.nilObject;
     }
 
     function _exit(frame, args) {
         var error = args[1];
-        return universe.exit(error.getEmbeddedInteger());
+        return u.universe.exit(error.getEmbeddedInteger());
     }
 
     function _global(frame, args) {
         var symbol = args[1];
-        var result = universe.getGlobal(symbol);
-        return (result != null) ? result : som.nilObject;
+        var result = u.universe.getGlobal(symbol);
+        return (result != null) ? result : u.nilObject;
     }
 
     function _hasGlobal(frame, args) {
-        if (universe.hasGlobal(args[1])) {
-            return som.trueObject;
+        if (u.universe.hasGlobal(args[1])) {
+            return u.trueObject;
         } else {
-            return som.falseObject;
+            return u.falseObject;
         }
     }
 
     function _globalPut(frame, args) {
         var value  = args[2];
         var symbol = args[1];
-        universe.setGlobal(symbol, value);
+        u.universe.setGlobal(symbol, value);
         return value;
     }
 
     function _printString(frame, args) {
         var str = args[1];
-        universe.print(str.getEmbeddedString());
+        u.universe.print(str.getEmbeddedString());
         return args[0];
     }
 
     function _printNewline(frame, args) {
-        universe.println("");
+        u.universe.println("");
         return args[0];
     }
 
-    function _time(frame, args) {
-        var diff = getMillisecondTicks() - som.startTime;
+    function _time(_frame, _args) {
+        var diff = platform.getMillisecondTicks() - u.startTime;
         return intOrBigInt(diff);
     }
 
-    function _ticks(frame, args) {
-        var diff = getMillisecondTicks() - som.startTime;
+    function _ticks(_frame, _args) {
+        var diff = platform.getMillisecondTicks() - u.startTime;
         return intOrBigInt(diff * 1000);
     }
 
-    function _fullGC(frame, args) {
+    function _fullGC(_frame, _args) {
         /* not general way to do that in JS */
-        return som.falseObject;
+        return u.falseObject;
     }
 
     this.installPrimitives = function () {
@@ -96,4 +101,4 @@ function SystemPrimitives() {
     }
 }
 SystemPrimitives.prototype = Object.create(Primitives.prototype);
-som.primitives["System"] = SystemPrimitives;
+exports.prims = SystemPrimitives;

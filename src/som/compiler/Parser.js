@@ -19,19 +19,26 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+const RuntimeException = require('../../lib/exceptions').RuntimeException;
+
+const Lexer = require('./Lexer').Lexer;
+const Sym = require('./Symbol').Sym;
+const MethodGenerationContext = require('./MethodGenerationContext').MethodGenerationContext;
+const SourceSection = require('./SourceSection').SourceSection;
+
+const factory = require('../interpreter/NodeFactory');
+
+const u = require('../vm/Universe');
+
+const isInIntRange = require('../../lib/platform').isInIntRange;
+
+
 function isIdentifier(sym) {
     return sym == Sym.Identifier || sym == Sym.Primitive;
 }
 
 function printableSymbol(sym) {
     return sym == Sym.Integer || sym == Sym.Double || sym >= Sym.STString;
-}
-
-function SourceSection(startLine, startColumn, charIndex, length) {
-    this.startLine   = function () { return startLine;   };
-    this.startColumn = function () { return startColumn; };
-    this.charIndex   = function () { return charIndex;   };
-    this.length      = function () { return length;      };
 }
 
 function ParseError(message, expected, parser) {
@@ -125,7 +132,7 @@ function Parser(fileContent, fileName) {
     };
 
     this.classdef = function (cgenc) {
-        cgenc.setName(universe.symbolFor(text));
+        cgenc.setName(u.universe.symbolFor(text));
         expect(Sym.Identifier);
         expect(Sym.Equal);
 
@@ -159,16 +166,16 @@ function Parser(fileContent, fileName) {
     function superclass(cgenc) {
         var superName;
         if (sym == Sym.Identifier) {
-            superName = universe.symbolFor(text);
+            superName = u.universe.symbolFor(text);
             accept(Sym.Identifier);
         } else {
-            superName = universe.symbolFor("Object");
+            superName = u.universe.symbolFor("Object");
         }
         cgenc.setSuperName(superName);
 
         // Load the super class, if it is not nil (break the dependency cycle)
         if (superName.getString() != "nil") {
-            var superClass = universe.loadClass(superName);
+            var superClass = u.universe.loadClass(superName);
             if (superClass == null) {
                 throw new ParseError("Super class " + superName.getString() +
                     " could not be loaded", Sym.NONE, _this);
@@ -217,7 +224,7 @@ function Parser(fileContent, fileName) {
         if (accept(Sym.Or)) {
             while (isIdentifier(sym)) {
                 var v = variable();
-                cgenc.addInstanceField(universe.symbolFor(v));
+                cgenc.addInstanceField(u.universe.symbolFor(v));
             }
             expect(Sym.Or);
         }
@@ -227,7 +234,7 @@ function Parser(fileContent, fileName) {
         if (accept(Sym.Or)) {
             while (isIdentifier(sym)) {
                 var v = variable();
-                cgenc.addClassField(universe.symbolFor(v));
+                cgenc.addClassField(u.universe.symbolFor(v));
             }
             expect(Sym.Or);
         }
@@ -287,7 +294,7 @@ function Parser(fileContent, fileName) {
         }
         while (sym == Sym.Keyword);
 
-        mgenc.setSignature(universe.symbolFor(kw.toString()));
+        mgenc.setSignature(u.universe.symbolFor(kw.toString()));
     }
 
     function methodBlock(mgenc) {
@@ -301,7 +308,7 @@ function Parser(fileContent, fileName) {
     }
 
     function unarySelector() {
-        return universe.symbolFor(identifier());
+        return u.universe.symbolFor(identifier());
     }
 
     function binarySelector() {
@@ -315,7 +322,7 @@ function Parser(fileContent, fileName) {
         } else if (accept(Sym.OperatorSequence)) {
         } else { expect(Sym.NONE); }
 
-        return universe.symbolFor(s);
+        return u.universe.symbolFor(s);
     }
 
     function identifier() {
@@ -377,11 +384,11 @@ function Parser(fileContent, fileName) {
 
     function createSequenceNode(coord, expressions) {
         if (expressions.length == 0) {
-            return createGlobalRead(universe.symbolFor("nil"), getSource(coord));
+            return factory.createGlobalRead(u.universe.symbolFor("nil"), getSource(coord));
         } else if (expressions.length == 1) {
             return expressions[0];
         }
-        return createSequence(expressions.slice(), getSource(coord));
+        return factory.createSequence(expressions.slice(), getSource(coord));
     }
 
     function result(mgenc) {
@@ -467,7 +474,7 @@ function Parser(fileContent, fileName) {
 
                 var blockMethod = bgenc.assemble(blockBody, lastMethodsSourceSection);
 
-                return createBlockNode(blockMethod, getSource(coord));
+                return factory.createBlockNode(blockMethod, getSource(coord));
             }
             default: {
                 return literal();
@@ -514,7 +521,7 @@ function Parser(fileContent, fileName) {
     function unaryMessage(receiver) {
         var coord = _this.getCoordinate();
         var selector = unarySelector();
-        return createMessageSend(selector, [receiver], getSource(coord));
+        return factory.createMessageSend(selector, [receiver], getSource(coord));
     }
 
     function binaryMessage(mgenc, receiver) {
@@ -522,7 +529,7 @@ function Parser(fileContent, fileName) {
         var msg = binarySelector();
         var operand = binaryOperand(mgenc);
 
-        return createMessageSend(msg, [receiver, operand], getSource(coord));
+        return factory.createMessageSend(msg, [receiver, operand], getSource(coord));
     }
 
     function binaryOperand(mgenc) {
@@ -550,9 +557,9 @@ function Parser(fileContent, fileName) {
         }
         while (sym == Sym.Keyword);
 
-        var msg = universe.symbolFor(kw);
+        var msg = u.universe.symbolFor(kw);
 
-        return createMessageSend(msg, args.slice(), getSource(coord));
+        return factory.createMessageSend(msg, args.slice(), getSource(coord));
     }
 
     function formula(mgenc) {
@@ -595,7 +602,7 @@ function Parser(fileContent, fileName) {
             }
         }
         var source = getSource(coord);
-        return createLiteralNode(value, source);
+        return factory.createLiteralNode(value, source);
     }
 
     function literalNumber() {
@@ -641,9 +648,9 @@ function Parser(fileContent, fileName) {
         expect(Sym.Integer);
 
         if (isInIntRange(i)) {
-            return universe.newInteger(i);
+            return u.universe.newInteger(i);
         } else {
-            return universe.newBigInteger(BigInt(i));
+            return u.universe.newBigInteger(BigInt(i));
         }
     }
 
@@ -658,14 +665,14 @@ function Parser(fileContent, fileName) {
             d = 0.0 - d;
         }
         expect(Sym.Double);
-        return universe.newDouble(d);
+        return u.universe.newDouble(d);
     }
 
     function literalSymbol() {
         expect(Sym.Pound);
         if (sym == Sym.STString) {
             var s = string();
-            return universe.symbolFor(s);
+            return u.universe.symbolFor(s);
         } else {
             return selector();
         }
@@ -673,7 +680,7 @@ function Parser(fileContent, fileName) {
 
     function literalString() {
         var s = string();
-        return universe.newString(s);
+        return u.universe.newString(s);
     }
 
     function literalArray() {
@@ -686,7 +693,7 @@ function Parser(fileContent, fileName) {
         }
 
         expect(Sym.EndTerm);
-        return universe.newArrayFrom(literals);
+        return u.universe.newArrayFrom(literals);
     }
 
     function getObjectForCurrentLiteral() {
@@ -710,7 +717,7 @@ function Parser(fileContent, fileName) {
                 return literalDouble(isNegativeNumber(), coord);
             case Sym.Identifier:
                 expect(Sym.Identifier);
-                return universe.getGlobal(universe.symbolFor(new String(text)));
+                return u.universe.getGlobal(u.universe.symbolFor(new String(text)));
             default:
                 throw new ParseError("Could not parse literal array value", Sym.NONE, this);
         }
@@ -729,7 +736,7 @@ function Parser(fileContent, fileName) {
     function keywordSelector() {
         var s = text;
         expectOneOf(keywordSelectorSyms);
-        return universe.symbolFor(s);
+        return u.universe.symbolFor(s);
     }
 
     function string() {
@@ -755,7 +762,7 @@ function Parser(fileContent, fileName) {
             blockSig += ":";
         }
 
-        mgenc.setSignature(universe.symbolFor(blockSig));
+        mgenc.setSignature(u.universe.symbolFor(blockSig));
 
         var expressions = blockContents(mgenc);
 
@@ -792,7 +799,7 @@ function Parser(fileContent, fileName) {
         }
 
         // then object fields
-        var varName = universe.symbolFor(variableName);
+        var varName = u.universe.symbolFor(variableName);
         var fieldRead = mgenc.getObjectFieldRead(varName, source);
 
         if (fieldRead != null) {
@@ -809,7 +816,7 @@ function Parser(fileContent, fileName) {
             return mgenc.getLocalWriteNode(variableName, exp, source);
         }
 
-        var fieldName = universe.symbolFor(variableName);
+        var fieldName = u.universe.symbolFor(variableName);
         var fieldWrite = mgenc.getObjectFieldWrite(fieldName, exp, source);
 
         if (fieldWrite != null) {
@@ -839,3 +846,5 @@ function Parser(fileContent, fileName) {
     // init...
     getSymbolFromLexer();
 }
+
+exports.Parser = Parser;

@@ -1,10 +1,9 @@
 language: node_js
 node_js:
-  - 11
-
-before_install:
-  - pip install pyyaml
+  - 12
 
 script:
-  - make
-  - make test
+  - ./som.sh -cp core-lib/Smalltalk core-lib/TestSuite/TestHarness.som
+  - npm install .
+  - npm run test
+  - npm run browserify

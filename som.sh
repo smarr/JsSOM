@@ -1,2 +1,4 @@
 #!/bin/sh
-exec node build/node.min.js "$@"
+git submodule update --init --recursive > /dev/null 2>&1
+
+exec node src/node.js "$@"

@@ -19,16 +19,21 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+const IllegalStateException = require('../../lib/exceptions').IllegalStateException;
+
+const Primitives = require('./Primitives').Primitives;
+const u = require('../vm/Universe');
+
 function DoublePrimitives() {
     Primitives.call(this);
     var _this = this;
 
     function _coerce_to_double(obj) {
-        if (obj instanceof SDouble) {
+        if (obj instanceof u.SDouble) {
             return obj;
         }
-        if (obj instanceof SInteger) {
-            return universe.newDouble(obj.getEmbeddedInteger());
+        if (obj instanceof u.SInteger) {
+            return u.universe.newDouble(obj.getEmbeddedInteger());
         }
         throw new IllegalStateException("Cannot coerce " + obj.toSource()
             + " to Double!");
@@ -43,7 +48,7 @@ function DoublePrimitives() {
     }
 
     function _sqrt(frame, args) {
-        return universe.newDouble(
+        return u.universe.newDouble(
             Math.sqrt(args[0].getEmbeddedDouble()))
     }
 
@@ -77,21 +82,21 @@ function DoublePrimitives() {
 
     function _round(frame, args) {
         var intVal = Math.round(args[0].getEmbeddedDouble());
-        return universe.newInteger(intVal);
+        return u.universe.newInteger(intVal);
     }
 
     function _sin(frame, args) {
         var val = Math.sin(args[0].getEmbeddedDouble());
-        return universe.newDouble(val);
+        return u.universe.newDouble(val);
     }
 
     function _cos(frame, args) {
         var val = Math.cos(args[0].getEmbeddedDouble());
-        return universe.newDouble(val);
+        return u.universe.newDouble(val);
     }
 
-    function _positiveInfinity(frame, args) {
-        return universe.newDouble(Number.POSITIVE_INFINITY);
+    function _positiveInfinity(_frame, _args) {
+        return u.universe.newDouble(Number.POSITIVE_INFINITY);
     }
 
     this.installPrimitives = function () {
@@ -113,4 +118,4 @@ function DoublePrimitives() {
     }
 }
 DoublePrimitives.prototype = Object.create(Primitives.prototype);
-som.primitives["Double"] = DoublePrimitives;
+exports.prims = DoublePrimitives;
