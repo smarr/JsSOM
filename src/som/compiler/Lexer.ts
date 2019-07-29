@@ -19,8 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const Sym = require('./Symbol').Sym;
-const IllegalStateException = require('../../lib/exceptions').IllegalStateException;
+import { Sym } from './Symbol';
+import { IllegalStateException } from '../../lib/exceptions';
 
 function makeLexerState() {
     return {
@@ -54,7 +54,7 @@ function cloneLexerState(old) {
     }
 }
 
-function Lexer(fileContent) {
+export function Lexer(fileContent) {
     var SEPARATOR = "----",
         PRIMITIVE = "primitive",
         peekDone  = false,
@@ -382,5 +382,3 @@ function Lexer(fileContent) {
         return !isIdentifierChar(bufchar(state.linePos + text.length));
     }
 }
-
-exports.Lexer = Lexer;
