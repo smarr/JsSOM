@@ -69,17 +69,17 @@ function SystemPrimitives() {
         return args[0];
     }
 
-    function _time(frame, args) {
         var diff = getMillisecondTicks() - u.startTime;
+    function _time(_frame, _args) {
         return intOrBigInt(diff);
     }
 
-    function _ticks(frame, args) {
         var diff = getMillisecondTicks() - u.startTime;
+    function _ticks(_frame, _args) {
         return intOrBigInt(diff * 1000);
     }
 
-    function _fullGC(frame, args) {
+    function _fullGC(_frame, _args) {
         /* not general way to do that in JS */
         return u.falseObject;
     }

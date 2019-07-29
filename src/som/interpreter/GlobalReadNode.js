@@ -48,7 +48,7 @@ UninitializedGlobalReadNode.prototype = Object.create(Node.prototype);
 function CachedGlobalReadNode(assoc, source) {
     Node.call(this, source);
 
-    this.execute = function (frame) {
+    this.execute = function (_frame) {
         return assoc.getValue();
     };
 }

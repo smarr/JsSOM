@@ -22,7 +22,7 @@
 const u = require('../vm/Universe');
 
 function constructEmptyPrimitive(signature) {
-    function _empty(frame, args) {
+    function _empty(_frame, _args) {
         u.universe.errorPrintln("Warning: undefined primitive " +
             signature.getString() + " called");
     }

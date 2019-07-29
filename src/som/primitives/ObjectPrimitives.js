@@ -103,6 +103,7 @@ function ObjectPrimitives() {
 
     function _halt(frame, args) {
         u.universe.println("BREAKPOINT");
+        // eslint-disable-next-line no-debugger
         debugger;
         return args[0];
     }

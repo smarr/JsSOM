@@ -61,6 +61,7 @@ function Node(source) {
         }
 
         if (!replaced && _this._parent != null) {
+            // eslint-disable-next-line no-debugger
             debugger; // node was not replaced???
         }
         return newNode;

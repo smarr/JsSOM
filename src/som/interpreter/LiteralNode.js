@@ -24,7 +24,7 @@ const Node = require('./Node').Node;
 function LiteralNode(value, source) {
     Node.call(this, source);
 
-    this.execute = function (frame) {
+    this.execute = function (_frame) {
         return value;
     }
 }

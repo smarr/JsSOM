@@ -95,7 +95,7 @@ function DoublePrimitives() {
         return u.universe.newDouble(val);
     }
 
-    function _positiveInfinity(frame, args) {
+    function _positiveInfinity(_frame, _args) {
         return u.universe.newDouble(Number.POSITIVE_INFINITY);
     }
 
