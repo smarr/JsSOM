@@ -85,6 +85,36 @@ function StringPrimitives() {
         return u.universe.newInteger(hash);
     }
 
+    function _isWhiteSpace(frame, args) {
+        const s = args[0].getEmbeddedString();
+
+        if (s.match(/^\s+$/) !== null) {
+            return u.trueObject;
+        } else {
+            return u.falseObject;
+        }
+    }
+
+    function _isLetters(frame, args) {
+        const s = args[0].getEmbeddedString();
+
+        if (RegExp(/^\p{L}+$/,'u').test(s)) {
+            return u.trueObject;
+        } else {
+            return u.falseObject;
+        }
+    }
+
+    function _isDigits(frame, args) {
+        const s = args[0].getEmbeddedString();
+
+        if (s.match(/^\d+$/) !== null) {
+            return u.trueObject;
+        } else {
+            return u.falseObject;
+        }
+    }
+
     this.installPrimitives = function () {
         _this.installInstancePrimitive("concatenate:",          _concat);
         _this.installInstancePrimitive("asSymbol",              _asSymbol);
@@ -92,6 +122,9 @@ function StringPrimitives() {
         _this.installInstancePrimitive("=",                     _equals);
         _this.installInstancePrimitive("primSubstringFrom:to:", _substring);
         _this.installInstancePrimitive("hashcode",              _hashcode);
+        _this.installInstancePrimitive("isWhiteSpace",          _isWhiteSpace);
+        _this.installInstancePrimitive("isLetters",             _isLetters);
+        _this.installInstancePrimitive("isDigits",              _isDigits);
     };
 }
 StringPrimitives.prototype = Object.create(Primitives.prototype);
