@@ -77,10 +77,10 @@ function assertEqualsSomValue(expectedValue, expectedType, actualValue) {
 
 describe("BasicInterpreterTests", function() {
     for (const test of tests) {
-        var testClass          = test[0];
-        var testMethod         = test[1];
-        var expectedResult     = test[2];
-        var expectedResultType = test[3];
+        const testClass          = test[0];
+        const testMethod         = test[1];
+        const expectedResult     = test[2];
+        const expectedResultType = test[3];
 
         it ("should pass " + testClass + ">>#" + testMethod, function () {
             expect(universe).not.to.be.null;
@@ -88,10 +88,8 @@ describe("BasicInterpreterTests", function() {
             universe.setAvoidExit(true);
             universe.setupClassPath("core-lib/Smalltalk:core-lib/TestSuite/BasicInterpreterTests");
 
-            var actualResult = universe.interpretMethodInClass(testClass, testMethod);
+            const actualResult = universe.interpretMethodInClass(testClass, testMethod);
             assertEqualsSomValue(expectedResult, expectedResultType, actualResult);
         });
     }
 });
-
-
