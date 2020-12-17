@@ -578,30 +578,27 @@ function Parser(fileContent, fileName) {
         return exp;
     }
 
-    function literal() {
-        var coord = _this.getCoordinate();
-        var value;
+    function getObjectForCurrentLiteral(coord) {
         switch (sym) {
             case Sym.Pound: {
                 peekForNextSymbolFromLexerIfNecessary();
-
                 if (nextSym == Sym.NewTerm) {
-                    value = literalArray();
+                    return literalArray();
                 } else {
-                    value = literalSymbol();
+                    return literalSymbol();
                 }
-                break;
             }
-            case Sym.STString: {
-                value = literalString();
-                break;
-            }
-            default: {
-                value = literalNumber();
-                break;
-            }
+            case Sym.STString:
+                return literalString();
+            default:
+                return literalNumber();
         }
-        var source = getSource(coord);
+    }
+
+    function literal() {
+        const coord = _this.getCoordinate();
+        const value = getObjectForCurrentLiteral(coord);
+        const source = getSource(coord);
         return factory.createLiteralNode(value, source);
     }
 
@@ -694,33 +691,6 @@ function Parser(fileContent, fileName) {
 
         expect(Sym.EndTerm);
         return u.universe.newArrayFrom(literals);
-    }
-
-    function getObjectForCurrentLiteral() {
-        var coord = _this.getCoordinate();
-
-        switch (sym) {
-            case Sym.Pound: {
-                peekForNextSymbolFromLexerIfNecessary();
-
-                if (nextSym == Sym.NewTerm) {
-                    return literalArray();
-                } else {
-                    return literalSymbol();
-                }
-            }
-            case Sym.STString:
-                return literalString();
-            case Sym.Integer:
-                return literalInteger(isNegativeNumber(), coord);
-            case Sym.Double:
-                return literalDouble(isNegativeNumber(), coord);
-            case Sym.Identifier:
-                expect(Sym.Identifier);
-                return u.universe.getGlobal(u.universe.symbolFor(new String(text)));
-            default:
-                throw new ParseError("Could not parse literal array value", Sym.NONE, this);
-        }
     }
 
     function selector() {
