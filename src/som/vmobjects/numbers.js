@@ -24,17 +24,10 @@ const RuntimeException = require('../../lib/exceptions').RuntimeException;
 const assert = require('../../lib/assert').assert;
 const notYetImplemented = require('../../lib/assert').notYetImplemented;
 const isInIntRange = require('../../lib/platform').isInIntRange;
+const intOrBigInt = require('../../lib/platform').intOrBigInt;
 
 const SAbstractObject = require('./SAbstractObject').SAbstractObject;
 const u = require('../vm/Universe');
-
-function intOrBigInt(val) {
-  if (isInIntRange(val)) {
-      return u.universe.newInteger(val | 0);
-  } else {
-      return u.universe.newBigInteger(BigInt(val));
-  }
-}
 
 function SInteger(intVal) {
   assert(isInIntRange(intVal) && Math.floor(intVal) == intVal);
@@ -55,7 +48,7 @@ function SInteger(intVal) {
   this.primLessThan = function (right) {
       var result;
       if (right instanceof SBigInteger) {
-          result = BigInt(intVal).lesser(right.getEmbeddedBigInteger());
+          result = intVal < right.getEmbeddedBigInteger();
       } else if (right instanceof SDouble) {
           return toDouble.primLessThan(right);
       } else {
@@ -71,24 +64,24 @@ function SInteger(intVal) {
   this.primAdd = function (right) {
       if (right instanceof SBigInteger) {
           return u.universe.newBigInteger(
-              right.getEmbeddedBigInteger().add(intVal));
+              right.getEmbeddedBigInteger() + BigInt(intVal));
       } else if (right instanceof SDouble) {
           return toDouble().primAdd(right);
       } else {
           var r = right.getEmbeddedInteger();
-          return intOrBigInt(intVal + r);
+          return intOrBigInt(intVal + r, u.universe);
       }
   };
 
   this.primSubtract = function (right) {
       if (right instanceof SBigInteger) {
           return u.universe.newBigInteger(
-              right.getEmbeddedBigInteger().subtract(intVal));
+            BigInt(intVal) - right.getEmbeddedBigInteger());
       } else if (right instanceof SDouble) {
           return toDouble().primSubtract(right);
       } else {
-          var r = right.getEmbeddedInteger();
-          return intOrBigInt(intVal - r);
+          const r = right.getEmbeddedInteger();
+          return intOrBigInt(intVal - r, u.universe);
       }
   };
 
@@ -100,7 +93,7 @@ function SInteger(intVal) {
           return toDouble().primMultiply(right);
       } else {
           var r = right.getEmbeddedInteger();
-          return intOrBigInt(intVal * r);
+          return intOrBigInt(intVal * r, u.universe);
       }
   };
 
@@ -167,7 +160,7 @@ function SInteger(intVal) {
   this.prim32BitUnsignedValue = function () {
       var arr = new Uint32Array(1);
       arr[0] = intVal;
-      return intOrBigInt(arr[0]);
+      return intOrBigInt(arr[0], u.universe);
   }
 
   this.prim32BitSignedValue = function () {
@@ -283,7 +276,7 @@ function SBigInteger(bigintVal) {
       } else if (right instanceof SDouble) {
           return u.universe.newDouble(bigintVal.toJSNumber() - right.getEmbeddedDouble());
       } else {
-          result = bigintVal - right.getEmbeddedInteger()
+          result = bigintVal - BigInt(right.getEmbeddedInteger())
       }
       return u.universe.newBigInteger(result);
   };
@@ -355,13 +348,11 @@ function SBigInteger(bigintVal) {
   };
 
   this.prim32BitUnsignedValue = function () {
-      var val = Number(bigintVal) >>> 0;
-      return intOrBigInt(val);
+      return intOrBigInt(BigInt.asUintN(32, bigintVal), u.universe);
   }
 
   this.prim32BitSignedValue = function () {
-      var val = Number(bigintVal) >> 0;
-      return intOrBigInt(val);
+      return intOrBigInt(BigInt.asIntN(32, bigintVal), u.universe);
   }
 }
 SBigInteger.prototype = Object.create(SAbstractObject.prototype);

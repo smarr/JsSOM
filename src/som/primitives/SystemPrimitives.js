@@ -73,12 +73,12 @@ function SystemPrimitives() {
 
     function _time(_frame, _args) {
         var diff = platform.getMillisecondTicks() - u.startTime;
-        return intOrBigInt(diff);
+        return intOrBigInt(diff, u.universe);
     }
 
     function _ticks(_frame, _args) {
         var diff = platform.getMillisecondTicks() - u.startTime;
-        return intOrBigInt(diff * 1000);
+        return intOrBigInt(diff * 1000, u.universe);
     }
 
     function _fullGC(_frame, _args) {

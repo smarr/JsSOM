@@ -31,6 +31,7 @@ const factory = require('../interpreter/NodeFactory');
 const u = require('../vm/Universe');
 
 const isInIntRange = require('../../lib/platform').isInIntRange;
+const intOrBigInt = require('../../lib/platform').intOrBigInt;
 
 
 function isIdentifier(sym) {
@@ -633,22 +634,21 @@ function Parser(fileContent, fileName) {
     }
 
     function literalInteger(isNegative) {
-        var i = parseInt(text, 10);
-        if (isNaN(i)) {
+        let i;
+
+        try {
+            i = BigInt(text);
+        } catch (e) {
             throw new ParseError("Could not parse integer. Expected a number " +
                 "but got '" + text + "'", Sym.NONE, _this);
         }
 
         if (isNegative) {
-            i = 0 - i;
+            i = 0n - i;
         }
         expect(Sym.Integer);
 
-        if (isInIntRange(i)) {
-            return u.universe.newInteger(i);
-        } else {
-            return u.universe.newBigInteger(BigInt(i));
-        }
+        return intOrBigInt(i, u.universe);
     }
 
     function literalDouble(isNegative) {

@@ -532,7 +532,7 @@ function Universe() {
         // Exit from the Java system
         lastExitCode = errorCode;
         if (!avoidExit) {
-            exitInterpreter(errorCode);
+            platform.exitInterpreter(errorCode);
         }
         throw new ExitException(errorCode);
     };
