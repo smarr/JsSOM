@@ -218,11 +218,13 @@ function Lexer(fileContent) {
         state.set(Sym.STString, "");
         state.linePos++
 
-        while (currentChar() != '\'') {
-            lexStringChar();
+        while (currentChar() !== '\'') {
             while (endOfLine()) {
                 if (!readNextLine()) { return; }
                 state.text += "\n";
+            }
+            if (currentChar() !== '\'') {
+                lexStringChar();
             }
         }
 
