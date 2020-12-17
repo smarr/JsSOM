@@ -84,4 +84,16 @@ function isInIntRange(val) {
     return val >= -2147483647 && val <= 2147483647;
 }
 
+function intOrBigInt(val, universe) {
+    if (isInIntRange(val)) {
+        if (typeof val === "bigint") {
+            return universe.newInteger(Number(val) | 0);
+        }
+        return universe.newInteger(val | 0);
+    } else {
+        return universe.newBigInteger(val);
+    }
+}
+
 exports.isInIntRange = isInIntRange;
+exports.intOrBigInt = intOrBigInt;

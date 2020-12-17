@@ -199,6 +199,7 @@ function Lexer(fileContent) {
             case 'f':  state.text += "\f"; break;
             case '\'': state.text += "'"; break;
             case '\\': state.text += "\\"; break;
+            case '0': state.text += "\0"; break;
         }
         state.linePos++;
     }
@@ -217,11 +218,13 @@ function Lexer(fileContent) {
         state.set(Sym.STString, "");
         state.linePos++
 
-        while (currentChar() != '\'') {
-            lexStringChar();
+        while (currentChar() !== '\'') {
             while (endOfLine()) {
                 if (!readNextLine()) { return; }
                 state.text += "\n";
+            }
+            if (currentChar() !== '\'') {
+                lexStringChar();
             }
         }
 

@@ -50,8 +50,7 @@ var tests = [
 describe("SomTests", function() {
     for (const test of tests) {
         it ("should pass " + test, function() {
-
-            var args = ["-cp", "core-lib/Smalltalk", "core-lib/TestSuite/TestHarness.som", test];
+            const args = ["-cp", "core-lib/Smalltalk", "core-lib/TestSuite/TestHarness.som", test];
             universe.setAvoidExit(true);
             universe.interpret(args);
 

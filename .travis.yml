@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - 12
+  - 15
 
 script:
   - ./som.sh -cp core-lib/Smalltalk core-lib/TestSuite/TestHarness.som

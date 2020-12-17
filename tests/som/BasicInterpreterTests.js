@@ -29,39 +29,87 @@ var tests = [
     ["MethodCall",     "test",  42, u.integerClass],
     ["MethodCall",     "test2", 42, u.integerClass],
 
-    ["NonLocalReturn", "test",  "NonLocalReturn", u.classClass],
     ["NonLocalReturn", "test1", 42, u.integerClass],
     ["NonLocalReturn", "test2", 43, u.integerClass],
     ["NonLocalReturn", "test3",  3, u.integerClass],
     ["NonLocalReturn", "test4", 42, u.integerClass],
     ["NonLocalReturn", "test5", 22, u.integerClass],
 
-    ["Blocks", "arg1",          42, u.integerClass],
-    ["Blocks", "arg2",          77, u.integerClass],
-    ["Blocks", "argAndLocal",    8, u.integerClass],
-    ["Blocks", "argAndContext",  8, u.integerClass],
+    ["Blocks", "testArg1",          42, u.integerClass],
+    ["Blocks", "testArg2",          77, u.integerClass],
+    ["Blocks", "testArgAndLocal",    8, u.integerClass],
+    ["Blocks", "testArgAndContext",  8, u.integerClass],
+    ["Blocks", "testEmptyZeroArg", 1, u.integerClass],
+    ["Blocks", "testEmptyOneArg",  1, u.integerClass],
+    ["Blocks", "testEmptyTwoArg",  1, u.integerClass],
 
-    ["Return", "returnSelf",           "Return", u.classClass],
-    ["Return", "returnSelfImplicitly", "Return", u.classClass],
-    ["Return", "noReturnReturnsSelf",  "Return", u.classClass],
-    ["Return", "blockReturnsImplicitlyLastValue", 4, u.integerClass],
+
+    ["Return", "testReturnSelf",           "Return", u.classClass],
+    ["Return", "testReturnSelfImplicitly", "Return", u.classClass],
+    ["Return", "testNoReturnReturnsSelf",  "Return", u.classClass],
+    ["Return", "testBlockReturnsImplicitlyLastValue", 4, u.integerClass],
 
     ["IfTrueIfFalse", "test",  42, u.integerClass],
     ["IfTrueIfFalse", "test2", 33, u.integerClass],
     ["IfTrueIfFalse", "test3",  4, u.integerClass],
 
-    ["CompilerSimplification", "returnConstantSymbol",  "constant", u.symbolClass],
-    ["CompilerSimplification", "returnConstantInt",        42,      u.integerClass],
-    ["CompilerSimplification", "returnSelf",            "CompilerSimplification", u.classClass],
-    ["CompilerSimplification", "returnSelfImplicitly",  "CompilerSimplification", u.classClass],
+    ["CompilerSimplification", "testReturnConstantSymbol",  "constant", u.symbolClass],
+    ["CompilerSimplification", "testReturnConstantInt",        42,      u.integerClass],
+    ["CompilerSimplification", "testReturnSelf",            "CompilerSimplification", u.classClass],
+    ["CompilerSimplification", "testReturnSelfImplicitly",  "CompilerSimplification", u.classClass],
     ["CompilerSimplification", "testReturnArgumentN",      55,      u.integerClass],
     ["CompilerSimplification", "testReturnArgumentA",      44,      u.integerClass],
     ["CompilerSimplification", "testSetField",          "foo",      u.symbolClass],
-    ["CompilerSimplification", "testGetField",             40,      u.integerClass]];
+    ["CompilerSimplification", "testGetField",             40,      u.integerClass],
+
+    ["Hash", "testHash", 444, u.integerClass],
+
+    ["Arrays", "testEmptyToInts", 3, u.integerClass],
+    ["Arrays", "testPutAllInt", 5, u.integerClass],
+    ["Arrays", "testPutAllNil", "Nil", u.classClass],
+    ["Arrays", "testPutAllBlock", 3, u.integerClass],
+    ["Arrays", "testNewWithAll", 1, u.integerClass],
+
+    ["BlockInlining", "testNoInlining", 1, u.integerClass],
+    ["BlockInlining", "testOneLevelInlining", 1, u.integerClass],
+    ["BlockInlining", "testOneLevelInliningWithLocalShadowTrue", 2, u.integerClass],
+    ["BlockInlining", "testOneLevelInliningWithLocalShadowFalse", 1, u.integerClass],
+
+    ["BlockInlining", "testBlockNestedInIfTrue", 2, u.integerClass],
+    ["BlockInlining", "testBlockNestedInIfFalse", 42, u.integerClass],
+
+    ["BlockInlining", "testDeepNestedInlinedIfTrue", 3, u.integerClass],
+    ["BlockInlining", "testDeepNestedInlinedIfFalse", 42, u.integerClass],
+
+    ["BlockInlining", "testDeepNestedBlocksInInlinedIfTrue", 5, u.integerClass],
+    ["BlockInlining", "testDeepNestedBlocksInInlinedIfFalse", 43, u.integerClass],
+
+    ["BlockInlining", "testDeepDeepNestedTrue", 9, u.integerClass],
+    ["BlockInlining", "testDeepDeepNestedFalse", 43, u.integerClass],
+
+    ["BlockInlining", "testToDoNestDoNestIfTrue", 2, u.integerClass],
+
+    ["NonLocalVars", "testWriteDifferentTypes", 3.75, u.doubleClass],
+
+    ["ObjectCreation", "test", 1000000, u.integerClass],
+
+    ["Regressions", "testSymbolEquality", 1, u.integerClass],
+    ["Regressions", "testSymbolReferenceEquality", 1, u.integerClass],
+    ["Regressions", "testUninitializedLocal", 1, u.integerClass],
+    ["Regressions", "testUninitializedLocalInBlock", 1, u.integerClass],
+
+    ["BinaryOperation", "test", 3 + 8, u.integerClass],
+
+    ["NumberOfTests", "numberOfTests", 57, u.integerClass]
+];
 
 function assertEqualsSomValue(expectedValue, expectedType, actualValue) {
     if (expectedType == u.integerClass) {
         expect(actualValue.getEmbeddedInteger()).to.equal(expectedValue);
+        return;
+    }
+    if (expectedType == u.doubleClass) {
+        expect(actualValue.getEmbeddedDouble()).to.equal(expectedValue);
         return;
     }
     if (expectedType == u.symbolClass) {
@@ -77,10 +125,10 @@ function assertEqualsSomValue(expectedValue, expectedType, actualValue) {
 
 describe("BasicInterpreterTests", function() {
     for (const test of tests) {
-        var testClass          = test[0];
-        var testMethod         = test[1];
-        var expectedResult     = test[2];
-        var expectedResultType = test[3];
+        const testClass          = test[0];
+        const testMethod         = test[1];
+        const expectedResult     = test[2];
+        const expectedResultType = test[3];
 
         it ("should pass " + testClass + ">>#" + testMethod, function () {
             expect(universe).not.to.be.null;
@@ -88,10 +136,8 @@ describe("BasicInterpreterTests", function() {
             universe.setAvoidExit(true);
             universe.setupClassPath("core-lib/Smalltalk:core-lib/TestSuite/BasicInterpreterTests");
 
-            var actualResult = universe.interpretMethodInClass(testClass, testMethod);
+            const actualResult = universe.interpretMethodInClass(testClass, testMethod);
             assertEqualsSomValue(expectedResult, expectedResultType, actualResult);
         });
     }
 });
-
-

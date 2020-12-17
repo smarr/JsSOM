@@ -31,6 +31,7 @@ const factory = require('../interpreter/NodeFactory');
 const u = require('../vm/Universe');
 
 const isInIntRange = require('../../lib/platform').isInIntRange;
+const intOrBigInt = require('../../lib/platform').intOrBigInt;
 
 
 function isIdentifier(sym) {
@@ -578,30 +579,27 @@ function Parser(fileContent, fileName) {
         return exp;
     }
 
-    function literal() {
-        var coord = _this.getCoordinate();
-        var value;
+    function getObjectForCurrentLiteral(coord) {
         switch (sym) {
             case Sym.Pound: {
                 peekForNextSymbolFromLexerIfNecessary();
-
                 if (nextSym == Sym.NewTerm) {
-                    value = literalArray();
+                    return literalArray();
                 } else {
-                    value = literalSymbol();
+                    return literalSymbol();
                 }
-                break;
             }
-            case Sym.STString: {
-                value = literalString();
-                break;
-            }
-            default: {
-                value = literalNumber();
-                break;
-            }
+            case Sym.STString:
+                return literalString();
+            default:
+                return literalNumber();
         }
-        var source = getSource(coord);
+    }
+
+    function literal() {
+        const coord = _this.getCoordinate();
+        const value = getObjectForCurrentLiteral(coord);
+        const source = getSource(coord);
         return factory.createLiteralNode(value, source);
     }
 
@@ -636,22 +634,21 @@ function Parser(fileContent, fileName) {
     }
 
     function literalInteger(isNegative) {
-        var i = parseInt(text, 10);
-        if (isNaN(i)) {
+        let i;
+
+        try {
+            i = BigInt(text);
+        } catch (e) {
             throw new ParseError("Could not parse integer. Expected a number " +
                 "but got '" + text + "'", Sym.NONE, _this);
         }
 
         if (isNegative) {
-            i = 0 - i;
+            i = 0n - i;
         }
         expect(Sym.Integer);
 
-        if (isInIntRange(i)) {
-            return u.universe.newInteger(i);
-        } else {
-            return u.universe.newBigInteger(BigInt(i));
-        }
+        return intOrBigInt(i, u.universe);
     }
 
     function literalDouble(isNegative) {
@@ -694,33 +691,6 @@ function Parser(fileContent, fileName) {
 
         expect(Sym.EndTerm);
         return u.universe.newArrayFrom(literals);
-    }
-
-    function getObjectForCurrentLiteral() {
-        var coord = _this.getCoordinate();
-
-        switch (sym) {
-            case Sym.Pound: {
-                peekForNextSymbolFromLexerIfNecessary();
-
-                if (nextSym == Sym.NewTerm) {
-                    return literalArray();
-                } else {
-                    return literalSymbol();
-                }
-            }
-            case Sym.STString:
-                return literalString();
-            case Sym.Integer:
-                return literalInteger(isNegativeNumber(), coord);
-            case Sym.Double:
-                return literalDouble(isNegativeNumber(), coord);
-            case Sym.Identifier:
-                expect(Sym.Identifier);
-                return u.universe.getGlobal(u.universe.symbolFor(new String(text)));
-            default:
-                throw new ParseError("Could not parse literal array value", Sym.NONE, this);
-        }
     }
 
     function selector() {

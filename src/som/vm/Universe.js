@@ -415,11 +415,15 @@ function Universe() {
     this.interpretMethodInClass = function (className, selector) {
         initializeObjectSystem();
 
-        var clazz = _this.loadClass(_this.symbolFor(className));
+        const clazz = _this.loadClass(_this.symbolFor(className));
 
         // Lookup the initialize invokable on the system class
-        var initialize = clazz.getClass().
+        const initialize = clazz.getClass().
             lookupInvokable(_this.symbolFor(selector));
+
+        if (initialize === null) {
+            throw new Error(`Lookup of ${selector} in ${className} failed. Can't be executed.`)
+        }
 
         try {
             return initialize.invoke(null, [clazz]);
@@ -528,7 +532,7 @@ function Universe() {
         // Exit from the Java system
         lastExitCode = errorCode;
         if (!avoidExit) {
-            exitInterpreter(errorCode);
+            platform.exitInterpreter(errorCode);
         }
         throw new ExitException(errorCode);
     };
