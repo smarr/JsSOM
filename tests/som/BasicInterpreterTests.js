@@ -29,26 +29,25 @@ var tests = [
     ["MethodCall",     "test",  42, u.integerClass],
     ["MethodCall",     "test2", 42, u.integerClass],
 
-    ["NonLocalReturn", "test",  "NonLocalReturn", u.classClass],
     ["NonLocalReturn", "test1", 42, u.integerClass],
     ["NonLocalReturn", "test2", 43, u.integerClass],
     ["NonLocalReturn", "test3",  3, u.integerClass],
     ["NonLocalReturn", "test4", 42, u.integerClass],
     ["NonLocalReturn", "test5", 22, u.integerClass],
 
-    ["Blocks", "arg1",          42, u.integerClass],
-    ["Blocks", "arg2",          77, u.integerClass],
-    ["Blocks", "argAndLocal",    8, u.integerClass],
-    ["Blocks", "argAndContext",  8, u.integerClass],
+    ["Blocks", "testArg1",          42, u.integerClass],
+    ["Blocks", "testArg2",          77, u.integerClass],
+    ["Blocks", "testArgAndLocal",    8, u.integerClass],
+    ["Blocks", "testArgAndContext",  8, u.integerClass],
     ["Blocks", "testEmptyZeroArg", 1, u.integerClass],
     ["Blocks", "testEmptyOneArg",  1, u.integerClass],
     ["Blocks", "testEmptyTwoArg",  1, u.integerClass],
 
 
-    ["Return", "returnSelf",           "Return", u.classClass],
-    ["Return", "returnSelfImplicitly", "Return", u.classClass],
-    ["Return", "noReturnReturnsSelf",  "Return", u.classClass],
-    ["Return", "blockReturnsImplicitlyLastValue", 4, u.integerClass],
+    ["Return", "testReturnSelf",           "Return", u.classClass],
+    ["Return", "testReturnSelfImplicitly", "Return", u.classClass],
+    ["Return", "testNoReturnReturnsSelf",  "Return", u.classClass],
+    ["Return", "testBlockReturnsImplicitlyLastValue", 4, u.integerClass],
 
     ["IfTrueIfFalse", "test",  42, u.integerClass],
     ["IfTrueIfFalse", "test2", 33, u.integerClass],
@@ -107,6 +106,10 @@ var tests = [
 function assertEqualsSomValue(expectedValue, expectedType, actualValue) {
     if (expectedType == u.integerClass) {
         expect(actualValue.getEmbeddedInteger()).to.equal(expectedValue);
+        return;
+    }
+    if (expectedType == u.doubleClass) {
+        expect(actualValue.getEmbeddedDouble()).to.equal(expectedValue);
         return;
     }
     if (expectedType == u.symbolClass) {
