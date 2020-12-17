@@ -199,6 +199,7 @@ function Lexer(fileContent) {
             case 'f':  state.text += "\f"; break;
             case '\'': state.text += "'"; break;
             case '\\': state.text += "\\"; break;
+            case '0': state.text += "\0"; break;
         }
         state.linePos++;
     }
