@@ -13,10 +13,10 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "browserify": "^16.3.0",
+    "browserify": "^17.0.0",
     "chai": "^4.2.0",
-    "mocha": "^6.2.0",
-    "tinyify": "^2.5.1"
+    "mocha": "^8.2.1",
+    "tinyify": "^3.0.0"
   },
   "scripts": {
     "browserify": "mkdir -p build && npm run core-lib && npm run browserify:som-core && npm run browserify:main && npm run browserify:test",
