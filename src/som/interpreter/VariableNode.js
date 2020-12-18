@@ -19,33 +19,37 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const ContextualNode = require('./ContextualNode').ContextualNode;
 
-function VariableReadNode(contextLevel, local, source) {
-    ContextualNode.call(this, contextLevel, source);
-    var _this = this;
+class VariableReadNode extends ContextualNode {
+    constructor(contextLevel, local, source) {
+        super(contextLevel, source);
+        this.local = local;
+    }
 
-    this.execute = function (frame) {
-        var ctx = _this.determineContext(frame);
-        return ctx.getTemp(local.getIndex());
+    execute(frame) {
+        const ctx = this.determineContext(frame);
+        return ctx.getTemp(this.local.getIndex());
     }
 }
-VariableReadNode.prototype = Object.create(ContextualNode.prototype);
 
-function VariableWriteNode(contextLevel, local, _valueExpr, source) {
-    ContextualNode.call(this, contextLevel, source);
-    var _this = this;
-    _this._child_value = _this.adopt(_valueExpr);
+class VariableWriteNode extends ContextualNode {
+    constructor(contextLevel, local, valueExpr, source) {
+        super(contextLevel, source);
+        this.child_value = this.adopt(valueExpr);
+        this.local = local;
+    }
 
-    this.execute = function (frame) {
-        var val = _this._child_value.execute(frame);
+    execute(frame) {
+        const val = this.child_value.execute(frame);
 
-        var ctx = _this.determineContext(frame);
-        ctx.setTemp(local.getIndex(), val);
+        const ctx = this.determineContext(frame);
+        ctx.setTemp(this.local.getIndex(), val);
         return val;
     }
 }
-VariableReadNode.prototype = Object.create(ContextualNode.prototype);
 
 exports.VariableReadNode = VariableReadNode;
 exports.VariableWriteNode = VariableWriteNode;

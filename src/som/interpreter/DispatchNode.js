@@ -19,6 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const RuntimeException = require('../../lib/exceptions').RuntimeException;
 
 const assert = require('../../lib/assert').assert;
@@ -30,58 +32,65 @@ const SSymbol = require('../vmobjects/SSymbol').SSymbol;
 
 const u = require('../vm/Universe');
 
-function GenericDispatchNode(selector) {
-    Node.call(this, null);
+class GenericDispatchNode extends Node {
+    constructor(selector) {
+        super(null);
+        this.selector = selector;
+    }
 
-    this.executeDispatch = function (frame, args) {
-        var rcvr = args[0];
-        var rcvrClass = rcvr.getClass();
+    executeDispatch(frame, args) {
+        const rcvr = args[0];
+        const rcvrClass = rcvr.getClass();
 
-        var method = rcvrClass.lookupInvokable(selector);
-        if (method != null) {
+        const method = rcvrClass.lookupInvokable(this.selector);
+        if (method !== null) {
             return method.invoke(frame, args);
         } else {
-            return rcvr.sendDoesNotUnderstand(selector, frame, args);
+            return rcvr.sendDoesNotUnderstand(this.selector, frame, args);
         }
-    };
+    }
 }
-GenericDispatchNode.prototype = Object.create(Node.prototype);
 
-function UninitializedSuperDispatchNode(selector, holderClass, classSide) {
-    Node.call(this, null);
-    var _this = this;
-    assert(holderClass instanceof SSymbol);
+class UninitializedSuperDispatchNode extends Node {
+    constructor(selector, holderClass, classSide) {
+        super(null);
+        assert(holderClass instanceof SSymbol);
+        this.selector = selector;
+        this.classSide = classSide;
+        this.holderClass = holderClass;
+    }
 
-    function getLookupClass() {
-        var clazz = u.universe.getGlobal(holderClass);
-        if (classSide) {
+    getLookupClass() {
+        let clazz = u.universe.getGlobal(this.holderClass);
+        if (this.classSide) {
             clazz = clazz.getClass();
         }
         return clazz.getSuperClass();
     }
 
-    this.executeDispatch = function (frame, args) {
-        var lookupClass = getLookupClass();
-        return _this.replace(new CachedSuperDispatchNode(selector, lookupClass)).
+    executeDispatch(frame, args) {
+        const lookupClass = this.getLookupClass();
+        return this.replace(new CachedSuperDispatchNode(this.selector, lookupClass)).
             executeDispatch(frame, args);
-    };
+    }
 }
-UninitializedSuperDispatchNode.prototype = Object.create(Node.prototype);
 
-function CachedSuperDispatchNode(selector, lookupClass) {
-    Node.call(this, null);
-    assert(lookupClass instanceof SClass);
-    var method = lookupClass.lookupInvokable(selector);
+class CachedSuperDispatchNode extends Node {
+    constructor(selector, lookupClass) {
+        super(null);
+        assert(lookupClass instanceof SClass);
+        const method = lookupClass.lookupInvokable(selector);
 
-    if (method == null) {
-        throw new RuntimeException("Currently #dnu with super sent is not yet implemented. ");
+        if (method == null) {
+            throw new RuntimeException("Currently #dnu with super sent is not yet implemented. ");
+        }
+        this.method = method;
     }
 
-    this.executeDispatch = function (frame, args) {
-        return method.invoke(frame, args);
-    };
+    executeDispatch(frame, args) {
+        return this.method.invoke(frame, args);
+    }
 }
-CachedSuperDispatchNode.prototype = Object.create(Node.prototype);
 
 exports.GenericDispatchNode = GenericDispatchNode;
 exports.UninitializedSuperDispatchNode = UninitializedSuperDispatchNode;

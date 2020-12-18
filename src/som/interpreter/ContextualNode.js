@@ -19,38 +19,42 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const Node = require('./Node').Node;
 
-function ContextualNode(contextLevel, source) {
-    Node.call(this, source);
+class ContextualNode extends Node {
+    constructor(contextLevel, source) {
+        super(source);
+        this.contextLevel = contextLevel;
+    }
 
-    this.getContextLevel = function() {
-        return contextLevel;
-    };
+    getContextLevel() {
+        return this.contextLevel;
+    }
 
-    this.determineContext = function (frame) {
-        if (contextLevel == 0) { return frame; }
+    determineContext(frame) {
+        if (this.contextLevel == 0) { return frame; }
 
-        var self = frame.getReceiver();
-        var i = contextLevel - 1;
+        let self = frame.getReceiver();
+        let i = this.contextLevel - 1;
 
         while (i > 0) {
             self = self.getOuterSelf();
             i--;
         }
         return self.getContext();
-    };
+    }
 
-    this.determineOuterSelf = function (frame) {
-        var self = frame.getReceiver();
-        var i = contextLevel;
+    determineOuterSelf(frame) {
+        let self = frame.getReceiver();
+        let i = this.contextLevel;
         while (i > 0) {
             self = self.getOuterSelf();
             i--;
         }
         return self;
-    };
+    }
 }
-ContextualNode.prototype = Object.create(Node.prototype);
 
 exports.ContextualNode = ContextualNode;

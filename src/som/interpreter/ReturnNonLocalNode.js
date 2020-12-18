@@ -19,45 +19,50 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const Node = require('./Node').Node;
 const ContextualNode = require('./ContextualNode').ContextualNode;
 
-function ReturnException(result, targetFrame) {
-    this.hasReachedTarget = function (current) {
-        return current === targetFrame;
-    };
-    this.getResult = function () {
-        return result;
+class ReturnException {
+    constructor(result, targetFrame) {
+        this.result = result;
+        this.targetFrame = targetFrame;
     }
+
+    hasReachedTarget(current) { return current === this.targetFrame; }
+
+    getResult() { return this.result; }
 }
 
-function ReturnNonLocalNode(exp, contextLevel, source) {
-    ContextualNode.call(this, contextLevel, source);
-    var _this = this;
-    _this._child_exp = _this.adopt(exp);
+class ReturnNonLocalNode extends ContextualNode {
+    constructor(exp, contextLevel, source) {
+        super(contextLevel, source);
+        this.child_exp = this.adopt(exp);
+    }
 
-    this.execute = function (frame) {
-        var result = _this._child_exp.execute(frame);
+    execute(frame) {
+        const result = this.child_exp.execute(frame);
 
-        var ctx = _this.determineContext(frame);
+        const ctx = this.determineContext(frame);
         if (ctx.isOnStack()) {
             throw new ReturnException(result, ctx);
         } else {
-            var outerReceiver = ctx.getReceiver();
+            const outerReceiver = ctx.getReceiver();
             return outerReceiver.sendEscapedBlock(frame.getReceiver(), frame);
         }
     }
 }
-ReturnNonLocalNode.prototype = Object.create(ContextualNode.prototype);
 
-function CatchNonLocalReturnNode(_body) {
-    Node.call(this, null);
-    var _this = this;
-    this._child_body = _this.adopt(_body);
+class CatchNonLocalReturnNode extends Node{
+    constructor(body) {
+        super(null);
+        this.child_body = this.adopt(body);
+    }
 
-    this.execute = function (frame) {
+    execute(frame) {
         try {
-            return _this._child_body.execute(frame);
+            return this.child_body.execute(frame);
         } catch (e) {
             if (e instanceof ReturnException) {
                 if (e.hasReachedTarget(frame)) {
@@ -70,7 +75,6 @@ function CatchNonLocalReturnNode(_body) {
         }
     }
 }
-CatchNonLocalReturnNode.prototype = Object.create(Node.prototype);
 
 exports.ReturnNonLocalNode = ReturnNonLocalNode;
 exports.CatchNonLocalReturnNode = CatchNonLocalReturnNode;

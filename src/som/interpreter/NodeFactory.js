@@ -19,6 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const assert = require('../../lib/assert').assert;
 
 const ArgumentReadNode = require('./ArgumentNode').ArgumentReadNode;
@@ -111,4 +113,3 @@ exports.createBlockNode = createBlockNode;
 exports.createMessageSend = createMessageSend;
 exports.createNonLocalReturn = createNonLocalReturn;
 exports.createLiteralNode = createLiteralNode;
-

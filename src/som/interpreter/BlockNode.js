@@ -19,17 +19,21 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const Node = require('./Node').Node;
 
 const u = require('../vm/Universe');
 
-function BlockNode(blockMethod, source) {
-    Node.call(this, source);
+class BlockNode extends Node {
+    constructor(blockMethod, source) {
+        super(source);
+        this.blockMethod = blockMethod;
+    }
 
-    this.execute = function(frame) {
-        return u.universe.newBlock(blockMethod, frame);
-    };
+    execute = function (frame) {
+        return u.universe.newBlock(this.blockMethod, frame);
+    }
 }
-BlockNode.prototype = Object.create(Node.prototype);
 
 exports.BlockNode = BlockNode;

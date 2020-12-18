@@ -19,40 +19,43 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-function Node(source) {
-    var _this = this;
+//@ts-check
+"use strict";
+class Node {
+    constructor(source) {
+        this.parent = null;
+        this.source = source;
+    }
 
-    this._parent = null;
+    getSource() { return this.source; };
 
-    this.getSource = function () { return source; };
-
-    this.adopt = function (nodeOrNodes) {
+    adopt(nodeOrNodes) {
         if (nodeOrNodes instanceof Array) {
             for (var i in nodeOrNodes) {
-                nodeOrNodes[i]._parent = _this;
+                nodeOrNodes[i].parent = this;
             }
         } else {
-            nodeOrNodes._parent = _this;
+            nodeOrNodes.parent = this;
         }
         return nodeOrNodes;
-    };
+    }
 
-    this.replace = function (newNode) {
-        var parent   = _this._parent;
-        var replaced = false;
+    replace(newNode) {
+        const parent = this.parent;
+        let replaced = false;
 
-        for (var prop in parent) {
+        for (const prop in parent) {
             if (prop.indexOf("_child") == 0) {
                 if (prop.indexOf("_children") == 0) { // an array with child nodes
-                    var children = parent[prop];
-                    for (var i in children) {
-                        if (children[i] === _this) {
+                    const children = parent[prop];
+                    for (const i in children) {
+                        if (children[i] === this) {
                             children[i] = newNode;
                             replaced = true;
                         }
                     }
                 } else { // just a simple child node
-                    if (parent[prop] === _this) {
+                    if (parent[prop] === this) {
                         parent[prop] = newNode;
                         replaced = true;
                     }
@@ -60,16 +63,16 @@ function Node(source) {
             }
         }
 
-        if (!replaced && _this._parent != null) {
+        if (!replaced && this.parent != null) {
             // eslint-disable-next-line no-debugger
             debugger; // node was not replaced???
         }
         return newNode;
-    };
+    }
 
-    this.isSuperNode = function () {
+    isSuperNode() {
         return false;
-    };
+    }
 }
 
 exports.Node = Node;

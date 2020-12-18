@@ -19,39 +19,43 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const Node = require('./Node').Node;
 const u = require('../vm/Universe');
 
-function UninitializedGlobalReadNode(globalName, source) {
-    Node.call(this, source);
-    var _this = this;
-
-    function executeUnknownGlobal(frame) {
-        var self = frame.getReceiver();
-        return self.sendUnknownGlobal(globalName, frame);
+class UninitializedGlobalReadNode extends Node {
+    constructor(globalName, source) {
+        super(source);
+        this.globalName = globalName;
     }
 
-    this.execute = function (frame) {
+    executeUnknownGlobal(frame) {
+        const self = frame.getReceiver();
+        return self.sendUnknownGlobal(this.globalName, frame);
+    }
+
+    execute(frame) {
         // Get the global from the universe
-        var assoc = u.universe.getGlobalsAssociation(globalName);
+        const assoc = u.universe.getGlobalsAssociation(this.globalName);
         if (assoc != null) {
-            return _this.replace(new CachedGlobalReadNode(assoc, source)).
+            return this.replace(new CachedGlobalReadNode(assoc, this.source)).
                 execute(frame);
         } else {
-            return executeUnknownGlobal(frame);
+            return this.executeUnknownGlobal(frame);
         }
-    };
+    }
 }
-UninitializedGlobalReadNode.prototype = Object.create(Node.prototype);
 
+class CachedGlobalReadNode extends Node {
+    constructor(assoc, source) {
+        super(source);
+        this.assoc = assoc;
+    }
 
-function CachedGlobalReadNode(assoc, source) {
-    Node.call(this, source);
-
-    this.execute = function (_frame) {
-        return assoc.getValue();
-    };
+    execute(_frame) {
+        return this.assoc.getValue();
+    }
 }
-CachedGlobalReadNode.prototype = Object.create(Node.prototype);
 
 exports.UninitializedGlobalReadNode = UninitializedGlobalReadNode;
