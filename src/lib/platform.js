@@ -91,6 +91,9 @@ function intOrBigInt(val, universe) {
         }
         return universe.newInteger(val | 0);
     } else {
+        if (typeof val != "bigint") {
+            val = BigInt(val);
+        }
         return universe.newBigInteger(val);
     }
 }
