@@ -27,37 +27,38 @@ const u = require('../vm/Universe');
 class SObject extends SAbstractObject {
     constructor(instanceClass, numFields) {
         super();
-        var clazz = instanceClass,
-            objectFields = new Array((instanceClass === null) ?
+
+        this.clazz = instanceClass;
+        this.objectFields = new Array((instanceClass === null) ?
                 numFields : instanceClass.getNumberOfInstanceFields());
 
-        for (var i = 0; i < objectFields.length; i++) {
-            objectFields[i] = u.nilObject;
+        for (var i = 0; i < this.objectFields.length; i++) {
+            this.objectFields[i] = u.nilObject;
         }
+    }
 
-        this.getNumberOfFields = function () {
-            return objectFields.length;
-        };
+    getNumberOfFields() {
+        return this.objectFields.length;
+    }
 
-        this.setClass = function (value) {
-            clazz = value;
-        };
+    setClass(value) {
+        this.clazz = value;
+    }
 
-        this.getClass = function () {
-            return clazz;
-        };
+    getClass() {
+        return this.clazz;
+    }
 
-        this.getFieldIndex = function (fieldNameSymbol) {
-            return clazz.lookupFieldIndex(fieldNameSymbol);
-        };
+    getFieldIndex(fieldNameSymbol) {
+        return this.clazz.lookupFieldIndex(fieldNameSymbol);
+    }
 
-        this.getField = function (index) {
-            return objectFields[index];
-        };
+    getField(index) {
+        return this.objectFields[index];
+    }
 
-        this.setField = function (idx, value) {
-            objectFields[idx] = value;
-        };
+    setField(idx, value) {
+        this.objectFields[idx] = value;
     }
 }
 

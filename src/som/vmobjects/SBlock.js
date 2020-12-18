@@ -27,49 +27,51 @@ const SAbstractObject = require('./SAbstractObject').SAbstractObject;
 
 const u = require('../vm/Universe');
 
+function computeSignatureString(numberOfArguments) {
+    // Compute the signature string
+    let signatureString = "value";
+    if (numberOfArguments > 1) { signatureString += ":"; }
+
+    // Add extra value: selector elements if necessary
+    for (let i = 2; i < numberOfArguments; i++) {
+        signatureString += "with:";
+    }
+    return signatureString;
+}
+
+function _value(frame, args) {
+    const rcvrBlock = args[0];
+    return rcvrBlock.getMethod().invoke(frame, args);
+}
+
 function getBlockEvaluationPrimitive(numberOfArguments, rcvrClass) {
-    function _value(frame, args) {
-        var rcvrBlock = args[0];
-        return rcvrBlock.getMethod().invoke(frame, args);
-    }
-
-    function computeSignatureString() {
-        // Compute the signature string
-        var signatureString = "value";
-        if (numberOfArguments > 1) { signatureString += ":"; }
-
-        // Add extra value: selector elements if necessary
-        for (var i = 2; i < numberOfArguments; i++) {
-            signatureString += "with:";
-        }
-        return signatureString;
-    }
-
-    var sig = u.universe.symbolFor(computeSignatureString(numberOfArguments));
+    const sig = u.universe.symbolFor(computeSignatureString(numberOfArguments));
     return u.universe.newPrimitive(sig, _value, rcvrClass);
 }
 
 class SBlock extends SAbstractObject {
     constructor(blockMethod, context) {
         super();
-        const blockClass = u.blockClasses[blockMethod.getNumberOfArguments()];
+        this.blockClass = u.blockClasses[blockMethod.getNumberOfArguments()];
+        this.context = context;
+        this.blockMethod = blockMethod;
+    }
 
-        this.getClass = function () {
-            return blockClass;
-        };
+    getClass() {
+        return this.blockClass;
+    }
 
-        this.getMethod = function () {
-            return blockMethod;
-        };
+    getMethod() {
+        return this.blockMethod;
+    }
 
-        this.getContext = function () {
-            return context;
-        };
+    getContext() {
+        return this.context;
+    }
 
-        this.getOuterSelf = function () {
-            assert(context != null);
-            return context.getReceiver();
-        };
+    getOuterSelf() {
+        assert(this.context != null);
+        return this.context.getReceiver();
     }
 }
 

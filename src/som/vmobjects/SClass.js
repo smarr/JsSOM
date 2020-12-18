@@ -199,7 +199,7 @@ class SClass extends SObject {
 
     hasPrimitives() {
         return this.includesPrimitives(this) || this.includesPrimitives(this.getClass());
-    };
+    }
 
     loadPrimitives = function (displayWarning) {
         const primModuleName = "../primitives/" + this.name.getString() + "Primitives";
@@ -227,7 +227,7 @@ class SClass extends SObject {
 
     toString() {
         return "Class(" + this.name.getString() + ")";
-    };
+    }
 }
 
 exports.SClass = SClass;
