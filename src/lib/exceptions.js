@@ -19,24 +19,34 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-function IllegalStateException(msg) {
-    this.getMessage = function () { return msg; }
+class IllegalStateException {
+    constructor(msg) {
+        this.msg = msg;
 
-    // Use V8's native method if available, otherwise fallback
-    if ("captureStackTrace" in Error)
-        Error.captureStackTrace(this, IllegalStateException);
-    else
-        this.stack = (new Error()).stack;
+        // Use V8's native method if available, otherwise fallback
+        if ("captureStackTrace" in Error) {
+            Error.captureStackTrace(this, IllegalStateException);
+        } else {
+            this.stack = (new Error()).stack;
+        }
+    }
+
+    getMessage() { return this.msg; }
 }
 
-function RuntimeException(msg) {
-    this.getMessage = function () { return msg; }
+class RuntimeException {
+    constructor(msg) {
+        this.msg = msg;
 
-    // Use V8's native method if available, otherwise fallback
-    if ("captureStackTrace" in Error)
-        Error.captureStackTrace(this, RuntimeException);
-    else
-        this.stack = (new Error()).stack;
+        // Use V8's native method if available, otherwise fallback
+        if ("captureStackTrace" in Error) {
+            Error.captureStackTrace(this, RuntimeException);
+        } else {
+            this.stack = (new Error()).stack;
+        }
+    }
+
+    getMessage() { return this.msg; }
 }
 
 exports.IllegalStateException = IllegalStateException;

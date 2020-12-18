@@ -19,12 +19,15 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-function AssertionFailedException() {
-    // Use V8's native method if available, otherwise fallback
-    if ("captureStackTrace" in Error)
-        Error.captureStackTrace(this, AssertionFailedException);
-    else
-        this.stack = (new Error()).stack;
+class AssertionFailedException {
+    constructor() {
+        // Use V8's native method if available, otherwise fallback
+        if ("captureStackTrace" in Error) {
+            Error.captureStackTrace(this, AssertionFailedException);
+        } else {
+            this.stack = (new Error()).stack;
+        }
+    }
 }
 
 function assert(bool) {
@@ -33,7 +36,7 @@ function assert(bool) {
     }
 }
 
-function NotYetImplementedException() {}
+class NotYetImplementedException {}
 
 function notYetImplemented() {
     throw new NotYetImplementedException();
