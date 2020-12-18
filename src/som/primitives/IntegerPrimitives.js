@@ -21,9 +21,18 @@
 */
 const isInIntRange = require('../../lib/platform').isInIntRange;
 
+const SBigInteger = require('../vmobjects/numbers').SBigInteger;
 const Primitives = require('./Primitives').Primitives;
 
 const u = require('../vm/Universe');
+
+function toNumber(val) {
+    if (val instanceof SBigInteger) {
+        return Number(val.getEmbeddedBigInteger());
+    } else {
+        return val.getEmbeddedInteger();
+    }
+}
 
 function IntegerPrimitives() {
     Primitives.call(this);
@@ -98,13 +107,10 @@ function IntegerPrimitives() {
     }
 
     function _leftShift(frame, args) {
-        var rightObj = args[1];
-        var left     = args[0];
+        const r = toNumber(args[1]);
+        const l  = toNumber(args[0]);
 
-        var l = left.getEmbeddedInteger();
-        var r = rightObj.getEmbeddedInteger();
-
-        var result = l << r;
+        const result = l << r;
         if (Math.floor(l) != l || !isInIntRange(result) || !isInIntRange(l * Math.pow(2, r))) {
             var big = BigInt(l);
             big = big * BigInt(Math.pow(2, r));
@@ -114,10 +120,10 @@ function IntegerPrimitives() {
     }
 
     function _bitXor(frame, args) {
-        let right = args[1];
-        let left  = args[0];
-        return u.universe.newInteger(left.getEmbeddedInteger()
-            ^ right.getEmbeddedInteger())
+        const right = toNumber(args[1]);
+        const left  = toNumber(args[0]);
+
+        return u.universe.newInteger(left ^ right);
     }
 
     function _rem(frame, args) {
@@ -136,10 +142,9 @@ function IntegerPrimitives() {
     }
 
     function _unsignedRightShift(frame, args) {
-        var right = args[1];
-        var left  = args[0];
-        return u.universe.newInteger(
-            left.getEmbeddedInteger() >>> right.getEmbeddedInteger());
+        const right = toNumber(args[1]);
+        const left  = toNumber(args[0]);
+        return u.universe.newInteger(left >>> right);
     }
 
     this.installPrimitives = function () {

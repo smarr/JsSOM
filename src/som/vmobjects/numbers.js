@@ -66,8 +66,8 @@ class SInteger extends SAbstractObject {
 
         this.primAdd = function (right) {
             if (right instanceof SBigInteger) {
-                return u.universe.newBigInteger(
-                    right.getEmbeddedBigInteger() + BigInt(intVal));
+                return intOrBigInt(
+                    right.getEmbeddedBigInteger() + BigInt(intVal), u.universe);
             } else if (right instanceof SDouble) {
                 return toDouble().primAdd(right);
             } else {
@@ -78,8 +78,8 @@ class SInteger extends SAbstractObject {
 
         this.primSubtract = function (right) {
             if (right instanceof SBigInteger) {
-                return u.universe.newBigInteger(
-                    BigInt(intVal) - right.getEmbeddedBigInteger());
+                return intOrBigInt(
+                    BigInt(intVal) - right.getEmbeddedBigInteger(), u.universe);
             } else if (right instanceof SDouble) {
                 return toDouble().primSubtract(right);
             } else {
@@ -90,8 +90,8 @@ class SInteger extends SAbstractObject {
 
         this.primMultiply = function (right) {
             if (right instanceof SBigInteger) {
-                return u.universe.newBigInteger(
-                    right.getEmbeddedBigInteger().multiply(intVal));
+                return intOrBigInt(
+                    right.getEmbeddedBigInteger().multiply(intVal), u.universe);
             } else if (right instanceof SDouble) {
                 return toDouble().primMultiply(right);
             } else {
@@ -240,6 +240,7 @@ class SBigInteger extends SAbstractObject {
     constructor(bigIntVal) {
         super();
         assert(typeof bigIntVal === "bigint");
+        assert(!isInIntRange(bigIntVal));
         this.bigIntVal = bigIntVal;
     }
 
