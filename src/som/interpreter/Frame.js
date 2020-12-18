@@ -23,41 +23,44 @@
 "use strict";
 const universe = require('../vm/Universe');
 
-function Frame(callerFrame, args, numTemps) {
-    var isOnStack = true,
-        temps     = new Array(numTemps);
+class Frame {
+    constructor(args, numTemps) {
+        this.temps = new Array(numTemps);
+        this.onStack = true;
 
-    for (var i = 0; i < numTemps; i++) {
-        temps[i] = universe.nilObject;
+        for (let i = 0; i < numTemps; i++) {
+            this.temps[i] = universe.nilObject;
+        }
+        this.args = args;
     }
 
-    this.getReceiver = function () {
-        return args[0];
-    };
+    getReceiver() {
+        return this.args[0];
+    }
 
-    this.getArgument = function (idx) {
-        return args[idx];
-    };
+    getArgument(idx) {
+        return this.args[idx];
+    }
 
-    this.setArgument = function (idx, val) {
-        args[idx] = val;
-    };
+    setArgument(idx, val) {
+        this.args[idx] = val;
+    }
 
-    this.getTemp = function (idx) {
-        return temps[idx];
-    };
+    getTemp(idx) {
+        return this.temps[idx];
+    }
 
-    this.setTemp = function (idx, value) {
-        temps[idx] = value;
-    };
+    setTemp(idx, value) {
+        this.temps[idx] = value;
+    }
 
-    this.isOnStack = function () {
-        return isOnStack;
-    };
+    isOnStack() {
+        return this.onStack;
+    }
 
-    this.dropFromStack = function () {
-        isOnStack = false;
-    };
+    dropFromStack() {
+        this.onStack = false;
+    }
 }
 
 exports.Frame = Frame;

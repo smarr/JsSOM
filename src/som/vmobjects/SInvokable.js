@@ -66,7 +66,7 @@ class SMethod extends SInvokable {
     }
 
     invoke(frame, args) {
-        const newFrame = new Frame(frame, args, this.numberOfTemps);
+        const newFrame = new Frame(args, this.numberOfTemps);
         return this.bodyNode.execute(newFrame, args);
     }
 
