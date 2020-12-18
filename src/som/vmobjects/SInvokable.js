@@ -19,88 +19,96 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const SAbstractObject = require('./SAbstractObject').SAbstractObject;
 const Frame = require('../interpreter/Frame').Frame;
 const u = require('../vm/Universe');
 
-function SInvokable(signature, _holder) {
-    SAbstractObject.call(this);
-    var holder = _holder;
+class SInvokable extends SAbstractObject {
+    constructor(signature, holder) {
+        super();
+        this.holder = holder;
+        this.signature = signature;
+    }
 
-    this.getHolder = function () {
-        return holder;
-    };
+    getHolder() {
+        return this.holder;
+    }
 
-    this.setHolder = function (value) {
-        holder = value;
-    };
+    setHolder(value) {
+        this.holder = value;
+    }
 
-    this.getSignature = function () {
-        return signature;
-    };
+    getSignature() {
+        return this.signature;
+    }
 
-    this.getNumberOfArguments = function () {
-        return signature.getNumberOfSignatureArguments();
-    };
+    getNumberOfArguments() {
+        return this.signature.getNumberOfSignatureArguments();
+    }
 }
-SInvokable.prototype = Object.create(SAbstractObject.prototype);
 
-function SMethod(signature, sourceSection, bodyNode, numberOfTemps) {
-    SInvokable.call(this, signature, null);
-    var _this = this;
+class SMethod extends SInvokable {
+    constructor(signature, sourceSection, bodyNode, numberOfTemps) {
+        super(signature, null);
+        this.sourceSection = sourceSection;
+        this.bodyNode = bodyNode;
+        this.numberOfTemps = numberOfTemps;
+    }
 
-    this.getClass = function () {
+    getClass() {
         return u.methodClass;
-    };
+    }
 
-    this.isPrimitive = function () {
+    isPrimitive() {
         return false;
-    };
+    }
 
-    this.invoke = function(frame, args) {
-        var newFrame = new Frame(frame, args, numberOfTemps);
-        return bodyNode.execute(newFrame, args);
-    };
+    invoke(frame, args) {
+        const newFrame = new Frame(frame, args, this.numberOfTemps);
+        return this.bodyNode.execute(newFrame, args);
+    }
 
-    this.toString = function () {
-        var holder = _this.getHolder();
+    toString() {
+        const holder = this.holder;
         if (holder == null) {
-            return "Method(nil>>" + signature.toString() + ")";
+            return "Method(nil>>" + this.signature.toString() + ")";
         }
 
         return "Method(" + holder.getName().getString() + ">>" +
-            signature().toString() + ")";
-    };
+            this.signature.toString() + ")";
+    }
 }
-SMethod.prototype = Object.create(SInvokable.prototype);
 
-function SPrimitive(signature, primFun, _holder) {
-    SInvokable.call(this, signature, _holder);
-    var _this = this;
+class SPrimitive extends SInvokable {
+    constructor(signature, primFun, holder) {
+        super(signature, holder);
+        this.primFun = primFun;
+    }
 
-    this.getClass = function () {
+    getClass() {
         return u.primitiveClass;
-    };
+    }
 
-    this.isPrimitive = function () {
+    isPrimitive() {
         return true;
-    };
+    }
 
-    this.invoke = function (frame, args) {
-        return primFun(frame, args);
-    };
+    invoke(frame, args) {
+        return this.primFun(frame, args);
+    }
 
-    this.toString = function () {
-        var holder = _this.getHolder();
+    toString() {
+        const holder = this.holder;
         if (holder == null) {
-            return "Primitive(nil>>" + signature.toString() + ")";
+            return "Primitive(nil>>" + this.signature.toString() + ")";
         }
 
         return "Primitive(" + holder.getName().getString() + ">>" +
-            signature().toString() + ")";
-    };
+            this.signature.toString() + ")";
+    }
 }
-SPrimitive.prototype = Object.create(SInvokable.prototype);
 
 exports.SMethod = SMethod;
 exports.SPrimitive = SPrimitive;

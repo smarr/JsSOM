@@ -400,9 +400,9 @@ function Universe() {
         }
 
         // Lookup the initialize invokable on the system class
-        var initialize = exports.systemClass.
+        const initialize = exports.systemClass.
             lookupInvokable(_this.symbolFor("initialize:"));
-        var somArgs = _this.newArrayWithStrings(args);
+        const somArgs = _this.newArrayWithStrings(args);
 
         return initialize.invoke(null, [exports.systemObject, somArgs]);
     }

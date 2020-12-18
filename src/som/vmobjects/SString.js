@@ -19,20 +19,24 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const SAbstractObject = require('./SAbstractObject').SAbstractObject;
 const u = require('../vm/Universe');
 
-function SString(value) {
-    SAbstractObject.call(this);
+class SString extends SAbstractObject {
+    constructor(value) {
+        super();
+        this.value = value;
+    }
 
-    this.getEmbeddedString = function () {
-        return value;
-    };
+    getEmbeddedString() {
+        return this.value;
+    }
 
-    this.getClass = function () {
+    getClass() {
         return u.stringClass;
-    };
+    }
 }
-SString.prototype = Object.create(SAbstractObject.prototype);
 
 exports.SString = SString;

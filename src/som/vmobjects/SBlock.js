@@ -19,6 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const assert = require('../../lib/assert').assert;
 
 const SAbstractObject = require('./SAbstractObject').SAbstractObject;
@@ -47,28 +49,29 @@ function getBlockEvaluationPrimitive(numberOfArguments, rcvrClass) {
     return u.universe.newPrimitive(sig, _value, rcvrClass);
 }
 
-function SBlock(blockMethod, context) {
-    SAbstractObject.call(this);
-    const blockClass = u.blockClasses[blockMethod.getNumberOfArguments()];
+class SBlock extends SAbstractObject {
+    constructor(blockMethod, context) {
+        super();
+        const blockClass = u.blockClasses[blockMethod.getNumberOfArguments()];
 
-    this.getClass = function () {
-        return blockClass;
-    };
+        this.getClass = function () {
+            return blockClass;
+        };
 
-    this.getMethod = function () {
-        return blockMethod;
-    };
+        this.getMethod = function () {
+            return blockMethod;
+        };
 
-    this.getContext = function () {
-        return context;
-    };
+        this.getContext = function () {
+            return context;
+        };
 
-    this.getOuterSelf = function () {
-        assert(context != null);
-        return context.getReceiver();
-    };
+        this.getOuterSelf = function () {
+            assert(context != null);
+            return context.getReceiver();
+        };
+    }
 }
-SBlock.prototype = Object.create(SAbstractObject.prototype);
 
 exports.SBlock = SBlock;
 exports.getBlockEvaluationPrimitive = getBlockEvaluationPrimitive;

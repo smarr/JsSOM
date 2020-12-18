@@ -44,8 +44,8 @@ function MessageSendNode(selector, _argumentNodes, source) {
     };
 
     function evaluateArguments(frame) {
-        var args = new Array(_this._children_arguments.length);
-        for (var i = 0; i < _this._children_arguments.length; i++) {
+        const args = new Array(_this._children_arguments.length);
+        for (let i = 0; i < _this._children_arguments.length; i++) {
             args[i] = _this._children_arguments[i].execute(frame);
             assert(args[i] != null);
         }
