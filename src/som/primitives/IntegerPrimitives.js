@@ -114,8 +114,8 @@ function IntegerPrimitives() {
     }
 
     function _bitXor(frame, args) {
-        var right = args[1];
-        var left  = args[0];
+        let right = args[1];
+        let left  = args[0];
         return u.universe.newInteger(left.getEmbeddedInteger()
             ^ right.getEmbeddedInteger())
     }
