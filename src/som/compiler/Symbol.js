@@ -19,7 +19,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-var Sym = {
+const Sym = {
     NONE             :  0,
     Integer          :  1,
     Double           :  2,
@@ -56,7 +56,7 @@ var Sym = {
 };
 
 Sym.toString = function(sym) {
-  var arr = [
+  const arr = [
     "NONE",
     "Integer",
     "Double",
