@@ -19,6 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const assert = require('../../lib/assert').assert;
 const IllegalStateException = require('../../lib/exceptions').IllegalStateException;
 
@@ -43,7 +45,7 @@ const SDouble = numbers.SDouble;
 
 const getBlockEvaluationPrimitive = require('../vmobjects/SBlock').getBlockEvaluationPrimitive;
 
-var newMetaclassClass = function () {
+function newMetaclassClass() {
     // Allocate the metaclass classes
     var result = new SClass(null, 0);
     result.setClass(new SClass(null, 0));
@@ -51,9 +53,9 @@ var newMetaclassClass = function () {
     // Setup the metaclass hierarchy
     result.getClass().setClass(result);
     return result;
-};
+}
 
-var newSystemClass = function () {
+function newSystemClass() {
     // Allocate the new system class
     var systemClass = new SClass(null, 0);
 
@@ -63,7 +65,7 @@ var newSystemClass = function () {
 
     // Return the freshly allocated system class
     return systemClass;
-};
+}
 
 exports.nilObject      = new SObject(null, 0);
 exports.metaclassClass = newMetaclassClass();
@@ -87,61 +89,72 @@ exports.systemObject   = null;
 // exports.core_lib       = loadCoreLib();
 exports.startTime      = platform.getMillisecondTicks();
 
-function Association(keySymbol, valueObj) {
-    var key   = keySymbol,
-        value = valueObj;
-    this.getKey   = function ( ) { return key; };
-    this.getValue = function ( ) { return value; };
-    this.setValue = function (v) { value = v; }
-}
-
-function ExitException(exitCode) {
-    this.getExitCode = function () { return exitCode; }
-}
-
-function Universe() {
-    var avoidExit     = false,
-        classPath     = null,
-        globals       = {},
-        objectSystemInitialized = false,
-        pathSeparator = ":",
-        printAST      = false,
-        symbolTable   = {},
-        lastExitCode  = 0,
-        _this = this;
-
-    this.setAvoidExit = function (bool) {
-        avoidExit = bool;
-    };
-
-    function getDefaultClassPath() {
-        if (platform.isBrowser) {
-            return ['core-lib/Smalltalk', 'core-lib/Examples', 'core-lib/TestSuite'];
-        }
-        return ['.'];
+class Association {
+    constructor(keySymbol, valueObj) {
+        this.key = keySymbol;
+        this.value = valueObj;
     }
 
-    this.setupClassPath = function (cp) {
-        var tokens = cp.split(pathSeparator);
-        classPath = getDefaultClassPath();
-        classPath = classPath.concat(tokens);
-    };
+    getKey() { return this.key; };
+    getValue() { return this.value; };
+    setValue(v) { this.value = v; };
+}
 
-    function printUsageAndExit() {
-        // TODO
+class ExitException {
+    constructor(exitCode) {
+        this.exitCode = exitCode;
     }
+
+    getExitCode() { return this.exitCode; };
+}
+
+function printUsageAndExit() {
+    // TODO
+}
+
+function getDefaultClassPath() {
+    if (platform.isBrowser) {
+        return ['core-lib/Smalltalk', 'core-lib/Examples', 'core-lib/TestSuite'];
+    }
+    return ['.'];
+}
+
+const pathSeparator = ":";
+
+class Universe {
+    constructor() {
+        this.avoidExit     = false;
+        this.classPath     = null;
+        this.globals       = {};
+        this.objectSystemInitialized = false;
+
+        this.printAST      = false;
+        this.symbolTable   = {};
+        this.lastExitCode  = 0;
+    }
+
+    setAvoidExit(bool) {
+        this.avoidExit = bool;
+    }
+
+    setupClassPath(cp) {
+        const tokens = cp.split(pathSeparator);
+        this.classPath = getDefaultClassPath();
+        this.classPath = this.classPath.concat(tokens);
+    }
+
 
     // take argument of the form "../foo/Test.som" and return
     // "../foo", "Test", "som"
-    function getPathClassExt(str) {
-        var pathElements = str.split('/'),
+    getPathClassExt(str) {
+        const pathElements = str.split('/'),
             fileName     = pathElements.pop(),
             parentPath   = pathElements.join('/'),
             nameParts    = fileName.split('.');
 
         if (nameParts.length > 2) {
-            _this.errorPrintln("Class with . in its name?");
-            _this.exit(1);
+            this.errorPrintln("Class with . in its name?");
+            this.exit(1);
         }
 
         return [(parentPath === null) ? "" : parentPath,
@@ -149,7 +162,7 @@ function Universe() {
                 nameParts.length > 1 ? nameParts[1] : ""];
     }
 
-    function handleArguments(args) {
+    handleArguments(args) {
         var gotClasspath = false,
             remainingArgs = [];
 
@@ -158,11 +171,11 @@ function Universe() {
                 if (i + 1 >= args.length) {
                     printUsageAndExit();
                 }
-                _this.setupClassPath(args[i + 1]);
+                this.setupClassPath(args[i + 1]);
                 ++i; // skip class path
                 gotClasspath = true;
             } else if (args[i] == "-d") {
-                printAST = true;
+                this.printAST = true;
             } else {
                 remainingArgs.push(args[i]);
             }
@@ -170,15 +183,15 @@ function Universe() {
 
         if (!gotClasspath) {
             // Get the default class path of the appropriate size
-            classPath = getDefaultClassPath();
+            this.classPath = getDefaultClassPath();
         }
 
         // check remaining args for class paths, and strip file extension
         for (var i = 0; i < remainingArgs.length; i++) {
-            var split = getPathClassExt(remainingArgs[i]);
+            var split = this.getPathClassExt(remainingArgs[i]);
 
             if ("" != split[0]) { // there was a path
-                classPath.unshift(split[0]);
+                this.classPath.unshift(split[0]);
             }
             remainingArgs[i] = split[1];
         }
@@ -186,22 +199,22 @@ function Universe() {
         return remainingArgs;
     }
 
-    function newSymbol(string) {
+    newSymbol(string) {
         var result = new SSymbol(string);
-        symbolTable[string] = result;
+        this.symbolTable[string] = result;
         return result;
     }
 
-    this.symbolFor = function (string) {
+    symbolFor(string) {
         assert(typeof string == 'string' || string instanceof String);
         // Lookup the symbol in the symbol table
-        var result = symbolTable[string];
+        var result = this.symbolTable[string];
         if (result != null) { return result; }
 
-        return newSymbol(string);
-    };
+        return this.newSymbol(string);
+    }
 
-    function initializeSystemClass(systemClass, superClass, name) {
+    initializeSystemClass(systemClass, superClass, name) {
         // Initialize the superclass hierarchy
         if (superClass != null) {
             systemClass.setSuperClass(superClass);
@@ -219,14 +232,14 @@ function Universe() {
         systemClass.getClass().setInstanceInvokables(new SArray(0));
 
         // Initialize the name of the system class
-        systemClass.setName(_this.symbolFor(name));
-        systemClass.getClass().setName(_this.symbolFor(name + " class"));
+        systemClass.setName(this.symbolFor(name));
+        systemClass.getClass().setName(this.symbolFor(name + " class"));
 
         // Insert the system class into the dictionary of globals
-        _this.setGlobal(systemClass.getName(), systemClass);
+        this.setGlobal(systemClass.getName(), systemClass);
     }
 
-    function loadPrimitives(result, isSystemClass) {
+    loadPrimitives(result, isSystemClass) {
         if (result == null) { return; }
 
         // Load primitives if class defines them, or try to load optional
@@ -236,41 +249,41 @@ function Universe() {
         }
     }
 
-    function loadBlockClass(numberOfArguments) {
+    loadBlockClass(numberOfArguments) {
         // Compute the name of the block class with the given number of arguments
-        var name = _this.symbolFor("Block" + numberOfArguments);
-        assert(_this.getGlobal(name) == null);
+        var name = this.symbolFor("Block" + numberOfArguments);
+        assert(this.getGlobal(name) == null);
 
         // Get the block class for blocks with the given number of arguments
-        var result = _this.loadClass(name, null);
+        var result = this.loadClass(name, null);
 
         // Add the appropriate value primitive to the block class
         var prim = getBlockEvaluationPrimitive(numberOfArguments, result);
         result.addInstancePrimitive(prim);
 
         // Insert the block class into the dictionary of globals
-        _this.setGlobal(name, result);
+        this.setGlobal(name, result);
 
         exports.blockClasses[numberOfArguments] = result;
     }
 
-    this.loadClass = function (name) {
+    loadClass(name) {
         // Check if the requested class is already in the dictionary of globals
-        var result = _this.getGlobal(name);
+        var result = this.getGlobal(name);
         if (result != null) { return result; }
 
-        result = _this.loadClassFor(name, null);
+        result = this.loadClassFor(name, null);
 
-        loadPrimitives(result, false);
+        this.loadPrimitives(result, false);
 
-        _this.setGlobal(name, result);
+        this.setGlobal(name, result);
         return result;
-    };
+    }
 
-    this.loadClassFor = function(name, systemClass) {
+    loadClassFor(name, systemClass) {
         // Try loading the class from all different paths
-        for (var i = 0; i < classPath.length; i++) {
-            var cpEntry = classPath[i];
+        for (var i = 0; i < this.classPath.length; i++) {
+            var cpEntry = this.classPath[i];
 
             // Load the class from a file and return the loaded class
             var result = compiler.compileClassFile(cpEntry, name.getString(), // TODO: how to arrange the global/static namespace of SOM??
@@ -278,18 +291,18 @@ function Universe() {
             if (result == null) {
                 continue; // continue searching in the class path
             }
-            if (printAST) {
+            if (this.printAST) {
                 dump(result.getClass());  // TODO: how to // TODO: how to arrange the global/static namespace of SOM??
                 dump(result);
             }
             return result;
         }
         return null;  // The class could not be found.
-    };
+    }
 
-    function loadSystemClass(systemClass) {
+    loadSystemClass(systemClass) {
         // Load the system class
-        var result = _this.loadClassFor(systemClass.getName(), systemClass);
+        var result = this.loadClassFor(systemClass.getName(), systemClass);
 
         if (result === null) {
             throw new IllegalStateException(systemClass.getName().getString()
@@ -298,128 +311,128 @@ function Universe() {
                 + "Please set system property 'system.class.path' or "
                 + "pass the '-cp' command-line parameter.");
         }
-        loadPrimitives(result, true);
+        this.loadPrimitives(result, true);
     }
 
-    function initializeObjectSystem() {
-        if (objectSystemInitialized) { return; }
+    initializeObjectSystem() {
+        if (this.objectSystemInitialized) { return; }
 
         // Setup the class reference for the nil object
         exports.nilObject.setClass(exports.nilClass);
 
         // Initialize the system classes.
-        initializeSystemClass(exports.objectClass,               null,  "Object");
-        initializeSystemClass(exports.classClass,     exports.objectClass,  "Class");
-        initializeSystemClass(exports.metaclassClass, exports.classClass,   "Metaclass");
-        initializeSystemClass(exports.nilClass,       exports.objectClass,  "Nil");
-        initializeSystemClass(exports.arrayClass,     exports.objectClass,  "Array");
-        initializeSystemClass(exports.methodClass,    exports.objectClass,  "Method");
-        initializeSystemClass(exports.integerClass,   exports.objectClass,  "Integer");
-        initializeSystemClass(exports.primitiveClass, exports.objectClass,  "Primitive");
-        initializeSystemClass(exports.stringClass,    exports.objectClass,  "String");
-        initializeSystemClass(exports.symbolClass,    exports.stringClass,  "Symbol");
-        initializeSystemClass(exports.doubleClass,    exports.objectClass,  "Double");
-        initializeSystemClass(exports.booleanClass,   exports.objectClass,  "Boolean");
-        initializeSystemClass(exports.trueClass,      exports.booleanClass, "True");
-        initializeSystemClass(exports.falseClass,     exports.booleanClass, "False");
+        this.initializeSystemClass(exports.objectClass,               null,  "Object");
+        this.initializeSystemClass(exports.classClass,     exports.objectClass,  "Class");
+        this.initializeSystemClass(exports.metaclassClass, exports.classClass,   "Metaclass");
+        this.initializeSystemClass(exports.nilClass,       exports.objectClass,  "Nil");
+        this.initializeSystemClass(exports.arrayClass,     exports.objectClass,  "Array");
+        this.initializeSystemClass(exports.methodClass,    exports.objectClass,  "Method");
+        this.initializeSystemClass(exports.integerClass,   exports.objectClass,  "Integer");
+        this.initializeSystemClass(exports.primitiveClass, exports.objectClass,  "Primitive");
+        this.initializeSystemClass(exports.stringClass,    exports.objectClass,  "String");
+        this.initializeSystemClass(exports.symbolClass,    exports.stringClass,  "Symbol");
+        this.initializeSystemClass(exports.doubleClass,    exports.objectClass,  "Double");
+        this.initializeSystemClass(exports.booleanClass,   exports.objectClass,  "Boolean");
+        this.initializeSystemClass(exports.trueClass,      exports.booleanClass, "True");
+        this.initializeSystemClass(exports.falseClass,     exports.booleanClass, "False");
 
         // Load methods and fields into the system classes
-        loadSystemClass(exports.objectClass);
-        loadSystemClass(exports.classClass);
-        loadSystemClass(exports.metaclassClass);
-        loadSystemClass(exports.nilClass);
-        loadSystemClass(exports.arrayClass);
-        loadSystemClass(exports.methodClass);
-        loadSystemClass(exports.symbolClass);
-        loadSystemClass(exports.integerClass);
-        loadSystemClass(exports.primitiveClass);
-        loadSystemClass(exports.stringClass);
-        loadSystemClass(exports.doubleClass);
-        loadSystemClass(exports.booleanClass);
-        loadSystemClass(exports.trueClass);
-        loadSystemClass(exports.falseClass);
+        this.loadSystemClass(exports.objectClass);
+        this.loadSystemClass(exports.classClass);
+        this.loadSystemClass(exports.metaclassClass);
+        this.loadSystemClass(exports.nilClass);
+        this.loadSystemClass(exports.arrayClass);
+        this.loadSystemClass(exports.methodClass);
+        this.loadSystemClass(exports.symbolClass);
+        this.loadSystemClass(exports.integerClass);
+        this.loadSystemClass(exports.primitiveClass);
+        this.loadSystemClass(exports.stringClass);
+        this.loadSystemClass(exports.doubleClass);
+        this.loadSystemClass(exports.booleanClass);
+        this.loadSystemClass(exports.trueClass);
+        this.loadSystemClass(exports.falseClass);
 
         // Load the generic block class
-        exports.blockClasses[0] = _this.loadClass(_this.symbolFor("Block"));
+        exports.blockClasses[0] = this.loadClass(this.symbolFor("Block"));
 
         // Setup the true and false objects
-        exports.trueObject  = _this.newInstance(exports.trueClass);
-        exports.falseObject = _this.newInstance(exports.falseClass);
+        exports.trueObject  = this.newInstance(exports.trueClass);
+        exports.falseObject = this.newInstance(exports.falseClass);
 
         // Load the system class and create an instance of it
-        exports.systemClass  = _this.loadClass(_this.symbolFor("System"));
-        exports.systemObject = _this.newInstance(exports.systemClass);
+        exports.systemClass  = this.loadClass(this.symbolFor("System"));
+        exports.systemObject = this.newInstance(exports.systemClass);
 
         // Put special objects into the dictionary of globals
-        _this.setGlobal(_this.symbolFor("nil"),    exports.nilObject);
-        _this.setGlobal(_this.symbolFor("true"),   exports.trueObject);
-        _this.setGlobal(_this.symbolFor("false"),  exports.falseObject);
-        _this.setGlobal(_this.symbolFor("system"), exports.systemObject);
+        this.setGlobal(this.symbolFor("nil"),    exports.nilObject);
+        this.setGlobal(this.symbolFor("true"),   exports.trueObject);
+        this.setGlobal(this.symbolFor("false"),  exports.falseObject);
+        this.setGlobal(this.symbolFor("system"), exports.systemObject);
 
         // Load the remaining block classes
-        loadBlockClass(1);
-        loadBlockClass(2);
-        loadBlockClass(3);
+        this.loadBlockClass(1);
+        this.loadBlockClass(2);
+        this.loadBlockClass(3);
 
-        objectSystemInitialized = true;
+        this.objectSystemInitialized = true;
     }
 
-    this.getGlobal = function (name) {
-        var assoc = globals[name];
+    getGlobal(name) {
+        var assoc = this.globals[name];
         if (assoc == null) {
             return null;
         }
         return assoc.getValue();
-    };
+    }
 
-    this.getGlobalsAssociation = function (name) {
-        return globals[name];
-    };
+    getGlobalsAssociation(name) {
+        return this.globals[name];
+    }
 
-    this.hasGlobal = function (name) {
-        return globals[name] != undefined;
-    };
+    hasGlobal(name) {
+        return this.globals[name] != undefined;
+    }
 
-    this.setGlobal = function (nameSymbol, value) {
-        var assoc = globals[nameSymbol];
+    setGlobal(nameSymbol, value) {
+        var assoc = this.globals[nameSymbol];
         if (assoc == null) {
             assoc = new Association(nameSymbol, value);
-            globals[nameSymbol] = assoc;
+            this.globals[nameSymbol] = assoc;
         } else {
             assoc.setValue(value);
         }
-    };
+    }
 
-    function execute(args) {
-        initializeObjectSystem();
+    execute(args) {
+        this.initializeObjectSystem();
 
         // Start the shell if no filename is given
         if (args.length == 0) {
-            var shell = new Shell(this);
+            var shell = new Shell();
             return shell.start();
         }
 
         // Lookup the initialize invokable on the system class
         const initialize = exports.systemClass.
-            lookupInvokable(_this.symbolFor("initialize:"));
-        const somArgs = _this.newArrayWithStrings(args);
+            lookupInvokable(this.symbolFor("initialize:"));
+        const somArgs = this.newArrayWithStrings(args);
 
         return initialize.invoke(null, [exports.systemObject, somArgs]);
     }
 
-    this.initializeForStandardRepl = function () {
-        classPath = ['Smalltalk', 'TestSuite', 'Examples', 'Examples/Benchmarks', 'SUnit'];
-        initializeObjectSystem();
-    };
+    initializeForStandardRepl() {
+        this.classPath = ['Smalltalk', 'TestSuite', 'Examples', 'Examples/Benchmarks', 'SUnit'];
+        this.initializeObjectSystem();
+    }
 
-    this.interpretMethodInClass = function (className, selector) {
-        initializeObjectSystem();
+    interpretMethodInClass(className, selector) {
+        this.initializeObjectSystem();
 
-        const clazz = _this.loadClass(_this.symbolFor(className));
+        const clazz = this.loadClass(this.symbolFor(className));
 
         // Lookup the initialize invokable on the system class
         const initialize = clazz.getClass().
-            lookupInvokable(_this.symbolFor(selector));
+            lookupInvokable(this.symbolFor(selector));
 
         if (initialize === null) {
             throw new Error(`Lookup of ${selector} in ${className} failed. Can't be executed.`)
@@ -434,15 +447,15 @@ function Universe() {
                 throw e;
             }
         }
-    };
+    }
 
-    this.interpret = function (args) {
+    interpret(args) {
         // Check for command line switches first
-        var remainingArgs = handleArguments(args);
+        var remainingArgs = this.handleArguments(args);
 
         try {
-            initializeObjectSystem();
-            return execute(remainingArgs);
+            this.initializeObjectSystem();
+            return this.execute(remainingArgs);
         } catch (e) {
             if (e instanceof ExitException) {
                 return;
@@ -453,93 +466,93 @@ function Universe() {
                 throw e;
             }
         }
-    };
+    }
 
-    this.newArrayWithStrings = function (strArr) {
-        var arr = _this.newArrayWithLength(strArr.length);
+    newArrayWithStrings(strArr) {
+        var arr = this.newArrayWithLength(strArr.length);
         for (var i = 0; i < strArr.length; i++) {
-            arr.setIndexableField(i, _this.newString(strArr[i]));
+            arr.setIndexableField(i, this.newString(strArr[i]));
         }
         return arr;
-    };
+    }
 
-    this.newArrayFrom = function (array) {
+    newArrayFrom(array) {
         return new SArray(array.length, array);
-    };
+    }
 
-    this.newArrayWithLength = function (length) {
+    newArrayWithLength(length) {
         return new SArray(length);
-    };
+    }
 
-    this.newMethod = function (signature, sourceSection, bodyNode, numberOfTemps) {
+    newMethod(signature, sourceSection, bodyNode, numberOfTemps) {
         return new SMethod(signature, sourceSection, bodyNode, numberOfTemps);
-    };
+    }
 
-    this.newPrimitive = function (signature, primFun, holder) {
+    newPrimitive(signature, primFun, holder) {
         return new SPrimitive(signature, primFun, holder);
-    };
+    }
 
-    this.newString = function (strValue) {
+    newString(strValue) {
         return new SString(strValue);
-    };
+    }
 
-    this.newInteger = function (intVal) {
+    newInteger(intVal) {
         return new SInteger(intVal);
-    };
+    }
 
-    this.newBigInteger = function (BigIntVal) {
+    newBigInteger(BigIntVal) {
         return new SBigInteger(BigIntVal);
-    };
+    }
 
-    this.newBlock = function (blockMethod, contextFrame) {
+    newBlock(blockMethod, contextFrame) {
         return new SBlock(blockMethod, contextFrame);
-    };
+    }
 
-    this.newClass = function (classClass) {
+    newClass(classClass) {
         return new SClass(classClass);
-    };
+    }
 
-    this.newDouble = function (doubleVal) {
+    newDouble(doubleVal) {
         return new SDouble(doubleVal);
-    };
+    }
 
-    this.newInstance = function (clazz) {
+    newInstance(clazz) {
         return new SObject(clazz);
-    };
+    }
 
-    this.errorExit = function (message) {
-        _this.errorPrintln("Runtime Error: " + message);
-        _this.exit(1);
-    };
+    errorExit(message) {
+        this.errorPrintln("Runtime Error: " + message);
+        this.exit(1);
+    }
 
-    this.errorPrint = function (msg) {
+    errorPrint(msg) {
         platform.stderr(msg);
-    };
+    }
 
-    this.errorPrintln = function (msg) {
+    errorPrintln(msg) {
         platform.stderrnl(msg);
-    };
+    }
 
-    this.print = function (msg) {
+    print(msg) {
         platform.stdout(msg);
-    };
+    }
 
-    this.println = function(msg) {
+    println(msg) {
         platform.stdoutnl(msg);
-    };
+    }
 
-    this.exit = function (errorCode) {
+    exit(errorCode) {
         // Exit from the Java system
-        lastExitCode = errorCode;
-        if (!avoidExit) {
+        this.lastExitCode = errorCode;
+        if (!this.avoidExit) {
             platform.exitInterpreter(errorCode);
         }
         throw new ExitException(errorCode);
-    };
+    }
 
-    this.getLastExitCode = function () {
-        return lastExitCode;
-    };
+    getLastExitCode() {
+        return this.lastExitCode;
+    }
 }
 
 exports.Universe = Universe;

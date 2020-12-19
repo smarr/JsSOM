@@ -19,12 +19,15 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const u = require('./Universe');
 
 const compileClassString = require('../compiler/SourcecodeCompiler').compileClassString;
 
-function Shell() {
-    this.start = function () {
+class Shell {
+
+    start() {
         var counter = 0;
         var it = u.nilObject;
         u.universe.println("SOM Shell. Type \"quit\" to exit.\n");
@@ -32,7 +35,7 @@ function Shell() {
         u.universe.print("---> ");
 
         process.stdin.setEncoding('utf8');
-        process.stdin.on('readable', function() {
+        process.stdin.on('readable', function () {
             try {
                 // Read a statement from the keyboard
                 var stmt = process.stdin.read();
