@@ -21,6 +21,42 @@
 */
 //@ts-check
 "use strict";
+
+const symStrings = [
+  "NONE",
+  "Integer",
+  "Double",
+  "Not",
+  "And",
+  "Or",
+  "Star",
+  "Div",
+  "Mod",
+  "Plus",
+  "Minus",
+  "Equal",
+  "More",
+  "Less",
+  "Comma",
+  "At",
+  "Per",
+  "NewBlock",
+  "EndBlock",
+  "Colon",
+  "Period",
+  "Exit",
+  "Assign",
+  "NewTerm",
+  "EndTerm",
+  "Pound",
+  "Primitive",
+  "Separator",
+  "STString",
+  "Identifier",
+  "Keyword",
+  "KeywordSequence",
+  "OperatorSequence"]
+
 const Sym = {
     NONE             :  0,
     Integer          :  1,
@@ -54,45 +90,11 @@ const Sym = {
     Identifier       : 29,
     Keyword          : 30,
     KeywordSequence  : 31,
-    OperatorSequence : 32
-};
+    OperatorSequence : 32,
 
-Sym.toString = function(sym) {
-  const arr = [
-    "NONE",
-    "Integer",
-    "Double",
-    "Not",
-    "And",
-    "Or",
-    "Star",
-    "Div",
-    "Mod",
-    "Plus",
-    "Minus",
-    "Equal",
-    "More",
-    "Less",
-    "Comma",
-    "At",
-    "Per",
-    "NewBlock",
-    "EndBlock",
-    "Colon",
-    "Period",
-    "Exit",
-    "Assign",
-    "NewTerm",
-    "EndTerm",
-    "Pound",
-    "Primitive",
-    "Separator",
-    "STString",
-    "Identifier",
-    "Keyword",
-    "KeywordSequence",
-    "OperatorSequence"];
-  return arr[sym];
-}
+    toString : function(sym) {
+      return symStrings[sym];
+    }
+};
 
 exports.Sym = Sym;

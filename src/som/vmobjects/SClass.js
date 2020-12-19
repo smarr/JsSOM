@@ -182,7 +182,7 @@ class SClass extends SObject {
         return this.instanceFields.getIndexableField(index);
     }
 
-    getNumberOfInstanceFields = function () {
+    getNumberOfInstanceFields() {
         return this.instanceFields.getNumberOfIndexableFields();
     }
 
@@ -201,7 +201,7 @@ class SClass extends SObject {
         return this.includesPrimitives(this) || this.includesPrimitives(this.getClass());
     }
 
-    loadPrimitives = function (displayWarning) {
+    loadPrimitives(displayWarning) {
         const primModuleName = "../primitives/" + this.name.getString() + "Primitives";
 
         try {
