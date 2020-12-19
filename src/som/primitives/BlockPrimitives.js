@@ -19,40 +19,44 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const RuntimeException = require('../../lib/exceptions').RuntimeException;
 
 const Primitives = require('./Primitives').Primitives;
 
 const u = require('../vm/Universe');
 
-function BlockPrimitives() {
-    Primitives.call(this);
-    var _this = this;
+function _restart(_frame, _args) {
+    throw new RuntimeException("Restart primitive is not supported, #whileTrue:"
+        + " and #whileTrue: are intrisified so that #restart "
+        + "is not needed.");
+}
 
-    function _restart(_frame, _args) {
-        throw new RuntimeException("Restart primitive is not supported, #whileTrue:"
-            + " and #whileTrue: are intrisified so that #restart "
-            + "is not needed.");
+function _whileTrue(frame, args) {
+    var conditionBlock = args[0];
+    var bodyBlock = args[1];
+
+    var cond = conditionBlock.getMethod().invoke(frame, [conditionBlock]);
+
+    while (cond == u.trueObject) {
+        bodyBlock.getMethod().invoke(frame, [bodyBlock]);
+        cond = conditionBlock.getMethod().invoke(frame, [conditionBlock]);
     }
 
-    function _whileTrue(frame, args) {
-        var conditionBlock = args[0];
-        var bodyBlock = args[1];
+    return u.nilObject;
+}
 
-        var cond = conditionBlock.getMethod().invoke(frame, [conditionBlock]);
 
-        while (cond == u.trueObject) {
-            bodyBlock.getMethod().invoke(frame, [bodyBlock]);
-            cond = conditionBlock.getMethod().invoke(frame, [conditionBlock]);
-        }
-
-        return u.nilObject;
+class BlockPrimitives extends Primitives {
+    constructor() {
+        super();
     }
 
-    this.installPrimitives = function () {
-        _this.installInstancePrimitive("restart",    _restart);
-        _this.installInstancePrimitive("whileTrue:", _whileTrue);
+    installPrimitives() {
+        this.installInstancePrimitive("restart", _restart);
+        this.installInstancePrimitive("whileTrue:", _whileTrue);
     }
 }
-BlockPrimitives.prototype = Object.create(Primitives.prototype);
+
 exports.prims = BlockPrimitives;

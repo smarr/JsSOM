@@ -19,113 +19,116 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const Primitives = require('./Primitives').Primitives;
 const u = require('../vm/Universe');
 
 const SString = require('../vmobjects/SString').SString;
 
-function StringPrimitives() {
-    Primitives.call(this);
-    var _this = this;
+function _concat(frame, args) {
+    var argument = args[1];
+    return u.universe.newString(args[0].getEmbeddedString()
+        + argument.getEmbeddedString());
+}
 
-    function _concat(frame, args) {
-        var argument = args[1];
-        return u.universe.newString(args[0].getEmbeddedString()
-            + argument.getEmbeddedString());
-    }
+function _asSymbol(frame, args) {
+    return u.universe.symbolFor(args[0].getEmbeddedString());
+}
 
-    function _asSymbol(frame, args) {
-        return u.universe.symbolFor(args[0].getEmbeddedString());
-    }
+function _length(frame, args) {
+    return u.universe.newInteger(args[0].getEmbeddedString().length);
+}
 
-    function _length(frame, args) {
-        return u.universe.newInteger(args[0].getEmbeddedString().length);
-    }
-
-    function _equals(frame, args) {
-        var op1 = args[1];
-        var op2 = args[0];
-        if (op1 instanceof SString) {
-            if (op1.getEmbeddedString() == op2.getEmbeddedString()) {
-                return u.trueObject;
-            }
-        }
-        return u.falseObject;
-    }
-
-    function _substring(frame, args) {
-        var end   = args[2];
-        var start = args[1];
-
-        var s = start.getEmbeddedInteger() - 1;
-        var e = end.getEmbeddedInteger();
-        var string = args[0].getEmbeddedString();
-
-        if (s < 0  ||  s >= string.length  ||  e > string.length  ||  e < s) {
-            return u.universe.newString("Error - index out of bounds");
-        } else {
-            return u.universe.newString(string.substring(s, e));
+function _equals(frame, args) {
+    var op1 = args[1];
+    var op2 = args[0];
+    if (op1 instanceof SString) {
+        if (op1.getEmbeddedString() == op2.getEmbeddedString()) {
+            return u.trueObject;
         }
     }
+    return u.falseObject;
+}
 
-    function _hashcode(frame, args) {
-        var s = args[0].getEmbeddedString();
+function _substring(frame, args) {
+    var end = args[2];
+    var start = args[1];
 
-        // hash code from: http://stackoverflow.com/a/7616484/916546
-        var hash = 0, i, chr, len;
-        if (s.length == 0) {
-            return u.universe.newInteger(hash);
-        }
+    var s = start.getEmbeddedInteger() - 1;
+    var e = end.getEmbeddedInteger();
+    var string = args[0].getEmbeddedString();
 
-        for (i = 0, len = s.length; i < len; i++) {
-            chr   = s.charCodeAt(i);
-            hash  = ((hash << 5) - hash) + chr;
-            hash |= 0; // Convert to 32bit integer
-        }
+    if (s < 0 || s >= string.length || e > string.length || e < s) {
+        return u.universe.newString("Error - index out of bounds");
+    } else {
+        return u.universe.newString(string.substring(s, e));
+    }
+}
+
+function _hashcode(frame, args) {
+    var s = args[0].getEmbeddedString();
+
+    // hash code from: http://stackoverflow.com/a/7616484/916546
+    var hash = 0, i, chr, len;
+    if (s.length == 0) {
         return u.universe.newInteger(hash);
     }
 
-    function _isWhiteSpace(frame, args) {
-        const s = args[0].getEmbeddedString();
-
-        if (s.match(/^\s+$/) !== null) {
-            return u.trueObject;
-        } else {
-            return u.falseObject;
-        }
+    for (i = 0, len = s.length; i < len; i++) {
+        chr = s.charCodeAt(i);
+        hash = ((hash << 5) - hash) + chr;
+        hash |= 0; // Convert to 32bit integer
     }
-
-    function _isLetters(frame, args) {
-        const s = args[0].getEmbeddedString();
-
-        if (RegExp(/^\p{L}+$/,'u').test(s)) {
-            return u.trueObject;
-        } else {
-            return u.falseObject;
-        }
-    }
-
-    function _isDigits(frame, args) {
-        const s = args[0].getEmbeddedString();
-
-        if (s.match(/^\d+$/) !== null) {
-            return u.trueObject;
-        } else {
-            return u.falseObject;
-        }
-    }
-
-    this.installPrimitives = function () {
-        _this.installInstancePrimitive("concatenate:",          _concat);
-        _this.installInstancePrimitive("asSymbol",              _asSymbol);
-        _this.installInstancePrimitive("length",                _length);
-        _this.installInstancePrimitive("=",                     _equals);
-        _this.installInstancePrimitive("primSubstringFrom:to:", _substring);
-        _this.installInstancePrimitive("hashcode",              _hashcode);
-        _this.installInstancePrimitive("isWhiteSpace",          _isWhiteSpace);
-        _this.installInstancePrimitive("isLetters",             _isLetters);
-        _this.installInstancePrimitive("isDigits",              _isDigits);
-    };
+    return u.universe.newInteger(hash);
 }
-StringPrimitives.prototype = Object.create(Primitives.prototype);
+
+function _isWhiteSpace(frame, args) {
+    const s = args[0].getEmbeddedString();
+
+    if (s.match(/^\s+$/) !== null) {
+        return u.trueObject;
+    } else {
+        return u.falseObject;
+    }
+}
+
+function _isLetters(frame, args) {
+    const s = args[0].getEmbeddedString();
+
+    if (RegExp(/^\p{L}+$/, 'u').test(s)) {
+        return u.trueObject;
+    } else {
+        return u.falseObject;
+    }
+}
+
+function _isDigits(frame, args) {
+    const s = args[0].getEmbeddedString();
+
+    if (s.match(/^\d+$/) !== null) {
+        return u.trueObject;
+    } else {
+        return u.falseObject;
+    }
+}
+
+class StringPrimitives extends Primitives {
+    constructor() {
+        super();
+    }
+
+    installPrimitives() {
+        this.installInstancePrimitive("concatenate:", _concat);
+        this.installInstancePrimitive("asSymbol", _asSymbol);
+        this.installInstancePrimitive("length", _length);
+        this.installInstancePrimitive("=", _equals);
+        this.installInstancePrimitive("primSubstringFrom:to:", _substring);
+        this.installInstancePrimitive("hashcode", _hashcode);
+        this.installInstancePrimitive("isWhiteSpace", _isWhiteSpace);
+        this.installInstancePrimitive("isLetters", _isLetters);
+        this.installInstancePrimitive("isDigits", _isDigits);
+    }
+}
+
 exports.prims = StringPrimitives;

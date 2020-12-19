@@ -19,6 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const u = require('../vm/Universe');
 const Primitives = require('./Primitives').Primitives;
 
@@ -68,20 +70,20 @@ function _do(frame, args) {
     return args[0];
 }
 
-function ArrayPrimitives() {
-    Primitives.call(this);
-    var _this = this;
+class ArrayPrimitives extends Primitives {
+    constructor() {
+        super();
+    }
 
-    this.installPrimitives = function () {
-        _this.installInstancePrimitive("at:",         _at);
-        _this.installInstancePrimitive("at:put:",     _atPut);
-        _this.installInstancePrimitive("length",      _length);
-        _this.installInstancePrimitive("doIndexes:",  _doIndexes);
-        _this.installInstancePrimitive("do:",         _do);
+    installPrimitives() {
+        this.installInstancePrimitive("at:", _at);
+        this.installInstancePrimitive("at:put:", _atPut);
+        this.installInstancePrimitive("length", _length);
+        this.installInstancePrimitive("doIndexes:", _doIndexes);
+        this.installInstancePrimitive("do:", _do);
 
-        _this.installClassPrimitive("new:", _new);
+        this.installClassPrimitive("new:", _new);
     }
 }
-ArrayPrimitives.prototype = Object.create(Primitives.prototype);
 
 exports.prims = ArrayPrimitives;

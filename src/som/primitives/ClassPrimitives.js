@@ -19,40 +19,43 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const Primitives = require('./Primitives').Primitives;
 const u = require('../vm/Universe');
 
-function ClassPrimitives() {
-    Primitives.call(this);
-    var _this = this;
+function _new(frame, args) {
+    return u.universe.newInstance(args[0]);
+}
 
-    function _new(frame, args) {
-        return u.universe.newInstance(args[0]);
+function _name(frame, args) {
+    return args[0].getName();
+}
+
+function _superClass(frame, args) {
+    return args[0].getSuperClass();
+}
+
+function _methods(frame, args) {
+    return args[0].getInstanceInvokables();
+}
+
+function _fields(frame, args) {
+    return args[0].getInstanceFields();
+}
+
+class ClassPrimitives extends Primitives {
+    constructor() {
+        super();
     }
 
-    function _name(frame, args) {
-        return args[0].getName();
-    }
-
-    function _superClass(frame, args) {
-        return args[0].getSuperClass();
-    }
-
-    function _methods(frame, args) {
-        return args[0].getInstanceInvokables();
-    }
-
-    function _fields(frame, args) {
-        return args[0].getInstanceFields();
-    }
-
-    this.installPrimitives = function () {
-        _this.installInstancePrimitive("new",         _new);
-        _this.installInstancePrimitive("name",        _name);
-        _this.installInstancePrimitive("superclass",  _superClass);
-        _this.installInstancePrimitive("methods",     _methods);
-        _this.installInstancePrimitive("fields",      _fields);
+    installPrimitives() {
+        this.installInstancePrimitive("new", _new);
+        this.installInstancePrimitive("name", _name);
+        this.installInstancePrimitive("superclass", _superClass);
+        this.installInstancePrimitive("methods", _methods);
+        this.installInstancePrimitive("fields", _fields);
     }
 }
-ClassPrimitives.prototype = Object.create(Primitives.prototype);
+
 exports.prims = ClassPrimitives;

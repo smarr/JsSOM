@@ -19,21 +19,24 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const Primitives = require('./Primitives').Primitives;
 
 const u = require('../vm/Universe');
 
-function SymbolPrimitives() {
-    Primitives.call(this);
-    var _this = this;
+function _asString(_frame, args) {
+    return u.universe.newString(args[0].getString());
+}
 
-    function _asString(frame, args) {
-        return u.universe.newString(args[0].getString());
+class SymbolPrimitives extends Primitives {
+    constructor() {
+        super();
     }
 
-    this.installPrimitives = function () {
-        _this.installInstancePrimitive("asString", _asString);
+    installPrimitives() {
+        this.installInstancePrimitive("asString", _asString);
     }
 }
-SymbolPrimitives.prototype = Object.create(Primitives.prototype);
+
 exports.prims = SymbolPrimitives;

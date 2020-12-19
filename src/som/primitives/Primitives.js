@@ -19,6 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const u = require('../vm/Universe');
 
 function constructEmptyPrimitive(signature) {
@@ -29,35 +31,36 @@ function constructEmptyPrimitive(signature) {
     return u.universe.newPrimitive(signature, _empty, null);
 }
 
-function Primitives () {
-    var holder = null,
-        _this = this;
+class Primitives {
+    constructor() {
+        this.holder = null;
+    }
 
-    this.installPrimitivesIn = function (value) {
-        holder = value;
+    installPrimitivesIn(value) {
+        this.holder = value;
 
         // Install the primitives from this primitives class
-        _this.installPrimitives();
-    };
+        this.installPrimitives();
+    }
 
-    this.installInstancePrimitive = function (selector, primFun, suppressWarning) {
+    installInstancePrimitive(selector, primFun, suppressWarning) {
         var signature = u.universe.symbolFor(selector);
 
         // Install the given primitive as an instance primitive in the holder class
-        holder.addInstancePrimitive(u.universe.newPrimitive(
-            signature, primFun, holder), suppressWarning);
-    };
+        this.holder.addInstancePrimitive(u.universe.newPrimitive(
+            signature, primFun, this.holder), suppressWarning);
+    }
 
-    this.installClassPrimitive = function (selector, primFun) {
+    installClassPrimitive(selector, primFun) {
         var signature = u.universe.symbolFor(selector);
 
         // Install the given primitive as an instance primitive in the class of
         // the holder class
-        holder.getClass().addInstancePrimitive(u.universe.newPrimitive(
-            signature, primFun, holder));
-    };
+        this.holder.getClass().addInstancePrimitive(u.universe.newPrimitive(
+            signature, primFun, this.holder));
+    }
 
-    this.getEmptyPrimitive = function (selector) {
+    getEmptyPrimitive(selector) {
         var signature = u.universe.symbolFor(selector);
         return constructEmptyPrimitive(signature);
     }
