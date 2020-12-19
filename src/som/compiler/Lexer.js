@@ -19,370 +19,378 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const Sym = require('./Symbol').Sym;
 const IllegalStateException = require('../../lib/exceptions').IllegalStateException;
 
-function makeLexerState() {
-    return {
-        lineNumber :    0,
-        charsRead  :    0, // all characters read, excluding the current line
-        line       :   "",
-        linePos    :    0,
-        sym        : null,
-        text       :   "",
-        startCoord : null,
-        set        : function (sym, text) {
-            this.sym  = sym;
-            this.text = text;
-        }
+function isIdentifierChar(c) {
+    return /[A-Za-z\d]/.test(c) || c == '_';
+}
+
+function isOperator(c) {
+    return c == '~' || c == '&' || c == '|' || c == '*' || c == '/'
+        || c == '\\' || c == '+' || c == '=' || c == '>' || c == '<'
+        || c == ',' || c == '@' || c == '%' || c == '-';
+}
+
+class LexerState {
+    constructor() {
+        this.lineNumber =    0;
+        this.charsRead  =    0; // all characters read, excluding the current line
+        this.line       =   "";
+        this.linePos    =    0;
+        this.sym        = null;
+        this.text       =   "";
+        this.startCoord = null;
+    }
+
+    set(sym, text) {
+        this.sym  = sym;
+        this.text = text;
+    }
+
+    clone() {
+        const newState = new LexerState();
+        newState.lineNumber = this.lineNumber;
+        newState.charsRead = this.charsRead;
+        newState.line = this.line;
+        newState.linePos = this.linePos;
+        newState.sym = this.sym;
+        newState.text = this.text;
+        newState.startCoord = this.startCoord;
+        return newState;
     }
 }
 
-function cloneLexerState(old) {
-    return {
-        lineNumber : old.lineNumber,
-        charsRead  : old.charsRead, // all characters read, excluding the current line
-        line       : old.line,
-        linePos    : old.linePos,
-        sym        : old.sym,
-        text       : old.text,
-        startCoord : old.startCoord,
-        set        : function (sym, text) {
-            this.sym  = sym;
-            this.text = text;
-        }
+const SEPARATOR = "----";
+const PRIMITIVE = "primitive";
+
+class SourceCoordinate {
+    constructor(startLine, startColumn, charIndex) {
+        this._startLine = startLine;
+        this._startColumn = startColumn;
+        this._charIndex = charIndex;
+    }
+
+    get startLine() { return this._startLine; }
+    get startColumn() { return this._startColumn; }
+    get charIndex() { return this._charIndex; }
+
+    toString () {
+        return `SrcCoord(line: ${this._startLine}, col: ${this._startColumn})`;
     }
 }
 
-function Lexer(fileContent) {
-    var SEPARATOR = "----",
-        PRIMITIVE = "primitive",
-        peekDone  = false,
-        state     = makeLexerState(),
-        stateAfterPeek = null,
-        fileLines = fileContent.split('\n'),
-        _this = this;
-
-    function makeSourceCoordinate() {
-        var startLine   = state.lineNumber,
-            startColumn = state.linePos + 1,
-            charIndex   = state.charsRead + state.linePos;
-
-        return {
-            get startLine()   { return startLine;   },
-            get startColumn() { return startColumn; },
-            get charIndex()   { return charIndex;   },
-            toString: function() {
-                return "SrcCoord(line: " + startLine + ", col: " + startColumn + ")";
-            }
-        };
+class Lexer {
+    constructor(fileContent) {
+        this.peekDone = false;
+        this.state = new LexerState();
+        this.stateAfterPeek = null;
+        this.fileLines = fileContent.split('\n');
     }
 
-    this.getStartCoordinate = function () {
-        return state.startCoord;
-    };
-
-    this.getPeekDone = function () {
-        return peekDone;
+    makeSourceCoordinate() {
+        return new SourceCoordinate(
+            this.state.lineNumber,
+            this.state.linePos + 1,
+            this.state.charsRead + this.state.linePos);
     }
 
-    this.getSym = function () {
-        if (peekDone) {
-            peekDone = false;
-            state = stateAfterPeek;
-            stateAfterPeek = null;
-            return state.sym;
+    getStartCoordinate() {
+        return this.state.startCoord;
+    }
+
+    getPeekDone() {
+        return this.peekDone;
+    }
+
+    getSym() {
+        if (this.peekDone) {
+            this.peekDone = false;
+            this.state = this.stateAfterPeek;
+            this.stateAfterPeek = null;
+            return this.state.sym;
         }
 
-        state.startCoord = makeSourceCoordinate();
+        this.state.startCoord = this.makeSourceCoordinate();
 
         do {
-            if (!hasMoreInput()) {
-                state.set(Sym.NONE, "");
-                return state.sym;
+            if (!this.hasMoreInput()) {
+                this.state.set(Sym.NONE, "");
+                return this.state.sym;
             }
-            skipWhiteSpace();
-            skipComment();
+            this.skipWhiteSpace();
+            this.skipComment();
         }
-        while (endOfLine() || /\s/.test(currentChar())
-            || currentChar() == '"');
+        while (this.endOfLine() || /\s/.test(this.currentChar())
+            || this.currentChar() == '"');
 
-        if (currentChar() == '\'') {
-            lexString();
-        } else if (currentChar() == '[') {
-            match(Sym.NewBlock);
-        } else if (currentChar() == ']') {
-            match(Sym.EndBlock);
-        } else if (currentChar() == ':') {
-            if (bufchar(state.linePos + 1) == '=') {
-                state.linePos += 2;
-                state.set(Sym.Assign, ":=");
+        if (this.currentChar() == '\'') {
+            this.lexString();
+        } else if (this.currentChar() == '[') {
+            this.match(Sym.NewBlock);
+        } else if (this.currentChar() == ']') {
+            this.match(Sym.EndBlock);
+        } else if (this.currentChar() == ':') {
+            if (this.bufchar(this.state.linePos + 1) == '=') {
+                this.state.linePos += 2;
+                this.state.set(Sym.Assign, ":=");
             } else {
-                state.linePos++;
-                state.set(Sym.Colon, ":");
+                this.state.linePos++;
+                this.state.set(Sym.Colon, ":");
             }
-        } else if (currentChar() == '(') {
-            match(Sym.NewTerm);
-        } else if (currentChar() == ')') {
-            match(Sym.EndTerm);
-        } else if (currentChar() == '#') {
-            match(Sym.Pound);
-        } else if (currentChar() == '^') {
-            match(Sym.Exit);
-        } else if (currentChar() == '.') {
-            match(Sym.Period);
-        } else if (currentChar() == '-') {
-            if (state.line.indexOf(SEPARATOR, state.linePos) == state.linePos) {
-                state.text = "";
-                while (currentChar() == '-') {
-                    state.text += bufchar(state.linePos++);
+        } else if (this.currentChar() == '(') {
+            this.match(Sym.NewTerm);
+        } else if (this.currentChar() == ')') {
+            this.match(Sym.EndTerm);
+        } else if (this.currentChar() == '#') {
+            this.match(Sym.Pound);
+        } else if (this.currentChar() == '^') {
+            this.match(Sym.Exit);
+        } else if (this.currentChar() == '.') {
+            this.match(Sym.Period);
+        } else if (this.currentChar() == '-') {
+            if (this.state.line.indexOf(SEPARATOR, this.state.linePos) == this.state.linePos) {
+                this.state.text = "";
+                while (this.currentChar() == '-') {
+                    this.state.text += this.bufchar(this.state.linePos++);
                 }
-                state.sym = Sym.Separator;
+                this.state.sym = Sym.Separator;
             } else {
-                lexOperator();
+                this.lexOperator();
             }
-        } else if (isOperator(currentChar())) {
-            lexOperator();
-        } else if (nextWordInBufferIs(PRIMITIVE)) {
-            state.linePos += PRIMITIVE.length;
-            state.set(Sym.Primitive, PRIMITIVE);
-        } else if (/[A-Za-z]/.test(currentChar())) {
-            state.set(Sym.Identifier, "");
-            while (isIdentifierChar(currentChar())) {
-                state.text += bufchar(state.linePos++);
+        } else if (isOperator(this.currentChar())) {
+            this.lexOperator();
+        } else if (this.nextWordInBufferIs(PRIMITIVE)) {
+            this.state.linePos += PRIMITIVE.length;
+            this.state.set(Sym.Primitive, PRIMITIVE);
+        } else if (/[A-Za-z]/.test(this.currentChar())) {
+            this.state.set(Sym.Identifier, "");
+            while (isIdentifierChar(this.currentChar())) {
+                this.state.text += this.bufchar(this.state.linePos++);
             }
-            if (bufchar(state.linePos) == ':') {
-                state.sym = Sym.Keyword;
-                state.linePos++;
-                state.text += ':';
-                if (/[A-Za-z]/.test(currentChar())) {
-                    state.sym = Sym.KeywordSequence;
-                    while (/[A-Za-z]/.test(currentChar()) || currentChar() == ':') {
-                        state.text += bufchar(state.linePos++);
+            if (this.bufchar(this.state.linePos) == ':') {
+                this.state.sym = Sym.Keyword;
+                this.state.linePos++;
+                this.state.text += ':';
+                if (/[A-Za-z]/.test(this.currentChar())) {
+                    this.state.sym = Sym.KeywordSequence;
+                    while (/[A-Za-z]/.test(this.currentChar()) || this.currentChar() == ':') {
+                        this.state.text += this.bufchar(this.state.linePos++);
                     }
                 }
             }
-        } else if (/\d/.test(currentChar())) {
-            lexNumber();
+        } else if (/\d/.test(this.currentChar())) {
+            this.lexNumber();
         } else {
-            state.set(Sym.NONE, currentChar());
+            this.state.set(Sym.NONE, this.currentChar());
         }
 
-        return state.sym;
-    };
-
-    function lexNumber() {
-        state.set(Sym.Integer, "");
-
-        var sawDecimalMark = false;
-
-        do {
-            state.text += bufchar(state.linePos++);
-
-            if (!sawDecimalMark      &&
-                '.' == currentChar() &&
-                /\d/.test(bufchar(state.linePos + 1))) {
-                state.sym = Sym.Double;
-                state.text += bufchar(state.linePos++);
-            }
-        } while (/\d/.test(currentChar()));
+        return this.state.sym;
     }
 
-    function lexEscapeChar() {
-        const current = currentChar();
+    lexNumber() {
+        this.state.set(Sym.Integer, "");
+
+        let sawDecimalMark = false;
+        do {
+            this.state.text += this.bufchar(this.state.linePos++);
+
+            if (!sawDecimalMark &&
+                '.' == this.currentChar() &&
+                /\d/.test(this.bufchar(this.state.linePos + 1))) {
+                    this.state.sym = Sym.Double;
+                    this.state.text += this.bufchar(this.state.linePos++);
+            }
+        } while (/\d/.test(this.currentChar()));
+    }
+
+    lexEscapeChar() {
+        const current = this.currentChar();
 
         switch (current) {
-            case 't':  state.text += "\t"; break;
-            case 'b':  state.text += "\b"; break;
-            case 'n':  state.text += "\n"; break;
-            case 'r':  state.text += "\r"; break;
-            case 'f':  state.text += "\f"; break;
-            case '\'': state.text += "'"; break;
-            case '\\': state.text += "\\"; break;
-            case '0': state.text += "\0"; break;
+            case 't': this.state.text += "\t"; break;
+            case 'b': this.state.text += "\b"; break;
+            case 'n': this.state.text += "\n"; break;
+            case 'r': this.state.text += "\r"; break;
+            case 'f': this.state.text += "\f"; break;
+            case '\'': this.state.text += "'"; break;
+            case '\\': this.state.text += "\\"; break;
+            case '0': this.state.text += "\0"; break;
         }
-        state.linePos++;
+        this.state.linePos++;
     }
 
-    function lexStringChar() {
-        if (currentChar() === '\\') {
-            state.linePos++;
-            lexEscapeChar();
+    lexStringChar() {
+        if (this.currentChar() === '\\') {
+            this.state.linePos++;
+            this.lexEscapeChar();
         } else {
-            state.text += currentChar();
-            state.linePos++;
+            this.state.text += this.currentChar();
+            this.state.linePos++;
         }
     }
 
-    function lexString() {
-        state.set(Sym.STString, "");
-        state.linePos++
+    lexString() {
+        this.state.set(Sym.STString, "");
+        this.state.linePos++;
 
-        while (currentChar() !== '\'') {
-            while (endOfLine()) {
-                if (!readNextLine()) { return; }
-                state.text += "\n";
+        while (this.currentChar() !== '\'') {
+            while (this.endOfLine()) {
+                if (!this.readNextLine()) { return; }
+                this.state.text += "\n";
             }
-            if (currentChar() !== '\'') {
-                lexStringChar();
+            if (this.currentChar() !== '\'') {
+                this.lexStringChar();
             }
         }
 
-        state.linePos++;
+        this.state.linePos++;
     }
 
-    function lexOperator() {
-        if (isOperator(bufchar(state.linePos + 1))) {
-            state.set(Sym.OperatorSequence, "");
-            while (isOperator(currentChar())) {
-                state.text += bufchar(state.linePos++);
+    lexOperator() {
+        if (isOperator(this.bufchar(this.state.linePos + 1))) {
+            this.state.set(Sym.OperatorSequence, "");
+            while (isOperator(this.currentChar())) {
+                this.state.text += this.bufchar(this.state.linePos++);
             }
-        } else if (currentChar() == '~') {
-            match(Sym.Not);
-        } else if (currentChar() == '&') {
-            match(Sym.And);
-        } else if (currentChar() == '|') {
-            match(Sym.Or);
-        } else if (currentChar() == '*') {
-            match(Sym.Star);
-        } else if (currentChar() == '/') {
-            match(Sym.Div);
-        } else if (currentChar() == '\\') {
-            match(Sym.Mod);
-        } else if (currentChar() == '+') {
-            match(Sym.Plus);
-        } else if (currentChar() == '=') {
-            match(Sym.Equal);
-        } else if (currentChar() == '>') {
-            match(Sym.More);
-        } else if (currentChar() == '<') {
-            match(Sym.Less);
-        } else if (currentChar() == ',') {
-            match(Sym.Comma);
-        } else if (currentChar() == '@') {
-            match(Sym.At);
-        } else if (currentChar() == '%') {
-            match(Sym.Per);
-        } else if (currentChar() == '-') {
-            match(Sym.Minus);
+        } else if (this.currentChar() == '~') {
+            this.match(Sym.Not);
+        } else if (this.currentChar() == '&') {
+            this.match(Sym.And);
+        } else if (this.currentChar() == '|') {
+            this.match(Sym.Or);
+        } else if (this.currentChar() == '*') {
+            this.match(Sym.Star);
+        } else if (this.currentChar() == '/') {
+            this.match(Sym.Div);
+        } else if (this.currentChar() == '\\') {
+            this.match(Sym.Mod);
+        } else if (this.currentChar() == '+') {
+            this.match(Sym.Plus);
+        } else if (this.currentChar() == '=') {
+            this.match(Sym.Equal);
+        } else if (this.currentChar() == '>') {
+            this.match(Sym.More);
+        } else if (this.currentChar() == '<') {
+            this.match(Sym.Less);
+        } else if (this.currentChar() == ',') {
+            this.match(Sym.Comma);
+        } else if (this.currentChar() == '@') {
+            this.match(Sym.At);
+        } else if (this.currentChar() == '%') {
+            this.match(Sym.Per);
+        } else if (this.currentChar() == '-') {
+            this.match(Sym.Minus);
         }
     }
 
-    this.peek = function () {
-        var old = cloneLexerState(state);
-        if (peekDone) {
+    peek() {
+        const old = this.state.clone();
+        if (this.peekDone) {
             throw new IllegalStateException("SOM lexer: cannot peek twice!");
         }
-        _this.getSym();
-        var nextSym = state.sym;
-        stateAfterPeek = state;
-        state = old;
+        this.getSym();
+        const nextSym = this.state.sym;
+        this.stateAfterPeek = this.state;
+        this.state = old;
 
-        peekDone = true;
+        this.peekDone = true;
         return nextSym;
-    };
+    }
 
-    this.getText = function () {
-        return state.text;
-    };
+    getText() {
+        return this.state.text;
+    }
 
-    this.getNextText = function () {
-        return stateAfterPeek.text;
-    };
+    getNextText() {
+        return this.stateAfterPeek.text;
+    }
 
-    this.getCurrentLine = function () {
-        return state.line;
-    };
+    getCurrentLine() {
+        return this.state.line;
+    }
 
-    this.getCurrentLineNumber = function () {
-        return state.lineNumber;
-    };
+    getCurrentLineNumber() {
+        return this.state.lineNumber;
+    }
 
-    this.getCurrentColumn = function () {
-        return state.linePos + 1;
-    };
+    getCurrentColumn() {
+        return this.state.linePos + 1;
+    }
 
     // All characters read and processed, including current line
-    this.getNumberOfCharactersRead = function () {
-        return state.startCoord.charIndex;
-    };
+    getNumberOfCharactersRead() {
+        return this.state.startCoord.charIndex;
+    }
 
-    function readNextLine() {
-        if (state.lineNumber >= fileLines.length) { return false; }
+    readNextLine() {
+        if (this.state.lineNumber >= this.fileLines.length) { return false; }
 
-        var charCntOldLine = state.line.length;
-        if (state.lineNumber > 0) { charCntOldLine++; } // add +1 for line break
-        state.line = fileLines[state.lineNumber];
-        state.charsRead = charCntOldLine;
-        state.lineNumber++;
-        state.linePos = 0;
+        let charCntOldLine = this.state.line.length;
+        if (this.state.lineNumber > 0) { charCntOldLine++; } // add +1 for line break
+        this.state.line = this.fileLines[this.state.lineNumber];
+        this.state.charsRead = charCntOldLine;
+        this.state.lineNumber++;
+        this.state.linePos = 0;
         return true;
     }
 
-    function hasMoreInput() {
-        while (endOfLine()) {
-            if (!readNextLine()) {
+    hasMoreInput() {
+        while (this.endOfLine()) {
+            if (!this.readNextLine()) {
                 return false;
             }
         }
         return true;
     }
 
-    function skipWhiteSpace() {
-        while (/\s/.test(currentChar())) {
-            state.linePos++;
-            while (endOfLine()) {
-                if (!readNextLine()) {
+    skipWhiteSpace() {
+        while (/\s/.test(this.currentChar())) {
+            this.state.linePos++;
+            while (this.endOfLine()) {
+                if (!this.readNextLine()) {
                     return;
                 }
             }
         }
     }
 
-    function skipComment() {
-        if (currentChar() == '"') {
+    skipComment() {
+        if (this.currentChar() == '"') {
             do {
-                state.linePos++;
-                while (endOfLine()) {
-                    if (!readNextLine()) { return; }
+                this.state.linePos++;
+                while (this.endOfLine()) {
+                    if (!this.readNextLine()) { return; }
                 }
-            } while (currentChar() != '"');
-            state.linePos++;
+            } while (this.currentChar() != '"');
+            this.state.linePos++;
         }
     }
 
-    function currentChar() {
-        return bufchar(state.linePos);
+    currentChar() {
+        return this.bufchar(this.state.linePos);
     }
 
-    function endOfLine() {
-        return state.linePos >= state.line.length;
+    endOfLine() {
+        return this.state.linePos >= this.state.line.length;
     }
 
-    function isOperator(c) {
-        return c == '~'  || c == '&' || c == '|' || c == '*' || c == '/'
-            || c == '\\' || c == '+' || c == '=' || c == '>' || c == '<'
-            || c == ','  || c == '@' || c == '%' || c == '-';
+    match(s) {
+        this.state.set(s, this.currentChar());
+        this.state.linePos++;
     }
 
-    function match(s) {
-        state.set(s, currentChar());
-        state.linePos++;
+    bufchar(p) {
+        return p >= this.state.line.length ? '\0' : this.state.line.charAt(p);
     }
 
-    function bufchar(p) {
-        return p >= state.line.length ? '\0' : state.line.charAt(p);
-    }
-
-    function isIdentifierChar(c) {
-        return /[A-Za-z\d]/.test(c) || c == '_';
-    }
-
-    function nextWordInBufferIs(text) {
-        if (state.line.indexOf(text, state.linePos) != state.linePos) {
+    nextWordInBufferIs(text) {
+        if (this.state.line.indexOf(text, this.state.linePos) !== this.state.linePos) {
             return false;
         }
-        return !isIdentifierChar(bufchar(state.linePos + text.length));
+        return !isIdentifierChar(this.bufchar(this.state.linePos + text.length));
     }
 }
 

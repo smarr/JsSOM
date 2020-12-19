@@ -19,6 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const IllegalStateException = require('../../lib/exceptions').IllegalStateException;
 
 const u = require('../vm/Universe');
@@ -33,209 +35,216 @@ const SourceSection = require('./SourceSection').SourceSection;
 
 const constructEmptyPrimitive = require('../primitives/Primitives').constructEmptyPrimitive;
 
-function MethodGenerationContext(holderGenc, outerGenc, blockMethod) {
-    var signature = null,
-        primitive = false,
-        needsToCatchNonLocalReturn      = false,
-        throwsNonLocalReturn            = false,
-        args       = [],
-        argNames   = [],
-        locals     = [],
-        localNames = [],
-        _this      = this;
+class MethodGenerationContext {
+    constructor(holderGenc, outerGenc, blockMethod) {
+        this.holderGenc = holderGenc;
+        this.outerGenc = outerGenc;
+        this.blockMethod = blockMethod;
 
-    this.makeCatchNonLocalReturn = function () {
-        throwsNonLocalReturn = true;
+        this.signature = null;
+        this.primitive = false;
+        this._needsToCatchNonLocalReturn = false;
+        this.throwsNonLocalReturn = false;
+        this.args = [];
+        this.argNames = [];
+        this.locals = [];
+        this.localNames = [];
+    }
 
-        var ctx = _this.getOuterContext();
+    makeCatchNonLocalReturn() {
+        this.throwsNonLocalReturn = true;
+
+        const ctx = this.getOuterContext();
         ctx.markToCatchNonLocalReturn();
-    };
+    }
 
-    this.markToCatchNonLocalReturn = function () {
-        needsToCatchNonLocalReturn = true;
-    };
+    markToCatchNonLocalReturn() {
+        this._needsToCatchNonLocalReturn = true;
+    }
 
-    this.getOuterContext = function () {
-        if (outerGenc == null) {
-            return _this;
+    getOuterContext() {
+        if (this.outerGenc == null) {
+            return this;
         } else {
-            return outerGenc.getOuterContext();
+            return this.outerGenc.getOuterContext();
         }
-    };
+    }
 
-    this.needsToCatchNonLocalReturn = function () {
+    needsToCatchNonLocalReturn() {
         // only the most outer method needs to catch
-        return needsToCatchNonLocalReturn && outerGenc == null;
-    };
+        return this._needsToCatchNonLocalReturn && this.outerGenc == null;
+    }
 
-    this.assemble = function (body, sourceSection) {
-        if (primitive) {
-            return constructEmptyPrimitive(signature);
+    assemble(body, sourceSection) {
+        if (this.primitive) {
+            return constructEmptyPrimitive(this.signature);
         }
 
-        if (_this.needsToCatchNonLocalReturn()) {
+        if (this._needsToCatchNonLocalReturn) {
             body = factory.createCatchNonLocalReturn(body);
         }
 
         // return the method - the holder field is to be set later on!
-        return  u.universe.newMethod(signature,
-            getSourceSectionForMethod(sourceSection), body, locals.length);
-    };
-
-    function getSourceSectionForMethod(ssBody) {
-        return new SourceSection(
-                holderGenc.getName().getString() + ">>" + signature.toString(),
-                ssBody.startLine(), ssBody.startColumn(),
-                ssBody.charIndex(), ssBody.length());
+        return u.universe.newMethod(this.signature,
+            this.getSourceSectionForMethod(sourceSection),
+            body, this.locals.length);
     }
 
-    this.markAsPrimitive = function () {
-        primitive = true;
-    };
+    getSourceSectionForMethod(ssBody) {
+        return new SourceSection(
+            this.holderGenc.getName().getString() + ">>" + this.signature.toString(),
+            ssBody.startLine(), ssBody.startColumn(),
+            ssBody.charIndex(), ssBody.length());
+    }
 
-    this.setSignature = function (sig) {
-        signature = sig;
-    };
+    markAsPrimitive() {
+        this.primitive = true;
+    }
 
-    function addArgument(arg) {
-        if (("self" == arg || "$blockSelf" == arg) && args.length > 0) {
+    setSignature(sig) {
+        this.signature = sig;
+    }
+
+    addArgument(arg) {
+        if (("self" == arg || "$blockSelf" == arg) && this.args.length > 0) {
             throw new IllegalStateException("The self argument always has to be the first argument of a method");
         }
 
-        var argument = new Argument(arg, args.length);
-        args.push(argument);
-        argNames.push(arg);
+        const argument = new Argument(arg, this.args.length);
+        this.args.push(argument);
+        this.argNames.push(arg);
     }
 
-    this.addArgumentIfAbsent = function (arg) {
-        if (argNames.indexOf(arg) != -1) {
+    addArgumentIfAbsent(arg) {
+        if (this.argNames.indexOf(arg) !== -1) {
             return;
         }
-        addArgument(arg);
-    };
-
-    this.addLocalIfAbsent = function (local) {
-        if (localNames.indexOf(local) != -1) {
-            return;
-        }
-        addLocal(local);
-    };
-
-    function addLocal(local) {
-        var l = new Local(local, locals.length);
-        locals.push(l);
-        localNames.push(local);
+        this.addArgument(arg);
     }
 
-    this.isBlockMethod = function () {
-        return blockMethod;
-    };
+    addLocalIfAbsent(local) {
+        if (this.localNames.indexOf(local) !== -1) {
+            return;
+        }
+        this.addLocal(local);
+    }
 
-    this.getHolder = function () {
-        return holderGenc;
-    };
+    addLocal(local) {
+        const l = new Local(local, this.locals.length);
+        this.locals.push(l);
+        this.localNames.push(local);
+    }
 
-    this.getOuterSelfContextLevel = function () {
-        if (outerGenc == null) {
+    isBlockMethod() {
+        return this.blockMethod;
+    }
+
+    getHolder() {
+        return this.holderGenc;
+    }
+
+    getOuterSelfContextLevel() {
+        if (this.outerGenc === null) {
             return 0;
         } else {
-            return outerGenc.getOuterSelfContextLevel() + 1;
+            return this.outerGenc.getOuterSelfContextLevel() + 1;
         }
-    };
+    }
 
-    this.getContextLevel = function (varName) {
-        if (localNames.indexOf(varName) != -1
-            || argNames.indexOf(varName) != -1) {
+    getContextLevel(varName) {
+        if (this.localNames.indexOf(varName) !== -1
+            || this.argNames.indexOf(varName) !== -1) {
             return 0;
         }
 
-        if (outerGenc != null) {
-            return 1 + outerGenc.getContextLevel(varName);
+        if (this.outerGenc != null) {
+            return 1 + this.outerGenc.getContextLevel(varName);
         }
         return 0;
-    };
-
-    this.getVariable = function (varName) {
-        var i = localNames.indexOf(varName);
-        if (i != -1) {
-            return locals[i];
-        }
-
-        i = argNames.indexOf(varName);
-        if (i != -1) {
-            return args[i];
-        }
-
-        if (outerGenc != null) {
-            return outerGenc.getVariable(varName);
-        }
-        return null;
-    };
-
-    this.getSuperReadNode = function (source) {
-        var self = _this.getVariable("self");
-        return self.getSuperReadNode(_this.getOuterSelfContextLevel(),
-            holderGenc.getName(), holderGenc.isClassSide(), source);
-    };
-
-    this.getLocalReadNode = function (variableName, source) {
-        var variable = _this.getVariable(variableName);
-        return variable.getReadNode(_this.getContextLevel(variableName), source);
-    };
-
-    this.getLocalWriteNode = function (variableName, valExpr, source) {
-        var variable = _this.getVariable(variableName);
-        return variable.getWriteNode(_this.getContextLevel(variableName),
-            valExpr, source);
-    };
-
-    this.getNonLocalReturn = function (expr, source) {
-        _this.makeCatchNonLocalReturn();
-        return factory.createNonLocalReturn(expr, _this.getOuterSelfContextLevel(),
-            source);
-    };
-
-    function getSelfRead(source) {
-        return _this.getVariable("self").getReadNode(
-            _this.getContextLevel("self"), source);
     }
 
-    this.getObjectFieldRead = function (fieldName, source) {
-        if (!holderGenc.hasField(fieldName)) {
+    getVariable(varName) {
+        let i = this.localNames.indexOf(varName);
+        if (i !== -1) {
+            return this.locals[i];
+        }
+
+        i = this.argNames.indexOf(varName);
+        if (i !== -1) {
+            return this.args[i];
+        }
+
+        if (this.outerGenc !== null) {
+            return this.outerGenc.getVariable(varName);
+        }
+        return null;
+    }
+
+    getSuperReadNode(source) {
+        const self = this.getVariable("self");
+        return self.getSuperReadNode(
+            this.getOuterSelfContextLevel(),
+            this.holderGenc.getName(), this.holderGenc.isClassSide(), source);
+    }
+
+    getLocalReadNode(variableName, source) {
+        const variable = this.getVariable(variableName);
+        return variable.getReadNode(this.getContextLevel(variableName), source);
+    }
+
+    getLocalWriteNode(variableName, valExpr, source) {
+        const variable = this.getVariable(variableName);
+        return variable.getWriteNode(this.getContextLevel(variableName),
+            valExpr, source);
+    }
+
+    getNonLocalReturn(expr, source) {
+        this.makeCatchNonLocalReturn();
+        return factory.createNonLocalReturn(
+            expr, this.getOuterSelfContextLevel(), source);
+    }
+
+    getSelfRead(source) {
+        return this.getVariable("self").getReadNode(
+            this.getContextLevel("self"), source);
+    }
+
+    getObjectFieldRead(fieldName, source) {
+        if (!this.holderGenc.hasField(fieldName)) {
             return null;
         }
-        return factory.createFieldRead(getSelfRead(source),
-            holderGenc.getFieldIndex(fieldName), source);
-    };
+        return factory.createFieldRead(this.getSelfRead(source),
+        this.holderGenc.getFieldIndex(fieldName), source);
+    }
 
-    this.getGlobalRead = function (varName, source) {
+    getGlobalRead(varName, source) {
         return factory.createGlobalRead(varName, source);
-    };
+    }
 
-    this.getObjectFieldWrite = function (fieldName, exp, source) {
-        if (!holderGenc.hasField(fieldName)) {
+    getObjectFieldWrite(fieldName, exp, source) {
+        if (!this.holderGenc.hasField(fieldName)) {
             return null;
         }
 
-        return factory.createFieldWrite(getSelfRead(source), exp,
-            holderGenc.getFieldIndex(fieldName), source);
+        return factory.createFieldWrite(this.getSelfRead(source), exp,
+            this.holderGenc.getFieldIndex(fieldName), source);
     };
 
     /**
      * @returns {Number} of explicit arguments,
      *         i.e., excluding the implicit 'self' argument
      */
-    this.getNumberOfArguments = function () {
-        return args.length;
-    };
+    getNumberOfArguments() {
+        return this.args.length;
+    }
 
-    this.getSignature = function () {
-        return signature;
-    };
+    getSignature() {
+        return this.signature;
+    }
 
-    this.toString = function () {
-        return "MethodGenC(" + holderGenc.getName().getString() + ">>" + signature.toString() + ")";
-    };
+    toString() {
+        return `MethodGenC(${this.holderGenc.getName().getString()}>>${this.signature.toString()})`;
+    }
 }
 
 exports.MethodGenerationContext = MethodGenerationContext;

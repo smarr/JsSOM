@@ -19,6 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 const fs = require('fs');
 const IllegalStateException = require('../../lib/exceptions').IllegalStateException;
 const isBrowser = require('../../lib/platform').isBrowser;
