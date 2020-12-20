@@ -45,19 +45,22 @@ export class Node {
         let replaced = false;
 
         for (const prop in parent) {
-            if (prop.indexOf("_child") == 0) {
-                if (prop.indexOf("_children") == 0) { // an array with child nodes
+            if (prop.indexOf("child_") >= 0) {
+                if (prop.indexOf("children_") >= 0) { // an array with child nodes
                     const children = parent[prop];
                     for (const i in children) {
                         if (children[i] === this) {
                             children[i] = newNode;
                             replaced = true;
+                            break;
                         }
                     }
-                } else { // just a simple child node
+                }
+                if (!replaced) { // just a simple child node
                     if (parent[prop] === this) {
                         parent[prop] = newNode;
                         replaced = true;
+                        break;
                     }
                 }
             }
