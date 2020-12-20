@@ -248,7 +248,7 @@ class Universe {
         assert(this.getGlobal(name) == null);
 
         // Get the block class for blocks with the given number of arguments
-        var result = this.loadClass(name);
+        var result = this.loadClassFor(name, null);
 
         // Add the appropriate value primitive to the block class
         var prim = getBlockEvaluationPrimitive(numberOfArguments, result);
