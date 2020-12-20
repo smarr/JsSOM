@@ -21,11 +21,11 @@
 */
 //@ts-check
 "use strict";
-const Primitives = require('./Primitives').Primitives;
-const u = require('../vm/Universe');
+import { Primitives } from './Primitives.js';
+import { universe } from '../vm/Universe.js';
 
 function _new(frame, args) {
-    return u.universe.newInstance(args[0]);
+    return universe.newInstance(args[0]);
 }
 
 function _name(frame, args) {
@@ -58,4 +58,4 @@ class ClassPrimitives extends Primitives {
     }
 }
 
-exports.prims = ClassPrimitives;
+export const prims = ClassPrimitives;

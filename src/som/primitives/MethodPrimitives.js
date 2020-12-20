@@ -21,9 +21,9 @@
 */
 //@ts-check
 "use strict";
-const Primitives = require('./Primitives').Primitives;
+import { Primitives } from './Primitives.js';
 
-const u = require('../vm/Universe');
+import { universe } from '../vm/Universe.js';
 
 function _holder(frame, args) {
     return args[0].getHolder();
@@ -40,7 +40,7 @@ function _invokeOnWith(frame, args) {
 
 
     var directArgs;
-    if (argArr === u.nilObject) {
+    if (argArr === universe.nilObject) {
         directArgs = [];
     } else {
         directArgs = argArr.getIndexableFields();
@@ -61,4 +61,4 @@ class MethodPrimitives extends Primitives {
     }
 }
 
-exports.prims = MethodPrimitives;
+export const prims = MethodPrimitives;

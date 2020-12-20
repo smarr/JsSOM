@@ -21,21 +21,17 @@
 */
 //@ts-check
 "use strict";
-const IllegalStateException = require('../../lib/exceptions').IllegalStateException;
+import { IllegalStateException } from '../../lib/exceptions.js';
 
-const u = require('../vm/Universe');
+import { Local, Argument } from './Variable.js';
+import { SourceSection } from './SourceSection.js';
 
-const Variable = require('./Variable');
-const Local = Variable.Local;
-const Argument = Variable.Argument;
+import * as factory from '../interpreter/NodeFactory.js';
+import { constructEmptyPrimitive } from '../primitives/Primitives.js';
 
-const factory = require('../interpreter/NodeFactory');
+import { universe } from '../vm/Universe.js';
 
-const SourceSection = require('./SourceSection').SourceSection;
-
-const constructEmptyPrimitive = require('../primitives/Primitives').constructEmptyPrimitive;
-
-class MethodGenerationContext {
+export class MethodGenerationContext {
     constructor(holderGenc, outerGenc, blockMethod) {
         this.holderGenc = holderGenc;
         this.outerGenc = outerGenc;
@@ -85,7 +81,7 @@ class MethodGenerationContext {
         }
 
         // return the method - the holder field is to be set later on!
-        return u.universe.newMethod(this.signature,
+        return universe.newMethod(this.signature,
             this.getSourceSectionForMethod(sourceSection),
             body, this.locals.length);
     }
@@ -246,5 +242,3 @@ class MethodGenerationContext {
         return `MethodGenC(${this.holderGenc.getName().getString()}>>${this.signature.toString()})`;
     }
 }
-
-exports.MethodGenerationContext = MethodGenerationContext;

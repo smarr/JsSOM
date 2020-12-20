@@ -21,8 +21,8 @@
 */
 //@ts-check
 "use strict";
-const u = require('../vm/Universe');
-const Primitives = require('./Primitives').Primitives;
+import { universe } from '../vm/Universe.js';
+import { Primitives } from './Primitives.js';
 
 function _at(frame, args) {
     var i = args[1];
@@ -38,13 +38,13 @@ function _atPut(frame, args) {
 }
 
 function _length(frame, args) {
-    return u.universe.newInteger(
+    return universe.newInteger(
         args[0].getNumberOfIndexableFields());
 }
 
 function _new(frame, args) {
     var length = args[1];
-    return u.universe.newArrayWithLength(length.getEmbeddedInteger())
+    return universe.newArrayWithLength(length.getEmbeddedInteger())
 }
 
 function _doIndexes(frame, args) {
@@ -53,7 +53,7 @@ function _doIndexes(frame, args) {
 
     var length = args[0].getNumberOfIndexableFields();
     for (var i = 1; i <= length; i++) {  // i is propagated to Smalltalk, so, start with 1
-        blockMethod.invoke(frame, [block, u.universe.newInteger(i)]);
+        blockMethod.invoke(frame, [block, universe.newInteger(i)]);
     }
     return args[0];
 }
@@ -86,4 +86,4 @@ class ArrayPrimitives extends Primitives {
     }
 }
 
-exports.prims = ArrayPrimitives;
+export const prims = ArrayPrimitives;

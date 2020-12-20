@@ -21,9 +21,9 @@
 */
 //@ts-check
 "use strict";
-const Node = require('./Node').Node;
+import { Node } from './Node.js';
 
-class SequenceNode extends Node {
+export class SequenceNode extends Node {
     constructor(expressions, source) {
         super(source);
         this.children_exprs = expressions;
@@ -36,5 +36,3 @@ class SequenceNode extends Node {
         return this.children_exprs[this.children_exprs.length - 1].execute(frame);
     }
 }
-
-exports.SequenceNode = SequenceNode;

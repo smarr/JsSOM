@@ -21,67 +21,66 @@
 */
 //@ts-check
 "use strict";
-const Primitives = require('./Primitives').Primitives;
-const u = require('../vm/Universe');
-const platform = require('../../lib/platform');
-const intOrBigInt = require('../vmobjects/numbers').intOrBigInt;
+import { Primitives } from './Primitives.js';
+import { universe } from '../vm/Universe.js';
+import { getMillisecondTicks, intOrBigInt } from '../../lib/platform.js';
 
 function _load(_frame, args) {
     var symbol = args[1];
-    var result = u.universe.loadClass(symbol);
-    return (result != null) ? result : u.nilObject;
+    var result = universe.loadClass(symbol);
+    return (result != null) ? result : universe.nilObject;
 }
 
 function _exit(_frame, args) {
     var error = args[1];
-    return u.universe.exit(error.getEmbeddedInteger());
+    return universe.exit(error.getEmbeddedInteger());
 }
 
 function _global(_frame, args) {
     var symbol = args[1];
-    var result = u.universe.getGlobal(symbol);
-    return (result != null) ? result : u.nilObject;
+    var result = universe.getGlobal(symbol);
+    return (result != null) ? result : universe.nilObject;
 }
 
 function _hasGlobal(_frame, args) {
-    if (u.universe.hasGlobal(args[1])) {
-        return u.trueObject;
+    if (universe.hasGlobal(args[1])) {
+        return universe.trueObject;
     } else {
-        return u.falseObject;
+        return universe.falseObject;
     }
 }
 
 function _globalPut(_frame, args) {
     var value = args[2];
     var symbol = args[1];
-    u.universe.setGlobal(symbol, value);
+    universe.setGlobal(symbol, value);
     return value;
 }
 
 function _printString(_frame, args) {
     var str = args[1];
-    u.universe.print(str.getEmbeddedString());
+    universe.print(str.getEmbeddedString());
     return args[0];
 }
 
 function _printNewline(_frame, args) {
-    u.universe.println("");
+    universe.println("");
     return args[0];
 }
 
 function _time(_frame, _args) {
-    var diff = platform.getMillisecondTicks() - u.startTime;
-    return intOrBigInt(diff, u.universe);
+    var diff = getMillisecondTicks() - universe.startTime;
+    return intOrBigInt(diff, universe);
 }
 
 function _ticks(_frame, _args) {
-    var diff = platform.getMillisecondTicks() - u.startTime;
-    return intOrBigInt(diff * 1000, u.universe);
+    var diff = getMillisecondTicks() - universe.startTime;
+    return intOrBigInt(diff * 1000, universe);
 }
 
 function _fullGC(_frame, _args) {
     /* not general way to do that in JS */
-    return u.falseObject;
+    return universe.falseObject;
 }
 
 class SystemPrimitives extends Primitives {
@@ -103,4 +102,4 @@ class SystemPrimitives extends Primitives {
     }
 }
 
-exports.prims = SystemPrimitives;
+export const prims = SystemPrimitives;

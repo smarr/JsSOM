@@ -19,7 +19,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-class IllegalStateException {
+export class IllegalStateException {
     constructor(msg) {
         this.msg = msg;
 
@@ -34,7 +34,7 @@ class IllegalStateException {
     getMessage() { return this.msg; }
 }
 
-class RuntimeException {
+export class RuntimeException {
     constructor(msg) {
         this.msg = msg;
 
@@ -48,6 +48,3 @@ class RuntimeException {
 
     getMessage() { return this.msg; }
 }
-
-exports.IllegalStateException = IllegalStateException;
-exports.RuntimeException = RuntimeException;

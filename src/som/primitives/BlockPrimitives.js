@@ -21,11 +21,11 @@
 */
 //@ts-check
 "use strict";
-const RuntimeException = require('../../lib/exceptions').RuntimeException;
+import { RuntimeException } from '../../lib/exceptions.js';
 
-const Primitives = require('./Primitives').Primitives;
+import { Primitives } from './Primitives.js';
 
-const u = require('../vm/Universe');
+import { universe } from '../vm/Universe.js';
 
 function _restart(_frame, _args) {
     throw new RuntimeException("Restart primitive is not supported, #whileTrue:"
@@ -39,12 +39,12 @@ function _whileTrue(frame, args) {
 
     var cond = conditionBlock.getMethod().invoke(frame, [conditionBlock]);
 
-    while (cond == u.trueObject) {
+    while (cond === universe.trueObject) {
         bodyBlock.getMethod().invoke(frame, [bodyBlock]);
         cond = conditionBlock.getMethod().invoke(frame, [conditionBlock]);
     }
 
-    return u.nilObject;
+    return universe.nilObject;
 }
 
 
@@ -59,4 +59,4 @@ class BlockPrimitives extends Primitives {
     }
 }
 
-exports.prims = BlockPrimitives;
+export const prims = BlockPrimitives;

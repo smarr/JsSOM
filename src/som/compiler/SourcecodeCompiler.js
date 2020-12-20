@@ -21,49 +21,12 @@
 */
 //@ts-check
 "use strict";
-const fs = require('fs');
-const IllegalStateException = require('../../lib/exceptions').IllegalStateException;
-const isBrowser = require('../../lib/platform').isBrowser;
+import { getFile } from '../../lib/core-lib.js';
+import { IllegalStateException } from '../../lib/exceptions.js';
 
-const ClassGenerationContext = require('./ClassGenerationContext').ClassGenerationContext;
+import { ClassGenerationContext } from './ClassGenerationContext.js';
 
-const Parser = require('./Parser').Parser;
-
-let somCoreLib = null;
-
-if (isBrowser) {
-    const loadCoreLib = require('../../../build/som').loadCoreLib;
-    somCoreLib = loadCoreLib();
-}
-
-function getFileFromJson(path, file) {
-    var current = somCoreLib;
-
-    path.split("/").forEach(function (e) {
-        if (current == undefined) {
-            return null;
-        }
-        current = current[e];
-    });
-
-    if (current == undefined || current[file] == undefined) {
-        return null;
-    } else {
-        return current[file];
-    }
-}
-
-function getFile(path, file) {
-    if (isBrowser) {
-        return getFileFromJson(path, file);
-    }
-
-    const name = path + '/' + file;
-    if (!fs.existsSync(name)) {
-        return null;
-    }
-    return fs.readFileSync(name, {encoding: 'utf-8'});
-}
+import { Parser } from './Parser.js';
 
 function compile(parser, systemClass) {
     var cgc = new ClassGenerationContext();
@@ -84,7 +47,7 @@ function compile(parser, systemClass) {
     return result;
 }
 
-function compileClassFile(path, file, systemClass) {
+export function compileClassFile(path, file, systemClass) {
     var source = getFile(path, file + ".som");
     if (source == null) {
         return null;
@@ -102,9 +65,6 @@ function compileClassFile(path, file, systemClass) {
     return result;
 }
 
-function compileClassString(stmt, systemClass) {
+export function compileClassString(stmt, systemClass) {
     return compile(new Parser(stmt, '$string'), systemClass);
 }
-
-exports.compileClassFile = compileClassFile;
-exports.compileClassString = compileClassString;

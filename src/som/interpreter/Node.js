@@ -21,7 +21,7 @@
 */
 //@ts-check
 "use strict";
-class Node {
+export class Node {
     constructor(source) {
         this.parent = null;
         this.source = source;
@@ -74,5 +74,3 @@ class Node {
         return false;
     }
 }
-
-exports.Node = Node;

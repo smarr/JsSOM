@@ -21,18 +21,18 @@
 */
 //@ts-check
 "use strict";
-const u = require('./Universe');
+import { universe } from './Universe.js';
 
-const compileClassString = require('../compiler/SourcecodeCompiler').compileClassString;
+import { compileClassString } from '../compiler/SourcecodeCompiler.js';
 
-class Shell {
+export class Shell {
 
     start() {
         var counter = 0;
-        var it = u.nilObject;
-        u.universe.println("SOM Shell. Type \"quit\" to exit.\n");
-        u.universe.setAvoidExit(true);
-        u.universe.print("---> ");
+        var it = universe.nilObject;
+        universe.println("SOM Shell. Type \"quit\" to exit.\n");
+        universe.setAvoidExit(true);
+        universe.print("---> ");
 
         process.stdin.setEncoding('utf8');
         process.stdin.on('readable', function () {
@@ -52,20 +52,18 @@ class Shell {
                 // Compile and load the newly generated class
                 var myClass = compileClassString(stmtClass, null);
                 if (myClass != null) {
-                    var myObject = u.universe.newInstance(myClass);
+                    var myObject = universe.newInstance(myClass);
                     // Lookup the run: method
                     var shellMethod = myClass.
-                        lookupInvokable(u.universe.symbolFor("run:"));
+                        lookupInvokable(universe.symbolFor("run:"));
 
                     // Invoke the run method
                     it = shellMethod.invoke(null, [myObject, it]);
-                    u.universe.print("---> ");
+                    universe.print("---> ");
                 }
             } catch (e) {
-                u.universe.errorPrintln("Caught exception: " + e.toString());
+                universe.errorPrintln("Caught exception: " + e.toString());
             }
         });
     }
 }
-
-exports.Shell = Shell;

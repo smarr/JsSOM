@@ -21,18 +21,18 @@
 */
 //@ts-check
 "use strict";
-const RuntimeException = require('../../lib/exceptions').RuntimeException;
+import { RuntimeException } from '../../lib/exceptions.js';
 
-const Lexer = require('./Lexer').Lexer;
-const Sym = require('./Symbol').Sym;
-const MethodGenerationContext = require('./MethodGenerationContext').MethodGenerationContext;
-const SourceSection = require('./SourceSection').SourceSection;
+import { Lexer } from './Lexer.js';
+import { Sym } from './Symbol.js';
+import { MethodGenerationContext } from './MethodGenerationContext.js';
+import { SourceSection } from './SourceSection.js';
 
-const factory = require('../interpreter/NodeFactory');
+import { createGlobalRead, createSequence, createBlockNode, createMessageSend, createLiteralNode } from '../interpreter/NodeFactory.js';
 
-const u = require('../vm/Universe');
+import { universe } from '../vm/Universe.js';
 
-const intOrBigInt = require('../../lib/platform').intOrBigInt;
+import { intOrBigInt } from '../../lib/platform.js';
 
 
 function isIdentifier(sym) {
@@ -107,7 +107,8 @@ const binaryOpSyms = [Sym.Or, Sym.Comma, Sym.Minus, Sym.Equal, Sym.Not,
     Sym.At, Sym.Per, Sym.NONE];
 
 const keywordSelectorSyms = [Sym.Keyword, Sym.KeywordSequence];
-class Parser {
+
+export class Parser {
     constructor(fileContent, fileName) {
         this.fileName = fileName;
         this.lexer = new Lexer(fileContent);
@@ -145,7 +146,7 @@ class Parser {
     }
 
     classdef(cgenc) {
-        cgenc.setName(u.universe.symbolFor(this.text));
+        cgenc.setName(universe.symbolFor(this.text));
         this.expect(Sym.Identifier);
         this.expect(Sym.Equal);
 
@@ -179,16 +180,16 @@ class Parser {
     superclass(cgenc) {
         let superName;
         if (this.sym == Sym.Identifier) {
-            superName = u.universe.symbolFor(this.text);
+            superName = universe.symbolFor(this.text);
             this.accept(Sym.Identifier);
         } else {
-            superName = u.universe.symbolFor("Object");
+            superName = universe.symbolFor("Object");
         }
         cgenc.setSuperName(superName);
 
         // Load the super class, if it is not nil (break the dependency cycle)
         if (superName.getString() !== "nil") {
-            var superClass = u.universe.loadClass(superName);
+            var superClass = universe.loadClass(superName);
             if (superClass === null) {
                 throw new ParseError("Super class " + superName.getString() +
                     " could not be loaded", Sym.NONE, this);
@@ -237,7 +238,7 @@ class Parser {
         if (this.accept(Sym.Or)) {
             while (isIdentifier(this.sym)) {
                 const v = this.variable();
-                cgenc.addInstanceField(u.universe.symbolFor(v));
+                cgenc.addInstanceField(universe.symbolFor(v));
             }
             this.expect(Sym.Or);
         }
@@ -247,7 +248,7 @@ class Parser {
         if (this.accept(Sym.Or)) {
             while (isIdentifier(this.sym)) {
                 const v = this.variable();
-                cgenc.addClassField(u.universe.symbolFor(v));
+                cgenc.addClassField(universe.symbolFor(v));
             }
             this.expect(Sym.Or);
         }
@@ -308,7 +309,7 @@ class Parser {
         }
         while (this.sym == Sym.Keyword);
 
-        mgenc.setSignature(u.universe.symbolFor(kw.toString()));
+        mgenc.setSignature(universe.symbolFor(kw.toString()));
     }
 
     methodBlock(mgenc) {
@@ -322,7 +323,7 @@ class Parser {
     }
 
     unarySelector() {
-        return u.universe.symbolFor(this.identifier());
+        return universe.symbolFor(this.identifier());
     }
 
     binarySelector() {
@@ -336,7 +337,7 @@ class Parser {
         } else if (this.accept(Sym.OperatorSequence)) {
         } else { this.expect(Sym.NONE); }
 
-        return u.universe.symbolFor(s);
+        return universe.symbolFor(s);
     }
 
     identifier() {
@@ -397,11 +398,11 @@ class Parser {
 
     createSequenceNode(coord, expressions) {
         if (expressions.length === 0) {
-            return factory.createGlobalRead(u.universe.symbolFor("nil"), this.getSource(coord));
+            return createGlobalRead(universe.symbolFor("nil"), this.getSource(coord));
         } else if (expressions.length === 1) {
             return expressions[0];
         }
-        return factory.createSequence(expressions.slice(), this.getSource(coord));
+        return createSequence(expressions.slice(), this.getSource(coord));
     }
 
     result(mgenc) {
@@ -484,7 +485,7 @@ class Parser {
                 const blockBody = this.nestedBlock(bgenc);
                 const blockMethod = bgenc.assemble(blockBody, this.lastMethodsSourceSection);
 
-                return factory.createBlockNode(blockMethod, this.getSource(coord));
+                return createBlockNode(blockMethod, this.getSource(coord));
             }
             default: {
                 return this.literal();
@@ -531,7 +532,7 @@ class Parser {
     unaryMessage(receiver) {
         const coord = this.getCoordinate();
         const selector = this.unarySelector();
-        return factory.createMessageSend(
+        return createMessageSend(
             selector, [receiver], this.getSource(coord));
     }
 
@@ -540,7 +541,7 @@ class Parser {
         const msg = this.binarySelector();
         const operand = this.binaryOperand(mgenc);
 
-        return factory.createMessageSend(
+        return createMessageSend(
             msg, [receiver, operand], this.getSource(coord));
     }
 
@@ -569,9 +570,9 @@ class Parser {
         }
         while (this.sym == Sym.Keyword);
 
-        var msg = u.universe.symbolFor(kw);
+        var msg = universe.symbolFor(kw);
 
-        return factory.createMessageSend(
+        return createMessageSend(
             msg, args.slice(), this.getSource(coord));
     }
 
@@ -612,7 +613,7 @@ class Parser {
         const coord = this.getCoordinate();
         const value = this.getObjectForCurrentLiteral(coord);
         const source = this.getSource(coord);
-        return factory.createLiteralNode(value, source);
+        return createLiteralNode(value, source);
     }
 
     literalNumber() {
@@ -660,7 +661,7 @@ class Parser {
         }
         this.expect(Sym.Integer);
 
-        return intOrBigInt(i, u.universe);
+        return intOrBigInt(i, universe);
     }
 
     literalDouble(isNegative) {
@@ -674,14 +675,14 @@ class Parser {
             d = 0.0 - d;
         }
         this.expect(Sym.Double);
-        return u.universe.newDouble(d);
+        return universe.newDouble(d);
     }
 
     literalSymbol() {
         this.expect(Sym.Pound);
         if (this.sym === Sym.STString) {
             const s = this.string();
-            return u.universe.symbolFor(s);
+            return universe.symbolFor(s);
         } else {
             return this.selector();
         }
@@ -689,7 +690,7 @@ class Parser {
 
     literalString() {
         const s = this.string();
-        return u.universe.newString(s);
+        return universe.newString(s);
     }
 
     literalArray() {
@@ -702,7 +703,7 @@ class Parser {
         }
 
         this.expect(Sym.EndTerm);
-        return u.universe.newArrayFrom(literals);
+        return universe.newArrayFrom(literals);
     }
 
     selector() {
@@ -718,7 +719,7 @@ class Parser {
     keywordSelector() {
         const s = this.text;
         this.expectOneOf(keywordSelectorSyms);
-        return u.universe.symbolFor(s);
+        return universe.symbolFor(s);
     }
 
     string() {
@@ -744,7 +745,7 @@ class Parser {
             blockSig += ":";
         }
 
-        mgenc.setSignature(u.universe.symbolFor(blockSig));
+        mgenc.setSignature(universe.symbolFor(blockSig));
 
         const expressions = this.blockContents(mgenc);
 
@@ -781,7 +782,7 @@ class Parser {
         }
 
         // then object fields
-        const varName = u.universe.symbolFor(variableName);
+        const varName = universe.symbolFor(variableName);
         const fieldRead = mgenc.getObjectFieldRead(varName, source);
 
         if (fieldRead !== null) {
@@ -798,7 +799,7 @@ class Parser {
             return mgenc.getLocalWriteNode(variableName, exp, source);
         }
 
-        const fieldName = u.universe.symbolFor(variableName);
+        const fieldName = universe.symbolFor(variableName);
         const fieldWrite = mgenc.getObjectFieldWrite(fieldName, exp, source);
 
         if (fieldWrite !== null) {
@@ -825,5 +826,3 @@ class Parser {
         }
     }
 }
-
-exports.Parser = Parser;

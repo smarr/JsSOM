@@ -21,21 +21,8 @@
 */
 //@ts-check
 "use strict";
-const IllegalStateException = require('../../lib/exceptions').IllegalStateException;
-
-const Primitives = require('./Primitives').Primitives;
-const u = require('../vm/Universe');
-
-function _coerce_to_double(obj) {
-    if (obj instanceof u.SDouble) {
-        return obj;
-    }
-    if (obj instanceof u.SInteger) {
-        return u.universe.newDouble(obj.getEmbeddedInteger());
-    }
-    throw new IllegalStateException("Cannot coerce " + obj.toSource()
-        + " to Double!");
-}
+import { Primitives } from './Primitives.js';
+import { universe } from '../vm/Universe.js';
 
 function _asInteger(frame, args) {
     return args[0].primAsInteger();
@@ -46,7 +33,7 @@ function _asString(frame, args) {
 }
 
 function _sqrt(frame, args) {
-    return u.universe.newDouble(
+    return universe.newDouble(
         Math.sqrt(args[0].getEmbeddedDouble()));
 }
 
@@ -80,21 +67,21 @@ function _lessThan(frame, args) {
 
 function _round(frame, args) {
     var intVal = Math.round(args[0].getEmbeddedDouble());
-    return u.universe.newInteger(intVal);
+    return universe.newInteger(intVal);
 }
 
 function _sin(frame, args) {
     var val = Math.sin(args[0].getEmbeddedDouble());
-    return u.universe.newDouble(val);
+    return universe.newDouble(val);
 }
 
 function _cos(frame, args) {
     var val = Math.cos(args[0].getEmbeddedDouble());
-    return u.universe.newDouble(val);
+    return universe.newDouble(val);
 }
 
 function _positiveInfinity(_frame, _args) {
-    return u.universe.newDouble(Number.POSITIVE_INFINITY);
+    return universe.newDouble(Number.POSITIVE_INFINITY);
 }
 class DoublePrimitives extends Primitives {
     constructor() {
@@ -120,4 +107,4 @@ class DoublePrimitives extends Primitives {
     }
 }
 
-exports.prims = DoublePrimitives;
+export const prims = DoublePrimitives;

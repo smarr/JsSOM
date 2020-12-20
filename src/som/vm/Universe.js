@@ -21,73 +21,23 @@
 */
 //@ts-check
 "use strict";
-const assert = require('../../lib/assert').assert;
-const IllegalStateException = require('../../lib/exceptions').IllegalStateException;
+import { assert } from '../../lib/assert.js';
+import { IllegalStateException } from '../../lib/exceptions.js';
 
-const platform = require('../../lib/platform');
+import { getMillisecondTicks, isBrowser, stderr, stderrnl, stdout, stdoutnl, exitInterpreter } from '../../lib/platform.js';
 
-const Shell = require('./Shell').Shell;
+import { Shell } from './Shell.js';
 
-const compiler = require('../compiler/SourcecodeCompiler');
+import { compileClassFile } from '../compiler/SourcecodeCompiler.js';
 
-const SObject = require('../vmobjects/SObject').SObject;
-const SBlock = require('../vmobjects/SBlock').SBlock;
-const SArray = require('../vmobjects/SArray').SArray;
-const SClass = require('../vmobjects/SClass').SClass;
-const SString = require('../vmobjects/SString').SString;
-const SSymbol = require('../vmobjects/SSymbol').SSymbol;
-const SPrimitive = require('../vmobjects/SInvokable').SPrimitive;
-const SMethod = require('../vmobjects/SInvokable').SMethod;
-const numbers = require('../vmobjects/numbers');
-const SInteger = numbers.SInteger;
-const SBigInteger = numbers.SBigInteger;
-const SDouble = numbers.SDouble;
-
-const getBlockEvaluationPrimitive = require('../vmobjects/SBlock').getBlockEvaluationPrimitive;
-
-function newMetaclassClass() {
-    // Allocate the metaclass classes
-    var result = new SClass(null, 0);
-    result.setClass(new SClass(null, 0));
-
-    // Setup the metaclass hierarchy
-    result.getClass().setClass(result);
-    return result;
-}
-
-function newSystemClass() {
-    // Allocate the new system class
-    var systemClass = new SClass(null, 0);
-
-    // Setup the metaclass hierarchy
-    systemClass.setClass(new SClass(null, 0));
-    systemClass.getClass().setClass(exports.metaclassClass);
-
-    // Return the freshly allocated system class
-    return systemClass;
-}
-
-exports.nilObject      = new SObject(null, 0);
-exports.metaclassClass = newMetaclassClass();
-exports.objectClass    = newSystemClass();
-exports.nilClass       = newSystemClass();
-exports.classClass     = newSystemClass();
-exports.arrayClass     = newSystemClass();
-exports.symbolClass    = newSystemClass();
-exports.methodClass    = newSystemClass();
-exports.integerClass   = newSystemClass();
-exports.primitiveClass = newSystemClass();
-exports.stringClass    = newSystemClass();
-exports.doubleClass    = newSystemClass();
-exports.booleanClass   = newSystemClass();
-exports.trueClass      = newSystemClass();
-exports.falseClass     = newSystemClass();
-exports.blockClasses   = [];
-exports.trueObject     = null;
-exports.falseObject    = null;
-exports.systemObject   = null;
-// exports.core_lib       = loadCoreLib();
-exports.startTime      = platform.getMillisecondTicks();
+import { SObject } from '../vmobjects/SObject.js';
+import { SBlock, getBlockEvaluationPrimitive } from '../vmobjects/SBlock.js';
+import { SArray } from '../vmobjects/SArray.js';
+import { SClass } from '../vmobjects/SClass.js';
+import { SString } from '../vmobjects/SString.js';
+import { SSymbol } from '../vmobjects/SSymbol.js';
+import { SPrimitive, SMethod } from '../vmobjects/SInvokable.js';
+import { SInteger, SBigInteger, SDouble } from '../vmobjects/numbers.js';
 
 class Association {
     constructor(keySymbol, valueObj) {
@@ -113,7 +63,7 @@ function printUsageAndExit() {
 }
 
 function getDefaultClassPath() {
-    if (platform.isBrowser) {
+    if (isBrowser) {
         return ['core-lib/Smalltalk', 'core-lib/Examples', 'core-lib/TestSuite'];
     }
     return ['.'];
@@ -131,6 +81,27 @@ class Universe {
         this.printAST      = false;
         this.symbolTable   = {};
         this.lastExitCode  = 0;
+
+        this.nilObject      = new SObject(null, 0);
+        this.metaclassClass = this.newMetaclassClass();
+        this.objectClass    = this.newSystemClass();
+        this.nilClass       = this.newSystemClass();
+        this.classClass     = this.newSystemClass();
+        this.arrayClass     = this.newSystemClass();
+        this.symbolClass    = this.newSystemClass();
+        this.methodClass    = this.newSystemClass();
+        this.integerClass   = this.newSystemClass();
+        this.primitiveClass = this.newSystemClass();
+        this.stringClass    = this.newSystemClass();
+        this.doubleClass    = this.newSystemClass();
+        this.booleanClass   = this.newSystemClass();
+        this.trueClass      = this.newSystemClass();
+        this.falseClass     = this.newSystemClass();
+        this.blockClasses   = [];
+        this.trueObject     = null;
+        this.falseObject    = null;
+        this.systemObject   = null;
+        this.startTime      = getMillisecondTicks();
     }
 
     setAvoidExit(bool) {
@@ -214,13 +185,35 @@ class Universe {
         return this.newSymbol(string);
     }
 
+    newMetaclassClass() {
+        // Allocate the metaclass classes
+        var result = new SClass(null, 0);
+        result.setClass(new SClass(null, 0));
+
+        // Setup the metaclass hierarchy
+        result.getClass().setClass(result);
+        return result;
+    }
+
+    newSystemClass() {
+        // Allocate the new system class
+        var systemClass = new SClass(null, 0);
+
+        // Setup the metaclass hierarchy
+        systemClass.setClass(new SClass(null, 0));
+        systemClass.getClass().setClass(this.metaclassClass);
+
+        // Return the freshly allocated system class
+        return systemClass;
+    }
+
     initializeSystemClass(systemClass, superClass, name) {
         // Initialize the superclass hierarchy
         if (superClass != null) {
             systemClass.setSuperClass(superClass);
             systemClass.getClass().setSuperClass(superClass.getClass());
         } else {
-            systemClass.getClass().setSuperClass(exports.classClass);
+            systemClass.getClass().setSuperClass(this.classClass);
         }
 
         // Initialize the array of instance fields
@@ -255,7 +248,7 @@ class Universe {
         assert(this.getGlobal(name) == null);
 
         // Get the block class for blocks with the given number of arguments
-        var result = this.loadClass(name, null);
+        var result = this.loadClass(name);
 
         // Add the appropriate value primitive to the block class
         var prim = getBlockEvaluationPrimitive(numberOfArguments, result);
@@ -264,7 +257,7 @@ class Universe {
         // Insert the block class into the dictionary of globals
         this.setGlobal(name, result);
 
-        exports.blockClasses[numberOfArguments] = result;
+        this.blockClasses[numberOfArguments] = result;
     }
 
     loadClass(name) {
@@ -286,7 +279,7 @@ class Universe {
             var cpEntry = this.classPath[i];
 
             // Load the class from a file and return the loaded class
-            var result = compiler.compileClassFile(cpEntry, name.getString(), // TODO: how to arrange the global/static namespace of SOM??
+            var result = compileClassFile(cpEntry, name.getString(), // TODO: how to arrange the global/static namespace of SOM??
                 systemClass);
             if (result == null) {
                 continue; // continue searching in the class path
@@ -318,56 +311,56 @@ class Universe {
         if (this.objectSystemInitialized) { return; }
 
         // Setup the class reference for the nil object
-        exports.nilObject.setClass(exports.nilClass);
+        this.nilObject.setClass(this.nilClass);
 
         // Initialize the system classes.
-        this.initializeSystemClass(exports.objectClass,               null,  "Object");
-        this.initializeSystemClass(exports.classClass,     exports.objectClass,  "Class");
-        this.initializeSystemClass(exports.metaclassClass, exports.classClass,   "Metaclass");
-        this.initializeSystemClass(exports.nilClass,       exports.objectClass,  "Nil");
-        this.initializeSystemClass(exports.arrayClass,     exports.objectClass,  "Array");
-        this.initializeSystemClass(exports.methodClass,    exports.objectClass,  "Method");
-        this.initializeSystemClass(exports.integerClass,   exports.objectClass,  "Integer");
-        this.initializeSystemClass(exports.primitiveClass, exports.objectClass,  "Primitive");
-        this.initializeSystemClass(exports.stringClass,    exports.objectClass,  "String");
-        this.initializeSystemClass(exports.symbolClass,    exports.stringClass,  "Symbol");
-        this.initializeSystemClass(exports.doubleClass,    exports.objectClass,  "Double");
-        this.initializeSystemClass(exports.booleanClass,   exports.objectClass,  "Boolean");
-        this.initializeSystemClass(exports.trueClass,      exports.booleanClass, "True");
-        this.initializeSystemClass(exports.falseClass,     exports.booleanClass, "False");
+        this.initializeSystemClass(this.objectClass,               null,  "Object");
+        this.initializeSystemClass(this.classClass,     this.objectClass,  "Class");
+        this.initializeSystemClass(this.metaclassClass, this.classClass,   "Metaclass");
+        this.initializeSystemClass(this.nilClass,       this.objectClass,  "Nil");
+        this.initializeSystemClass(this.arrayClass,     this.objectClass,  "Array");
+        this.initializeSystemClass(this.methodClass,    this.objectClass,  "Method");
+        this.initializeSystemClass(this.integerClass,   this.objectClass,  "Integer");
+        this.initializeSystemClass(this.primitiveClass, this.objectClass,  "Primitive");
+        this.initializeSystemClass(this.stringClass,    this.objectClass,  "String");
+        this.initializeSystemClass(this.symbolClass,    this.stringClass,  "Symbol");
+        this.initializeSystemClass(this.doubleClass,    this.objectClass,  "Double");
+        this.initializeSystemClass(this.booleanClass,   this.objectClass,  "Boolean");
+        this.initializeSystemClass(this.trueClass,      this.booleanClass, "True");
+        this.initializeSystemClass(this.falseClass,     this.booleanClass, "False");
 
         // Load methods and fields into the system classes
-        this.loadSystemClass(exports.objectClass);
-        this.loadSystemClass(exports.classClass);
-        this.loadSystemClass(exports.metaclassClass);
-        this.loadSystemClass(exports.nilClass);
-        this.loadSystemClass(exports.arrayClass);
-        this.loadSystemClass(exports.methodClass);
-        this.loadSystemClass(exports.symbolClass);
-        this.loadSystemClass(exports.integerClass);
-        this.loadSystemClass(exports.primitiveClass);
-        this.loadSystemClass(exports.stringClass);
-        this.loadSystemClass(exports.doubleClass);
-        this.loadSystemClass(exports.booleanClass);
-        this.loadSystemClass(exports.trueClass);
-        this.loadSystemClass(exports.falseClass);
+        this.loadSystemClass(this.objectClass);
+        this.loadSystemClass(this.classClass);
+        this.loadSystemClass(this.metaclassClass);
+        this.loadSystemClass(this.nilClass);
+        this.loadSystemClass(this.arrayClass);
+        this.loadSystemClass(this.methodClass);
+        this.loadSystemClass(this.symbolClass);
+        this.loadSystemClass(this.integerClass);
+        this.loadSystemClass(this.primitiveClass);
+        this.loadSystemClass(this.stringClass);
+        this.loadSystemClass(this.doubleClass);
+        this.loadSystemClass(this.booleanClass);
+        this.loadSystemClass(this.trueClass);
+        this.loadSystemClass(this.falseClass);
 
         // Load the generic block class
-        exports.blockClasses[0] = this.loadClass(this.symbolFor("Block"));
+        this.blockClasses[0] = this.loadClass(this.symbolFor("Block"));
 
         // Setup the true and false objects
-        exports.trueObject  = this.newInstance(exports.trueClass);
-        exports.falseObject = this.newInstance(exports.falseClass);
+        this.trueObject  = this.newInstance(this.trueClass);
+        this.falseObject = this.newInstance(this.falseClass);
 
         // Load the system class and create an instance of it
-        exports.systemClass  = this.loadClass(this.symbolFor("System"));
-        exports.systemObject = this.newInstance(exports.systemClass);
+        this.systemClass  = this.loadClass(this.symbolFor("System"));
+        this.systemObject = this.newInstance(this.systemClass);
 
         // Put special objects into the dictionary of globals
-        this.setGlobal(this.symbolFor("nil"),    exports.nilObject);
-        this.setGlobal(this.symbolFor("true"),   exports.trueObject);
-        this.setGlobal(this.symbolFor("false"),  exports.falseObject);
-        this.setGlobal(this.symbolFor("system"), exports.systemObject);
+        this.setGlobal(this.symbolFor("nil"),    this.nilObject);
+        this.setGlobal(this.symbolFor("true"),   this.trueObject);
+        this.setGlobal(this.symbolFor("false"),  this.falseObject);
+        this.setGlobal(this.symbolFor("system"), this.systemObject);
 
         // Load the remaining block classes
         this.loadBlockClass(1);
@@ -413,11 +406,11 @@ class Universe {
         }
 
         // Lookup the initialize invokable on the system class
-        const initialize = exports.systemClass.
+        const initialize = this.systemClass.
             lookupInvokable(this.symbolFor("initialize:"));
         const somArgs = this.newArrayWithStrings(args);
 
-        return initialize.invoke(null, [exports.systemObject, somArgs]);
+        return initialize.invoke(null, [this.systemObject, somArgs]);
     }
 
     initializeForStandardRepl() {
@@ -526,26 +519,26 @@ class Universe {
     }
 
     errorPrint(msg) {
-        platform.stderr(msg);
+        stderr(msg);
     }
 
     errorPrintln(msg) {
-        platform.stderrnl(msg);
+        stderrnl(msg);
     }
 
     print(msg) {
-        platform.stdout(msg);
+        stdout(msg);
     }
 
     println(msg) {
-        platform.stdoutnl(msg);
+        stdoutnl(msg);
     }
 
     exit(errorCode) {
         // Exit from the Java system
         this.lastExitCode = errorCode;
         if (!this.avoidExit) {
-            platform.exitInterpreter(errorCode);
+            exitInterpreter(errorCode);
         }
         throw new ExitException(errorCode);
     }
@@ -555,10 +548,4 @@ class Universe {
     }
 }
 
-exports.Universe = Universe;
-exports.universe = new Universe();
-exports.SArray = SArray;
-exports.SObject = SObject;
-exports.SString = SString;
-exports.SDouble = SDouble;
-exports.SInteger = SInteger;
+export const universe = new Universe();

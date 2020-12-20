@@ -21,11 +21,11 @@
 */
 //@ts-check
 "use strict";
-const assert = require('../../lib/assert').assert;
+import { assert } from '../../lib/assert.js';
 
-const Node = require('./Node').Node;
+import { Node } from './Node.js';
 
-class FieldReadNode extends Node {
+export class FieldReadNode extends Node {
     constructor(selfExp, fieldIdx, source) {
         super(source);
         assert(fieldIdx >= 0);
@@ -39,7 +39,7 @@ class FieldReadNode extends Node {
     }
 }
 
-class FieldWriteNode extends Node {
+export class FieldWriteNode extends Node {
     constructor(selfExp, valueExp, fieldIdx, source) {
         super(source);
         assert(fieldIdx >= 0);
@@ -55,6 +55,3 @@ class FieldWriteNode extends Node {
         return value;
     }
 }
-
-exports.FieldReadNode = FieldReadNode;
-exports.FieldWriteNode = FieldWriteNode;

@@ -21,11 +21,11 @@
 */
 //@ts-check
 "use strict";
-const SAbstractObject = require('./SAbstractObject').SAbstractObject;
+import { SAbstractObject } from './SAbstractObject.js';
 
-const u = require('../vm/Universe');
+import { universe } from '../vm/Universe.js';
 
-class SArray extends SAbstractObject {
+export class SArray extends SAbstractObject {
     constructor(length, values) {
         super();
         this.length = length;
@@ -33,7 +33,7 @@ class SArray extends SAbstractObject {
 
         if (values == null) {
             for (let i = 0; i < length; i++) {
-                this.indexableFields[i] = u.nilObject;
+                this.indexableFields[i] = universe.nilObject;
             }
         }
     }
@@ -67,8 +67,6 @@ class SArray extends SAbstractObject {
     }
 
     getClass() {
-        return u.arrayClass;
+        return universe.arrayClass;
     }
 }
-
-exports.SArray = SArray;

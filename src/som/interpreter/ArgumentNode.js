@@ -21,11 +21,11 @@
 */
 //@ts-check
 "use strict";
-const assert = require('../../lib/assert').assert;
+import { assert } from '../../lib/assert.js';
 
-const ContextualNode = require('./ContextualNode').ContextualNode;
+import { ContextualNode } from './ContextualNode.js';
 
-class ArgumentReadNode extends ContextualNode {
+export class ArgumentReadNode extends ContextualNode {
     constructor(contextLevel, arg, source) {
         super(contextLevel, source);
 
@@ -39,7 +39,7 @@ class ArgumentReadNode extends ContextualNode {
     }
 }
 
-class ArgumentWriteNode extends ContextualNode {
+export class ArgumentWriteNode extends ContextualNode {
     constructor(contextLevel, arg, valueExpr, source) {
         super(contextLevel, source);
         this.child_value = this.adopt(valueExpr);
@@ -56,7 +56,7 @@ class ArgumentWriteNode extends ContextualNode {
     }
 }
 
-class SuperReadNode extends ArgumentReadNode{
+export class SuperReadNode extends ArgumentReadNode{
     constructor(holderClass, classSide, contextLevel, arg, source) {
         super(contextLevel, arg, source);
         this.holderClass = holderClass;
@@ -75,7 +75,3 @@ class SuperReadNode extends ArgumentReadNode{
         return true;
     }
 }
-
-exports.ArgumentReadNode = ArgumentReadNode;
-exports.ArgumentWriteNode = ArgumentWriteNode;
-exports.SuperReadNode = SuperReadNode;

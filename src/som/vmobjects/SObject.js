@@ -21,10 +21,10 @@
 */
 //@ts-check
 "use strict";
-const SAbstractObject = require('./SAbstractObject').SAbstractObject;
-const u = require('../vm/Universe');
+import { SAbstractObject } from './SAbstractObject.js';
+import { universe } from '../vm/Universe.js';
 
-class SObject extends SAbstractObject {
+export class SObject extends SAbstractObject {
     constructor(instanceClass, numFields) {
         super();
 
@@ -33,7 +33,7 @@ class SObject extends SAbstractObject {
                 numFields : instanceClass.getNumberOfInstanceFields());
 
         for (var i = 0; i < this.objectFields.length; i++) {
-            this.objectFields[i] = u.nilObject;
+            this.objectFields[i] = universe.nilObject;
         }
     }
 
@@ -61,5 +61,3 @@ class SObject extends SAbstractObject {
         this.objectFields[idx] = value;
     }
 }
-
-exports.SObject = SObject;

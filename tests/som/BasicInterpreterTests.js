@@ -19,104 +19,108 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const u = require("../../src/som/vm/Universe");
-const universe = u.universe;
+import { universe } from "../../src/som/vm/Universe.js";
 
-const expect = require('chai').expect;
+import chai from 'chai';
+const expect = chai.expect;
+
+const integerClass = universe.integerClass;
+const classClass = universe.classClass;
+const symbolClass = universe.symbolClass;
+const doubleClass = universe.doubleClass;
+
+const tests = [
+    ["MethodCall",     "test",  42, integerClass],
+    ["MethodCall",     "test2", 42, integerClass],
+
+    ["NonLocalReturn", "test1", 42, integerClass],
+    ["NonLocalReturn", "test2", 43, integerClass],
+    ["NonLocalReturn", "test3",  3, integerClass],
+    ["NonLocalReturn", "test4", 42, integerClass],
+    ["NonLocalReturn", "test5", 22, integerClass],
+
+    ["Blocks", "testArg1",          42, integerClass],
+    ["Blocks", "testArg2",          77, integerClass],
+    ["Blocks", "testArgAndLocal",    8, integerClass],
+    ["Blocks", "testArgAndContext",  8, integerClass],
+    ["Blocks", "testEmptyZeroArg", 1, integerClass],
+    ["Blocks", "testEmptyOneArg",  1, integerClass],
+    ["Blocks", "testEmptyTwoArg",  1, integerClass],
 
 
-var tests = [
-    ["MethodCall",     "test",  42, u.integerClass],
-    ["MethodCall",     "test2", 42, u.integerClass],
+    ["Return", "testReturnSelf",           "Return", classClass],
+    ["Return", "testReturnSelfImplicitly", "Return", classClass],
+    ["Return", "testNoReturnReturnsSelf",  "Return", classClass],
+    ["Return", "testBlockReturnsImplicitlyLastValue", 4, integerClass],
 
-    ["NonLocalReturn", "test1", 42, u.integerClass],
-    ["NonLocalReturn", "test2", 43, u.integerClass],
-    ["NonLocalReturn", "test3",  3, u.integerClass],
-    ["NonLocalReturn", "test4", 42, u.integerClass],
-    ["NonLocalReturn", "test5", 22, u.integerClass],
+    ["IfTrueIfFalse", "test",  42, integerClass],
+    ["IfTrueIfFalse", "test2", 33, integerClass],
+    ["IfTrueIfFalse", "test3",  4, integerClass],
 
-    ["Blocks", "testArg1",          42, u.integerClass],
-    ["Blocks", "testArg2",          77, u.integerClass],
-    ["Blocks", "testArgAndLocal",    8, u.integerClass],
-    ["Blocks", "testArgAndContext",  8, u.integerClass],
-    ["Blocks", "testEmptyZeroArg", 1, u.integerClass],
-    ["Blocks", "testEmptyOneArg",  1, u.integerClass],
-    ["Blocks", "testEmptyTwoArg",  1, u.integerClass],
+    ["CompilerSimplification", "testReturnConstantSymbol",  "constant", symbolClass],
+    ["CompilerSimplification", "testReturnConstantInt",        42,      integerClass],
+    ["CompilerSimplification", "testReturnSelf",            "CompilerSimplification", classClass],
+    ["CompilerSimplification", "testReturnSelfImplicitly",  "CompilerSimplification", classClass],
+    ["CompilerSimplification", "testReturnArgumentN",      55,      integerClass],
+    ["CompilerSimplification", "testReturnArgumentA",      44,      integerClass],
+    ["CompilerSimplification", "testSetField",          "foo",      symbolClass],
+    ["CompilerSimplification", "testGetField",             40,      integerClass],
 
+    ["Hash", "testHash", 444, integerClass],
 
-    ["Return", "testReturnSelf",           "Return", u.classClass],
-    ["Return", "testReturnSelfImplicitly", "Return", u.classClass],
-    ["Return", "testNoReturnReturnsSelf",  "Return", u.classClass],
-    ["Return", "testBlockReturnsImplicitlyLastValue", 4, u.integerClass],
+    ["Arrays", "testEmptyToInts", 3, integerClass],
+    ["Arrays", "testPutAllInt", 5, integerClass],
+    ["Arrays", "testPutAllNil", "Nil", classClass],
+    ["Arrays", "testPutAllBlock", 3, integerClass],
+    ["Arrays", "testNewWithAll", 1, integerClass],
 
-    ["IfTrueIfFalse", "test",  42, u.integerClass],
-    ["IfTrueIfFalse", "test2", 33, u.integerClass],
-    ["IfTrueIfFalse", "test3",  4, u.integerClass],
+    ["BlockInlining", "testNoInlining", 1, integerClass],
+    ["BlockInlining", "testOneLevelInlining", 1, integerClass],
+    ["BlockInlining", "testOneLevelInliningWithLocalShadowTrue", 2, integerClass],
+    ["BlockInlining", "testOneLevelInliningWithLocalShadowFalse", 1, integerClass],
 
-    ["CompilerSimplification", "testReturnConstantSymbol",  "constant", u.symbolClass],
-    ["CompilerSimplification", "testReturnConstantInt",        42,      u.integerClass],
-    ["CompilerSimplification", "testReturnSelf",            "CompilerSimplification", u.classClass],
-    ["CompilerSimplification", "testReturnSelfImplicitly",  "CompilerSimplification", u.classClass],
-    ["CompilerSimplification", "testReturnArgumentN",      55,      u.integerClass],
-    ["CompilerSimplification", "testReturnArgumentA",      44,      u.integerClass],
-    ["CompilerSimplification", "testSetField",          "foo",      u.symbolClass],
-    ["CompilerSimplification", "testGetField",             40,      u.integerClass],
+    ["BlockInlining", "testBlockNestedInIfTrue", 2, integerClass],
+    ["BlockInlining", "testBlockNestedInIfFalse", 42, integerClass],
 
-    ["Hash", "testHash", 444, u.integerClass],
+    ["BlockInlining", "testDeepNestedInlinedIfTrue", 3, integerClass],
+    ["BlockInlining", "testDeepNestedInlinedIfFalse", 42, integerClass],
 
-    ["Arrays", "testEmptyToInts", 3, u.integerClass],
-    ["Arrays", "testPutAllInt", 5, u.integerClass],
-    ["Arrays", "testPutAllNil", "Nil", u.classClass],
-    ["Arrays", "testPutAllBlock", 3, u.integerClass],
-    ["Arrays", "testNewWithAll", 1, u.integerClass],
+    ["BlockInlining", "testDeepNestedBlocksInInlinedIfTrue", 5, integerClass],
+    ["BlockInlining", "testDeepNestedBlocksInInlinedIfFalse", 43, integerClass],
 
-    ["BlockInlining", "testNoInlining", 1, u.integerClass],
-    ["BlockInlining", "testOneLevelInlining", 1, u.integerClass],
-    ["BlockInlining", "testOneLevelInliningWithLocalShadowTrue", 2, u.integerClass],
-    ["BlockInlining", "testOneLevelInliningWithLocalShadowFalse", 1, u.integerClass],
+    ["BlockInlining", "testDeepDeepNestedTrue", 9, integerClass],
+    ["BlockInlining", "testDeepDeepNestedFalse", 43, integerClass],
 
-    ["BlockInlining", "testBlockNestedInIfTrue", 2, u.integerClass],
-    ["BlockInlining", "testBlockNestedInIfFalse", 42, u.integerClass],
+    ["BlockInlining", "testToDoNestDoNestIfTrue", 2, integerClass],
 
-    ["BlockInlining", "testDeepNestedInlinedIfTrue", 3, u.integerClass],
-    ["BlockInlining", "testDeepNestedInlinedIfFalse", 42, u.integerClass],
+    ["NonLocalVars", "testWriteDifferentTypes", 3.75, doubleClass],
 
-    ["BlockInlining", "testDeepNestedBlocksInInlinedIfTrue", 5, u.integerClass],
-    ["BlockInlining", "testDeepNestedBlocksInInlinedIfFalse", 43, u.integerClass],
+    ["ObjectCreation", "test", 1000000, integerClass],
 
-    ["BlockInlining", "testDeepDeepNestedTrue", 9, u.integerClass],
-    ["BlockInlining", "testDeepDeepNestedFalse", 43, u.integerClass],
+    ["Regressions", "testSymbolEquality", 1, integerClass],
+    ["Regressions", "testSymbolReferenceEquality", 1, integerClass],
+    ["Regressions", "testUninitializedLocal", 1, integerClass],
+    ["Regressions", "testUninitializedLocalInBlock", 1, integerClass],
 
-    ["BlockInlining", "testToDoNestDoNestIfTrue", 2, u.integerClass],
+    ["BinaryOperation", "test", 3 + 8, integerClass],
 
-    ["NonLocalVars", "testWriteDifferentTypes", 3.75, u.doubleClass],
-
-    ["ObjectCreation", "test", 1000000, u.integerClass],
-
-    ["Regressions", "testSymbolEquality", 1, u.integerClass],
-    ["Regressions", "testSymbolReferenceEquality", 1, u.integerClass],
-    ["Regressions", "testUninitializedLocal", 1, u.integerClass],
-    ["Regressions", "testUninitializedLocalInBlock", 1, u.integerClass],
-
-    ["BinaryOperation", "test", 3 + 8, u.integerClass],
-
-    ["NumberOfTests", "numberOfTests", 57, u.integerClass]
+    ["NumberOfTests", "numberOfTests", 57, integerClass]
 ];
 
 function assertEqualsSomValue(expectedValue, expectedType, actualValue) {
-    if (expectedType == u.integerClass) {
+    if (expectedType == integerClass) {
         expect(actualValue.getEmbeddedInteger()).to.equal(expectedValue);
         return;
     }
-    if (expectedType == u.doubleClass) {
+    if (expectedType == doubleClass) {
         expect(actualValue.getEmbeddedDouble()).to.equal(expectedValue);
         return;
     }
-    if (expectedType == u.symbolClass) {
+    if (expectedType == symbolClass) {
         expect(actualValue.getString()).to.equal(expectedValue);
         return;
     }
-    if (expectedType == u.classClass) {
+    if (expectedType == classClass) {
         expect(actualValue.getName().getString()).to.equal(expectedValue);
         return;
     }

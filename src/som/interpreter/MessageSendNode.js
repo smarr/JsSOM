@@ -21,13 +21,13 @@
 */
 //@ts-check
 "use strict";
-const assert = require('../../lib/assert').assert;
+import { assert } from '../../lib/assert.js';
 
-const Node = require('./Node').Node;
-const GenericDispatchNode = require('./DispatchNode').GenericDispatchNode;
-const UninitializedSuperDispatchNode = require('./DispatchNode').UninitializedSuperDispatchNode;
+import { Node } from './Node.js';
+import { GenericDispatchNode } from './DispatchNode.js';
+import { UninitializedSuperDispatchNode } from './DispatchNode.js';
 
-class MessageSendNode extends Node {
+export class MessageSendNode extends Node {
     constructor(selector, argumentNodes, source) {
         super(source);
         this.selector = selector;
@@ -60,5 +60,3 @@ class MessageSendNode extends Node {
         return "MsgSend(" + this.selector.getString() + ")";
     }
 }
-
-exports.MessageSendNode = MessageSendNode;

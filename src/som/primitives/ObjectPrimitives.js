@@ -21,16 +21,18 @@
 */
 //@ts-check
 "use strict";
-const Primitives = require('./Primitives').Primitives;
-const u = require('../vm/Universe');
+import { Primitives } from './Primitives.js';
+import { universe } from '../vm/Universe.js';
+import { SObject } from '../vmobjects/SObject.js';
+import { SArray } from '../vmobjects/SArray.js';
 
 function _equals(frame, args) {
     var op1 = args[1];
     var op2 = args[0];
     if (op1 === op2) {
-        return u.trueObject;
+        return universe.trueObject;
     } else {
-        return u.falseObject;
+        return universe.falseObject;
     }
 }
 
@@ -41,18 +43,18 @@ function _hashcode(frame, args) {
         hash = Math.round(Math.random() * 2147483647);
         rcvr.hash = hash;
     }
-    return u.universe.newInteger(hash);
+    return universe.newInteger(hash);
 }
 
 function _objectSize(frame, args) {
     var size = 0;
     var rcvr = args[0];
-    if (rcvr instanceof u.SObject) {
+    if (rcvr instanceof SObject) {
         size = rcvr.getNumberOfFields();
-    } else if (rcvr instanceof u.SArray) {
+    } else if (rcvr instanceof SArray) {
         size = rcvr.getNumberOfIndexableFields();
     }
-    return u.universe.newInteger(size);
+    return universe.newInteger(size);
 }
 
 function _perform(frame, args) {
@@ -100,7 +102,7 @@ function _instVarNamed(frame, args) {
 }
 
 function _halt(frame, args) {
-    u.universe.println("BREAKPOINT");
+    universe.println("BREAKPOINT");
     // eslint-disable-next-line no-debugger
     debugger;
     return args[0];
@@ -130,4 +132,4 @@ class ObjectPrimitives extends Primitives {
     }
 }
 
-exports.prims = ObjectPrimitives;
+export const prims = ObjectPrimitives;

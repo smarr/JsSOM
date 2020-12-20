@@ -1,7 +1,7 @@
 //@ts-check
 "use strict";
 
-class SourceSection {
+export class SourceSection {
   constructor(qualifier, startLine, startColumn, charIndex, length) {
     this.qualifier = qualifier;
     this._startLine = startLine;
@@ -15,5 +15,3 @@ class SourceSection {
   charIndex  () { return this._charIndex;   };
   length     () { return this._length;      };
 }
-
-exports.SourceSection = SourceSection;

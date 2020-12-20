@@ -21,9 +21,9 @@
 */
 //@ts-check
 "use strict";
-const Node = require('./Node').Node;
+import { Node } from './Node.js';
 
-class LiteralNode extends Node {
+export class LiteralNode extends Node {
     constructor(value, source) {
         super(source);
         this.value = value;
@@ -33,5 +33,3 @@ class LiteralNode extends Node {
         return this.value;
     }
 }
-
-exports.LiteralNode = LiteralNode;

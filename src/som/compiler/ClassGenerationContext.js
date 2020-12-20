@@ -21,9 +21,9 @@
 */
 //@ts-check
 "use strict";
-const u = require('../vm/Universe');
+import { universe } from '../vm/Universe.js';
 
-class ClassGenerationContext {
+export class ClassGenerationContext {
     constructor() {
         this.name = null;
         this.superName = null;
@@ -92,50 +92,48 @@ class ClassGenerationContext {
         const ccName = this.name.getString() + " class";
 
         // Load the super class
-        const superClass = u.universe.loadClass(this.superName);
-        const resultClass = u.universe.newClass(u.metaclassClass);
+        const superClass = universe.loadClass(this.superName);
+        const resultClass = universe.newClass(universe.metaclassClass);
 
         // Initialize the class of the resulting class
         resultClass.setInstanceFields(
-            u.universe.newArrayFrom(this.classFields.slice()));
+            universe.newArrayFrom(this.classFields.slice()));
         resultClass.setInstanceInvokables(
-            u.universe.newArrayFrom(this.classMethods.slice()));
-        resultClass.setName(u.universe.symbolFor(ccName));
+            universe.newArrayFrom(this.classMethods.slice()));
+        resultClass.setName(universe.symbolFor(ccName));
 
         const superMClass = superClass.getClass();
         resultClass.setSuperClass(superMClass);
 
         // Allocate the resulting class
-        const result = u.universe.newClass(resultClass);
+        const result = universe.newClass(resultClass);
 
         // Initialize the resulting class
         result.setName(this.name);
         result.setSuperClass(superClass);
         result.setInstanceFields(
-            u.universe.newArrayFrom(this.instanceFields.slice()));
+            universe.newArrayFrom(this.instanceFields.slice()));
         result.setInstanceInvokables(
-            u.universe.newArrayFrom(this.instanceMethods.slice()));
+            universe.newArrayFrom(this.instanceMethods.slice()));
 
         return result;
     }
 
     assembleSystemClass(systemClass) {
         systemClass.setInstanceInvokables(
-            u.universe.newArrayFrom(this.instanceMethods.slice()));
+            universe.newArrayFrom(this.instanceMethods.slice()));
         systemClass.setInstanceFields(
-            u.universe.newArrayFrom(this.instanceFields.slice()));
+            universe.newArrayFrom(this.instanceFields.slice()));
 
         // class-bound == class-instance-bound
         var superMClass = systemClass.getClass();
         superMClass.setInstanceInvokables(
-            u.universe.newArrayFrom(this.classMethods.slice()));
+            universe.newArrayFrom(this.classMethods.slice()));
         superMClass.setInstanceFields(
-            u.universe.newArrayFrom(this.classFields.slice()));
+            universe.newArrayFrom(this.classFields.slice()));
     }
 
     toString() {
         return "ClassGenC(" + this.name.getString() + ")";
     }
 }
-
-exports.ClassGenerationContext = ClassGenerationContext;

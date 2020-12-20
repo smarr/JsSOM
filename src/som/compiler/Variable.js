@@ -21,9 +21,9 @@
 */
 //@ts-check
 "use strict";
-const factory = require('../interpreter/NodeFactory');
+import { createArgumentRead, createArgumentWrite, createSuperRead, createVariableRead, createVariableWrite } from '../interpreter/NodeFactory.js';
 
-class Argument {
+export class Argument {
     constructor(name, index) {
         this.name = name;
         this.index = index;
@@ -38,15 +38,15 @@ class Argument {
     }
 
     getReadNode(contextLevel, source) {
-        return factory.createArgumentRead(this, contextLevel, source);
+        return createArgumentRead(this, contextLevel, source);
     }
 
     getWriteNode(contextLevel, valueExpr, source) {
-        return factory.createArgumentWrite(this, contextLevel, valueExpr, source);
+        return createArgumentWrite(this, contextLevel, valueExpr, source);
     }
 
     getSuperReadNode(contextLevel, holderClass, classSide, source) {
-        return factory.createSuperRead(
+        return createSuperRead(
             this, contextLevel, holderClass, classSide, source);
     }
 
@@ -55,7 +55,7 @@ class Argument {
     }
 }
 
-class Local {
+export class Local {
     constructor(name, index) {
         this.name = name;
         this.index = index;
@@ -70,13 +70,10 @@ class Local {
     }
 
     getReadNode(contextLevel, source) {
-        return factory.createVariableRead(this, contextLevel, source);
+        return createVariableRead(this, contextLevel, source);
     }
 
     getWriteNode(contextLevel, valueExpr, source) {
-        return factory.createVariableWrite(this, contextLevel, valueExpr, source);
+        return createVariableWrite(this, contextLevel, valueExpr, source);
     }
 }
-
-exports.Argument = Argument;
-exports.Local = Local;

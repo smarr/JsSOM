@@ -21,8 +21,8 @@
 */
 //@ts-check
 "use strict";
-const Sym = require('./Symbol').Sym;
-const IllegalStateException = require('../../lib/exceptions').IllegalStateException;
+import { Sym } from './Symbol.js';
+import { IllegalStateException } from '../../lib/exceptions.js';
 
 function isIdentifierChar(c) {
     return /[A-Za-z\d]/.test(c) || c == '_';
@@ -82,7 +82,7 @@ class SourceCoordinate {
     }
 }
 
-class Lexer {
+export class Lexer {
     constructor(fileContent) {
         this.peekDone = false;
         this.state = new LexerState();
@@ -393,5 +393,3 @@ class Lexer {
         return !isIdentifierChar(this.bufchar(this.state.linePos + text.length));
     }
 }
-
-exports.Lexer = Lexer;

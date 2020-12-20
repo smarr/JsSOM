@@ -21,19 +21,39 @@
 */
 //@ts-check
 "use strict";
-const assert = require('../../lib/assert').assert;
-const isBrowser = require('../../lib/platform').isBrowser;
-const SObject = require('./SObject').SObject;
-const SArray = require('./SArray').SArray;
+import { assert } from '../../lib/assert.js';
+import { SObject } from './SObject.js';
+import { SArray } from './SArray.js';
 
-const u = require('../vm/Universe');
+import { universe } from '../vm/Universe.js';
 
-let browserPrimitives = null;
-if (isBrowser) {
-    browserPrimitives = require('../primitives/in-browser');
+import { prims as ArrayPrims }     from '../primitives/ArrayPrimitives.js';
+import { prims as BlockPrims }     from '../primitives/BlockPrimitives.js';
+import { prims as ClassPrims }     from '../primitives/ClassPrimitives.js';
+import { prims as DoublePrims }    from '../primitives/DoublePrimitives.js';
+import { prims as IntegerPrims }   from '../primitives/IntegerPrimitives.js';
+import { prims as MethodPrims }    from '../primitives/MethodPrimitives.js';
+import { prims as ObjectPrims }    from '../primitives/ObjectPrimitives.js';
+import { prims as PrimitivePrims } from '../primitives/PrimitivePrimitives.js';
+import { prims as StringPrims }    from '../primitives/StringPrimitives.js';
+import { prims as SymbolPrims }    from '../primitives/SymbolPrimitives.js';
+import { prims as SystemPrims }    from '../primitives/SystemPrimitives.js';
+
+const prims = {
+    Array     : ArrayPrims,
+    Block     : BlockPrims,
+    Class     : ClassPrims,
+    Double    : DoublePrims,
+    Integer   : IntegerPrims,
+    Method    : MethodPrims,
+    Object    : ObjectPrims,
+    Primitive : PrimitivePrims,
+    String    : StringPrims,
+    Symbol    : SymbolPrims,
+    System    : SystemPrims
 }
 
-class SClass extends SObject {
+export class SClass extends SObject {
     constructor(clazz, numberOfFields) {
         super(clazz, numberOfFields);
 
@@ -45,7 +65,7 @@ class SClass extends SObject {
     }
 
     getSuperClass() {
-        return this.superclass == null ? u.nilObject : this.superclass;
+        return this.superclass == null ? universe.nilObject : this.superclass;
     };
 
     setSuperClass(value) {
@@ -172,8 +192,8 @@ class SClass extends SObject {
 
     addInstancePrimitive(value, suppressWarning) {
         if (this.addInstanceInvokable(value) && suppressWarning !== true) {
-            u.universe.print("Warning: Primitive " + value.getSignature().getString());
-            u.universe.println(" is not in class definition for class "
+            universe.print("Warning: Primitive " + value.getSignature().getString());
+            universe.println(" is not in class definition for class "
                 + this.getName().getString());
         }
     }
@@ -202,22 +222,16 @@ class SClass extends SObject {
     }
 
     loadPrimitives(displayWarning) {
-        const primModuleName = "../primitives/" + this.name.getString() + "Primitives";
 
         try {
-            let prims = null;
-            if (isBrowser) {
-                prims = browserPrimitives[this.name.getString()].prims;
-            } else {
-                prims = require(primModuleName).prims;
-            }
+            const primitives = prims[this.name.getString()];
 
-            if (prims !== undefined) {
-                (new prims()).
+            if (primitives !== undefined) {
+                (new primitives()).
                     installPrimitivesIn(this);
             } else {
                 if (displayWarning) {
-                    u.universe.println("Primitives class " + this.name.getString() + " not found");
+                    universe.println("Primitives class " + this.name.getString() + " not found");
                 }
             }
         } catch (Error) {
@@ -229,5 +243,3 @@ class SClass extends SObject {
         return "Class(" + this.name.getString() + ")";
     }
 }
-
-exports.SClass = SClass;

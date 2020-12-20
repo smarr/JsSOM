@@ -1,7 +1,7 @@
 {
   "name": "jssom",
   "displayName": "JsSOM",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A JavaScript implementation of the SOM (Simple Object Machine",
   "repository": {
     "type": "git",
@@ -13,20 +13,20 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "browserify": "^17.0.0",
     "chai": "^4.2.0",
-    "mocha": "^8.2.1",
-    "tinyify": "^3.0.0"
+    "mocha": "^8.2.1"
   },
   "scripts": {
-    "browserify": "mkdir -p build && npm run core-lib && npm run browserify:som-core && npm run browserify:main && npm run browserify:test",
-    "_re-add": "--plugin tinyify",
-    "browserify:test": "browserify tests/browserify.js -o build/test.js",
-    "browserify:main": "browserify src/node.js -o build/node.js",
-    "browserify:som-core": "./libs/jsify-core-lib.py core-lib > build/som.js",
+    "browserify": "mkdir -p build && npm run core-lib && npm run browserify:main && npm run browserify:som-core && npm run browserify:core-lib-loader",
+    "browserify:main": "cp -R src/ build",
+    "browserify:som-core": "./libs/jsify-core-lib.py core-lib > build/core-lib-data.js",
+    "browserify:core-lib-loader": "mv build/lib/core-lib-browser.js build/lib/core-lib.js ",
+
     "clean": "rm -Rf build/*.js",
     "clobber": "rm -Rf build/",
     "core-lib": "git submodule update --init --recursive",
+
     "test": "mocha -t 3000 -u bdd ./tests/som/"
-  }
+  },
+  "type": "module"
 }

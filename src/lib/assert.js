@@ -19,6 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
 class AssertionFailedException {
     constructor() {
         // Use V8's native method if available, otherwise fallback
@@ -30,7 +32,7 @@ class AssertionFailedException {
     }
 }
 
-function assert(bool) {
+export function assert(bool) {
     if (!bool) {
         throw new AssertionFailedException();
     }
@@ -38,9 +40,6 @@ function assert(bool) {
 
 class NotYetImplementedException {}
 
-function notYetImplemented() {
+export function notYetImplemented() {
     throw new NotYetImplementedException();
 }
-
-exports.assert = assert;
-exports.notYetImplemented = notYetImplemented;

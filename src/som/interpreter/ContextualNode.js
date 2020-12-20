@@ -21,9 +21,9 @@
 */
 //@ts-check
 "use strict";
-const Node = require('./Node').Node;
+import { Node } from './Node.js';
 
-class ContextualNode extends Node {
+export class ContextualNode extends Node {
     constructor(contextLevel, source) {
         super(source);
         this.contextLevel = contextLevel;
@@ -56,5 +56,3 @@ class ContextualNode extends Node {
         return self;
     }
 }
-
-exports.ContextualNode = ContextualNode;

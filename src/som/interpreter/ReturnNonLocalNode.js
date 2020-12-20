@@ -21,10 +21,10 @@
 */
 //@ts-check
 "use strict";
-const Node = require('./Node').Node;
-const ContextualNode = require('./ContextualNode').ContextualNode;
+import { Node } from './Node.js';
+import { ContextualNode } from './ContextualNode.js';
 
-class ReturnException {
+export class ReturnException {
     constructor(result, targetFrame) {
         this.result = result;
         this.targetFrame = targetFrame;
@@ -35,7 +35,7 @@ class ReturnException {
     getResult() { return this.result; }
 }
 
-class ReturnNonLocalNode extends ContextualNode {
+export class ReturnNonLocalNode extends ContextualNode {
     constructor(exp, contextLevel, source) {
         super(contextLevel, source);
         this.child_exp = this.adopt(exp);
@@ -54,7 +54,7 @@ class ReturnNonLocalNode extends ContextualNode {
     }
 }
 
-class CatchNonLocalReturnNode extends Node{
+export class CatchNonLocalReturnNode extends Node{
     constructor(body) {
         super(null);
         this.child_body = this.adopt(body);
@@ -75,6 +75,3 @@ class CatchNonLocalReturnNode extends Node{
         }
     }
 }
-
-exports.ReturnNonLocalNode = ReturnNonLocalNode;
-exports.CatchNonLocalReturnNode = CatchNonLocalReturnNode;

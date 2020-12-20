@@ -21,18 +21,18 @@
 */
 //@ts-check
 "use strict";
-const RuntimeException = require('../../lib/exceptions').RuntimeException;
+import { RuntimeException } from '../../lib/exceptions.js';
 
-const assert = require('../../lib/assert').assert;
+import { assert } from '../../lib/assert.js';
 
-const Node = require('./Node').Node;
+import { Node } from './Node.js';
 
-const SClass = require('../vmobjects/SClass').SClass;
-const SSymbol = require('../vmobjects/SSymbol').SSymbol;
+import { SClass } from '../vmobjects/SClass.js';
+import { SSymbol } from '../vmobjects/SSymbol.js';
 
-const u = require('../vm/Universe');
+import { universe } from '../vm/Universe.js';
 
-class GenericDispatchNode extends Node {
+export class GenericDispatchNode extends Node {
     constructor(selector) {
         super(null);
         this.selector = selector;
@@ -51,7 +51,7 @@ class GenericDispatchNode extends Node {
     }
 }
 
-class UninitializedSuperDispatchNode extends Node {
+export class UninitializedSuperDispatchNode extends Node {
     constructor(selector, holderClass, classSide) {
         super(null);
         assert(holderClass instanceof SSymbol);
@@ -61,7 +61,7 @@ class UninitializedSuperDispatchNode extends Node {
     }
 
     getLookupClass() {
-        let clazz = u.universe.getGlobal(this.holderClass);
+        let clazz = universe.getGlobal(this.holderClass);
         if (this.classSide) {
             clazz = clazz.getClass();
         }
@@ -91,6 +91,3 @@ class CachedSuperDispatchNode extends Node {
         return this.method.invoke(frame, args);
     }
 }
-
-exports.GenericDispatchNode = GenericDispatchNode;
-exports.UninitializedSuperDispatchNode = UninitializedSuperDispatchNode;

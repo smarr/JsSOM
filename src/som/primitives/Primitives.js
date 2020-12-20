@@ -21,17 +21,17 @@
 */
 //@ts-check
 "use strict";
-const u = require('../vm/Universe');
+import { universe } from '../vm/Universe.js';
 
-function constructEmptyPrimitive(signature) {
+export function constructEmptyPrimitive(signature) {
     function _empty(_frame, _args) {
-        u.universe.errorPrintln("Warning: undefined primitive " +
+        universe.errorPrintln("Warning: undefined primitive " +
             signature.getString() + " called");
     }
-    return u.universe.newPrimitive(signature, _empty, null);
+    return universe.newPrimitive(signature, _empty, null);
 }
 
-class Primitives {
+export class Primitives {
     constructor() {
         this.holder = null;
     }
@@ -44,27 +44,24 @@ class Primitives {
     }
 
     installInstancePrimitive(selector, primFun, suppressWarning) {
-        var signature = u.universe.symbolFor(selector);
+        var signature = universe.symbolFor(selector);
 
         // Install the given primitive as an instance primitive in the holder class
-        this.holder.addInstancePrimitive(u.universe.newPrimitive(
+        this.holder.addInstancePrimitive(universe.newPrimitive(
             signature, primFun, this.holder), suppressWarning);
     }
 
     installClassPrimitive(selector, primFun) {
-        var signature = u.universe.symbolFor(selector);
+        var signature = universe.symbolFor(selector);
 
         // Install the given primitive as an instance primitive in the class of
         // the holder class
-        this.holder.getClass().addInstancePrimitive(u.universe.newPrimitive(
+        this.holder.getClass().addInstancePrimitive(universe.newPrimitive(
             signature, primFun, this.holder));
     }
 
     getEmptyPrimitive(selector) {
-        var signature = u.universe.symbolFor(selector);
+        var signature = universe.symbolFor(selector);
         return constructEmptyPrimitive(signature);
     }
 }
-
-exports.constructEmptyPrimitive = constructEmptyPrimitive;
-exports.Primitives = Primitives;

@@ -21,17 +21,15 @@
 */
 //@ts-check
 "use strict";
-const RuntimeException = require('../../lib/exceptions').RuntimeException;
+import { RuntimeException } from '../../lib/exceptions.js';
 
-const assert = require('../../lib/assert').assert;
-const notYetImplemented = require('../../lib/assert').notYetImplemented;
-const isInIntRange = require('../../lib/platform').isInIntRange;
-const intOrBigInt = require('../../lib/platform').intOrBigInt;
+import { assert, notYetImplemented } from '../../lib/assert.js';
+import { isInIntRange, intOrBigInt } from '../../lib/platform.js';
 
-const SAbstractObject = require('./SAbstractObject').SAbstractObject;
-const u = require('../vm/Universe');
+import { SAbstractObject } from './SAbstractObject.js';
+import { universe } from '../vm/Universe.js';
 
-class SInteger extends SAbstractObject {
+export class SInteger extends SAbstractObject {
     constructor(intVal) {
         super();
         assert(isInIntRange(intVal) && Math.floor(intVal) == intVal);
@@ -43,11 +41,11 @@ class SInteger extends SAbstractObject {
     }
 
     getClass() {
-        return u.integerClass;
+        return universe.integerClass;
     }
 
     toDouble() {
-        return u.universe.newDouble(this.intVal); // JS numbers are always doubles...
+        return universe.newDouble(this.intVal); // JS numbers are always doubles...
     }
 
     primLessThan(right) {
@@ -59,46 +57,46 @@ class SInteger extends SAbstractObject {
         } else {
             result = this.intVal < right.getEmbeddedInteger();
         }
-        return result ? u.trueObject : u.falseObject;
+        return result ? universe.trueObject : universe.falseObject;
     }
 
     primAsString() {
-        return u.universe.newString(this.intVal.toString());
+        return universe.newString(this.intVal.toString());
     }
 
     primAdd(right) {
         if (right instanceof SBigInteger) {
             return intOrBigInt(
-                right.getEmbeddedBigInteger() + BigInt(this.intVal), u.universe);
+                right.getEmbeddedBigInteger() + BigInt(this.intVal), universe);
         } else if (right instanceof SDouble) {
             return this.toDouble().primAdd(right);
         } else {
             const r = right.getEmbeddedInteger();
-            return intOrBigInt(this.intVal + r, u.universe);
+            return intOrBigInt(this.intVal + r, universe);
         }
     }
 
     primSubtract(right) {
         if (right instanceof SBigInteger) {
             return intOrBigInt(
-                BigInt(this.intVal) - right.getEmbeddedBigInteger(), u.universe);
+                BigInt(this.intVal) - right.getEmbeddedBigInteger(), universe);
         } else if (right instanceof SDouble) {
             return this.toDouble().primSubtract(right);
         } else {
             const r = right.getEmbeddedInteger();
-            return intOrBigInt(this.intVal - r, u.universe);
+            return intOrBigInt(this.intVal - r, universe);
         }
     }
 
     primMultiply(right) {
         if (right instanceof SBigInteger) {
             return intOrBigInt(
-                right.getEmbeddedBigInteger().multiply(this.intVal), u.universe);
+                right.getEmbeddedBigInteger().multiply(this.intVal), universe);
         } else if (right instanceof SDouble) {
             return this.toDouble().primMultiply(right);
         } else {
             var r = right.getEmbeddedInteger();
-            return intOrBigInt(this.intVal * r, u.universe);
+            return intOrBigInt(this.intVal * r, universe);
         }
     }
 
@@ -111,25 +109,25 @@ class SInteger extends SAbstractObject {
         } else {
             result = this.intVal / right.getEmbeddedInteger();
         }
-        return u.universe.newDouble(result);
+        return universe.newDouble(result);
     }
 
     primIntDiv(right) {
         if (right instanceof SBigInteger) {
             var result = BigInt(this.intVal).divide(right.getEmbeddedBigInteger());
-            return u.universe.newBigInteger(result);
+            return universe.newBigInteger(result);
         } else if (right instanceof SDouble) {
             return this.toDouble().primIntDiv(right);
         } else {
             var result = Math.floor(this.intVal / right.getEmbeddedInteger());
-            return u.universe.newInteger(result);
+            return universe.newInteger(result);
         }
     }
 
     primModulo(right) {
         if (right instanceof SBigInteger) {
-            var result = BigInt(intVal).mod(right.getEmbeddedBigInteger());
-            return u.universe.newBigInteger(result);
+            var result = BigInt(this.intVal).mod(right.getEmbeddedBigInteger());
+            return universe.newBigInteger(result);
         } else if (right instanceof SDouble) {
             return this.toDouble().primModulo(right);
         } else {
@@ -137,13 +135,13 @@ class SInteger extends SAbstractObject {
             // Java has Math.floorMod, JavaScript can use this
             // but it is likely to be very inefficient
             var result = Math.floor(((this.intVal % r) + r) % r);
-            return u.universe.newInteger(result);
+            return universe.newInteger(result);
         }
     }
 
     primAnd(right) {
         if (right instanceof SInteger) {
-            return u.universe.newInteger(this.intVal & right.getEmbeddedInteger());
+            return universe.newInteger(this.intVal & right.getEmbeddedInteger());
         }
         notYetImplemented(); // not supported by the library and, not sure what semantics should be
     }
@@ -159,17 +157,17 @@ class SInteger extends SAbstractObject {
         } else {
             result = false;
         }
-        return (result) ? u.trueObject : u.falseObject;
+        return (result) ? universe.trueObject : universe.falseObject;
     }
 
     prim32BitUnsignedValue() {
         var arr = new Uint32Array(1);
         arr[0] = this.intVal;
-        return intOrBigInt(arr[0], u.universe);
+        return intOrBigInt(arr[0], universe);
     }
 
     prim32BitSignedValue() {
-        return u.universe.newInteger(this.intVal | 0);
+        return universe.newInteger(this.intVal | 0);
     }
 }
 
@@ -182,7 +180,7 @@ function asFloat(obj) {
     throw new RuntimeException("Cannot coerce " + obj + " to Double!");
 }
 
-class SDouble extends SAbstractObject {
+export class SDouble extends SAbstractObject {
     constructor(doubleVal) {
         super();
         this.doubleVal = doubleVal;
@@ -193,52 +191,52 @@ class SDouble extends SAbstractObject {
     }
 
     getClass() {
-        return u.doubleClass;
+        return universe.doubleClass;
     }
 
     primMultiply(right) {
-        return u.universe.newDouble(this.doubleVal * asFloat(right));
+        return universe.newDouble(this.doubleVal * asFloat(right));
     }
 
     primAdd(right) {
-        return u.universe.newDouble(this.doubleVal + asFloat(right));
+        return universe.newDouble(this.doubleVal + asFloat(right));
     }
 
     primAsInteger() {
         const val = this.doubleVal > 0 ? Math.floor(this.doubleVal) : Math.ceil(this.doubleVal);
-        return u.universe.newInteger(val);
+        return universe.newInteger(val);
     }
 
     primAsString() {
-        return u.universe.newString(this.doubleVal.toString());
+        return universe.newString(this.doubleVal.toString());
     }
 
     primSubtract(right) {
-        return u.universe.newDouble(this.doubleVal - asFloat(right));
+        return universe.newDouble(this.doubleVal - asFloat(right));
     }
 
     primDoubleDiv(right) {
-        return u.universe.newDouble(this.doubleVal / asFloat(right));
+        return universe.newDouble(this.doubleVal / asFloat(right));
     }
 
     primIntDiv(right) {
-        return u.universe.newInteger(Math.floor(this.doubleVal / asFloat(right)));
+        return universe.newInteger(Math.floor(this.doubleVal / asFloat(right)));
     }
 
     primModulo(right) {
-        return u.universe.newDouble(this.doubleVal % asFloat(right));
+        return universe.newDouble(this.doubleVal % asFloat(right));
     }
 
     primEquals(right) {
-        return (this.doubleVal == asFloat(right)) ? u.trueObject : u.falseObject;
+        return (this.doubleVal == asFloat(right)) ? universe.trueObject : universe.falseObject;
     }
 
     primLessThan(right) {
-        return (this.doubleVal < asFloat(right)) ? u.trueObject : u.falseObject;
+        return (this.doubleVal < asFloat(right)) ? universe.trueObject : universe.falseObject;
     }
 }
 
-class SBigInteger extends SAbstractObject {
+export class SBigInteger extends SAbstractObject {
     constructor(bigIntVal) {
         super();
         assert(typeof bigIntVal === "bigint");
@@ -251,7 +249,7 @@ class SBigInteger extends SAbstractObject {
     }
 
     getClass() {
-        return u.integerClass;
+        return universe.integerClass;
     }
 
     primLessThan(right) {
@@ -263,20 +261,20 @@ class SBigInteger extends SAbstractObject {
         } else {
             result = this.bigIntVal < right.getEmbeddedBigInteger();
         }
-        return (result) ? u.trueObject : u.falseObject;
+        return (result) ? universe.trueObject : universe.falseObject;
     }
 
     primAsString() {
-        return u.universe.newString(this.bigIntVal.toString());
+        return universe.newString(this.bigIntVal.toString());
     }
 
     primAdd(right) {
         if (right instanceof SBigInteger) {
-            return u.universe.newBigInteger(right.getEmbeddedBigInteger() + this.bigIntVal);
+            return universe.newBigInteger(right.getEmbeddedBigInteger() + this.bigIntVal);
         } else if (right instanceof SDouble) {
-            return u.universe.newDouble(Number(this.bigIntVal) + right.getEmbeddedDouble());
+            return universe.newDouble(Number(this.bigIntVal) + right.getEmbeddedDouble());
         } else {
-            return intOrBigInt(this.bigIntVal + BigInt(right.getEmbeddedInteger()), u.universe);
+            return intOrBigInt(this.bigIntVal + BigInt(right.getEmbeddedInteger()), universe);
         }
     };
 
@@ -285,11 +283,11 @@ class SBigInteger extends SAbstractObject {
         if (right instanceof SBigInteger) {
             result = this.bigIntVal - right.getEmbeddedBigInteger();
         } else if (right instanceof SDouble) {
-            return u.universe.newDouble(Number(this.bigIntVal) - right.getEmbeddedDouble());
+            return universe.newDouble(Number(this.bigIntVal) - right.getEmbeddedDouble());
         } else {
             result = this.bigIntVal - BigInt(right.getEmbeddedInteger());
         }
-        return u.universe.newBigInteger(result);
+        return universe.newBigInteger(result);
     }
 
     primMultiply(right) {
@@ -297,11 +295,11 @@ class SBigInteger extends SAbstractObject {
         if (right instanceof SBigInteger) {
             result = this.bigIntVal * right.getEmbeddedBigInteger();
         } else if (right instanceof SDouble) {
-            return u.universe.newDouble(Number(this.bigIntVal) * right.getEmbeddedDouble());
+            return universe.newDouble(Number(this.bigIntVal) * right.getEmbeddedDouble());
         } else {
             result = this.bigIntVal * right.getEmbeddedInteger();
         }
-        return u.universe.newBigInteger(result);
+        return universe.newBigInteger(result);
     }
 
     primDoubleDiv(right) {
@@ -314,7 +312,7 @@ class SBigInteger extends SAbstractObject {
         } else {
             result = doubleVal / right.getEmbeddedInteger();
         }
-        return u.universe.newDouble(result);
+        return universe.newDouble(result);
     }
 
     primIntDiv(right) {
@@ -322,11 +320,11 @@ class SBigInteger extends SAbstractObject {
         if (right instanceof SBigInteger) {
             result = this.bigIntVal / right.getEmbeddedBigInteger();
         } else if (right instanceof SDouble) {
-            return u.universe.newDouble(Number(this.bigIntVal)).primIntDiv(right);
+            return universe.newDouble(Number(this.bigIntVal)).primIntDiv(right);
         } else {
             result = this.bigIntVal / right.getEmbeddedInteger();
         }
-        return u.universe.newBigInteger(result);
+        return universe.newBigInteger(result);
     }
 
     primModulo(right) {
@@ -334,11 +332,11 @@ class SBigInteger extends SAbstractObject {
         if (right instanceof SBigInteger) {
             result = this.bigIntVal % right.getEmbeddedBigInteger();
         } else if (right instanceof SDouble) {
-            return u.universe.newDouble(Number(this.bigIntVal)).primModulo(right);
+            return universe.newDouble(Number(this.bigIntVal)).primModulo(right);
         } else {
             result = this.bigIntVal % right.getEmbeddedInteger();
         }
-        return u.universe.newBigInteger(result);
+        return universe.newBigInteger(result);
     }
 
     primAnd(right) {
@@ -356,21 +354,14 @@ class SBigInteger extends SAbstractObject {
         } else {
             result = false;
         }
-        return (result) ? u.trueObject : u.falseObject;
+        return (result) ? universe.trueObject : universe.falseObject;
     }
 
     prim32BitUnsignedValue() {
-        return intOrBigInt(BigInt.asUintN(32, this.bigIntVal), u.universe);
+        return intOrBigInt(BigInt.asUintN(32, this.bigIntVal), universe);
     }
 
     prim32BitSignedValue() {
-        return intOrBigInt(BigInt.asIntN(32, this.bigIntVal), u.universe);
+        return intOrBigInt(BigInt.asIntN(32, this.bigIntVal), universe);
     }
 }
-
-exports.SBigInteger = SBigInteger;
-exports.SInteger = SInteger;
-exports.SDouble = SDouble;
-
-exports.isInIntRange = isInIntRange;
-exports.intOrBigInt = intOrBigInt;

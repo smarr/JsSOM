@@ -21,10 +21,10 @@
 */
 //@ts-check
 "use strict";
-const Node = require('./Node').Node;
-const u = require('../vm/Universe');
+import { Node } from './Node.js';
+import { universe } from '../vm/Universe.js';
 
-class UninitializedGlobalReadNode extends Node {
+export class UninitializedGlobalReadNode extends Node {
     constructor(globalName, source) {
         super(source);
         this.globalName = globalName;
@@ -37,7 +37,7 @@ class UninitializedGlobalReadNode extends Node {
 
     execute(frame) {
         // Get the global from the universe
-        const assoc = u.universe.getGlobalsAssociation(this.globalName);
+        const assoc = universe.getGlobalsAssociation(this.globalName);
         if (assoc != null) {
             return this.replace(new CachedGlobalReadNode(assoc, this.source)).
                 execute(frame);
@@ -57,5 +57,3 @@ class CachedGlobalReadNode extends Node {
         return this.assoc.getValue();
     }
 }
-
-exports.UninitializedGlobalReadNode = UninitializedGlobalReadNode;

@@ -19,12 +19,12 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const u = require("../../src/som/vm/Universe");
-const universe = u.universe;
+import { universe } from "../../src/som/vm/Universe.js";
 
-const expect = require('chai').expect;
+import chai from 'chai';
+const expect = chai.expect;
 
-var tests = [
+const tests = [
     "ClassStructure",
     "Array"         ,
     "Block"         ,

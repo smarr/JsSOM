@@ -19,72 +19,89 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+//@ts-check
+"use strict";
+
+let _getMillisecondTicks;
+let _stdout;
+let _stdoutnl;
+let _stderr;
+let _stderrnl;
+let _isBrowser;
+let _exitInterpreter;
+
+let outHandler = null;
+
+export function setOutHandler(handler) {
+    outHandler = handler;
+}
+
 if (typeof global === "undefined" || process.browser) {
     // this seems to be a browser environment
     if (typeof performance === "undefined" || performance.now == undefined) {
-        exports.getMillisecondTicks = function () {
-            return Date.now();
-        };
+        _getMillisecondTicks = function() { return Date.now(); };
     } else {
-        exports.getMillisecondTicks = function () {
-            return performance.now();
-        };
+        _getMillisecondTicks = function() { return performance.now(); };
     }
 
-    exports.stdout = function (msg) {
-        document.write(msg);
-    };
+    _stdout = function(msg) {
+        if (outHandler) {
+            outHandler(msg);
+        } else {
+            document.write(msg);
+        }
+    }
 
-    exports.stdoutnl = function (msg) {
-        document.writeln(msg + "<br/>");
-    };
+    _stdoutnl = function(msg) {
+        _stdout(msg + "<br/>");
+    }
 
-    exports.stderr = function (msg) {
-        document.write("<span style='color:red';>" + msg + "</span>");
-    };
+    _stderr = function(msg) {
+        _stdout("<span style='color:red';>" + msg + "</span>");
+    }
 
-    exports.stderrnl = function (msg) {
-        document.writeln("<span style='color:red';>" + msg + "<br/></span>")
-    };
+    _stderrnl = function(msg) {
+        _stdout("<span style='color:red';>" + msg + "<br/></span>")
+    }
 
-    exports.exitInterpreter = function (errorCode) {};
+    _exitInterpreter = function(errorCode) {};
 
-    exports.isBrowser = true;
+    _isBrowser = true;
 } else {
     // this seems to be node.js
-    exports.getMillisecondTicks = function () {
-        var timeTuple = process.hrtime();
+    _getMillisecondTicks = function() {
+        const timeTuple = process.hrtime();
         return timeTuple[0] * 1000 + timeTuple[1]/1000000;
-    };
+    }
 
-    exports.stdout = function (msg) {
-        process.stdout.write(msg);
-    };
+    _stdout = function(msg) { process.stdout.write(msg) };
+    _stderr = function(msg) { process.stderr.write(msg) };
 
-    exports.stdoutnl = function (msg) {
+    _stdoutnl = function(msg) {
         process.stdout.write(msg + "\n");
-    };
+    }
 
-    exports.stderr = function (msg) {
-        process.stderr.write(msg);
-    };
-
-    exports.stderrnl = function (msg) {
+    _stderrnl = function(msg) {
         process.stderr.write(msg + "\n");
-    };
+    }
 
-    exports.exitInterpreter = function (errorCode) {
-        process.exit(errorCode);
-    };
-
-    exports.isBrowser = false;
+    _exitInterpreter = process.exit;
+    _isBrowser = false;
 }
 
-function isInIntRange(val) {
+export const getMillisecondTicks = _getMillisecondTicks;
+export const stdout = _stdout;
+export const stdoutnl = _stdoutnl;
+export const stderr = _stderr;
+export const stderrnl = _stderrnl;
+export const exitInterpreter = _exitInterpreter;
+export const isBrowser = _isBrowser;
+
+export function isInIntRange(val) {
     return val >= -2147483647 && val <= 2147483647;
 }
 
-function intOrBigInt(val, universe) {
+export function intOrBigInt(val, universe) {
     if (isInIntRange(val)) {
         if (typeof val === "bigint") {
             return universe.newInteger(Number(val) | 0);
@@ -97,6 +114,3 @@ function intOrBigInt(val, universe) {
         return universe.newBigInteger(val);
     }
 }
-
-exports.isInIntRange = isInIntRange;
-exports.intOrBigInt = intOrBigInt;

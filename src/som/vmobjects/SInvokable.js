@@ -21,9 +21,9 @@
 */
 //@ts-check
 "use strict";
-const SAbstractObject = require('./SAbstractObject').SAbstractObject;
-const Frame = require('../interpreter/Frame').Frame;
-const u = require('../vm/Universe');
+import { SAbstractObject } from './SAbstractObject.js';
+import { Frame } from '../interpreter/Frame.js';
+import { universe } from '../vm/Universe.js';
 
 class SInvokable extends SAbstractObject {
     constructor(signature, holder) {
@@ -49,7 +49,7 @@ class SInvokable extends SAbstractObject {
     }
 }
 
-class SMethod extends SInvokable {
+export class SMethod extends SInvokable {
     constructor(signature, sourceSection, bodyNode, numberOfTemps) {
         super(signature, null);
         this.sourceSection = sourceSection;
@@ -58,7 +58,7 @@ class SMethod extends SInvokable {
     }
 
     getClass() {
-        return u.methodClass;
+        return universe.methodClass;
     }
 
     isPrimitive() {
@@ -81,14 +81,14 @@ class SMethod extends SInvokable {
     }
 }
 
-class SPrimitive extends SInvokable {
+export class SPrimitive extends SInvokable {
     constructor(signature, primFun, holder) {
         super(signature, holder);
         this.primFun = primFun;
     }
 
     getClass() {
-        return u.primitiveClass;
+        return universe.primitiveClass;
     }
 
     isPrimitive() {
@@ -109,6 +109,3 @@ class SPrimitive extends SInvokable {
             this.signature.toString() + ")";
     }
 }
-
-exports.SMethod = SMethod;
-exports.SPrimitive = SPrimitive;

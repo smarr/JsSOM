@@ -21,10 +21,10 @@
 */
 //@ts-check
 "use strict";
-const SAbstractObject = require('./SAbstractObject').SAbstractObject;
-const u = require('../vm/Universe');
+import { SAbstractObject } from './SAbstractObject.js';
+import { universe } from '../vm/Universe.js';
 
-class SString extends SAbstractObject {
+export class SString extends SAbstractObject {
     constructor(value) {
         super();
         this.value = value;
@@ -35,8 +35,6 @@ class SString extends SAbstractObject {
     }
 
     getClass() {
-        return u.stringClass;
+        return universe.stringClass;
     }
 }
-
-exports.SString = SString;

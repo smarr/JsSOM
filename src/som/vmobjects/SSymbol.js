@@ -21,17 +21,17 @@
 */
 //@ts-check
 "use strict";
-const SString = require('./SString').SString;
-const u = require('../vm/Universe');
+import { SString } from './SString.js';
+import { universe } from '../vm/Universe.js';
 
-class SSymbol extends SString {
+export class SSymbol extends SString {
     constructor(value) {
         super(value);
         this.numberOfSignatureArguments = this.determineNumberOfSignatureArguments();
     }
 
     getClass() {
-        return u.symbolClass;
+        return universe.symbolClass;
     }
 
     getString() {
@@ -59,7 +59,7 @@ class SSymbol extends SString {
 
     toString() {
         return "#" + this.value;
-    };
+    }
 
     getNumberOfSignatureArguments() {
         return this.numberOfSignatureArguments;
@@ -75,5 +75,3 @@ class SSymbol extends SString {
         return true;
     }
 }
-
-exports.SSymbol = SSymbol;

@@ -21,9 +21,9 @@
 */
 //@ts-check
 "use strict";
-const universe = require('../vm/Universe');
+import { universe } from '../vm/Universe.js';
 
-class Frame {
+export class Frame {
     constructor(args, numTemps) {
         this.temps = new Array(numTemps);
         this.onStack = true;
@@ -62,5 +62,3 @@ class Frame {
         this.onStack = false;
     }
 }
-
-exports.Frame = Frame;

@@ -21,19 +21,17 @@
 */
 //@ts-check
 "use strict";
-const Node = require('./Node').Node;
+import { Node } from './Node.js';
 
-const u = require('../vm/Universe');
+import { universe } from '../vm/Universe.js';
 
-class BlockNode extends Node {
+export class BlockNode extends Node {
     constructor(blockMethod, source) {
         super(source);
         this.blockMethod = blockMethod;
     }
 
     execute = function (frame) {
-        return u.universe.newBlock(this.blockMethod, frame);
+        return universe.newBlock(this.blockMethod, frame);
     }
 }
-
-exports.BlockNode = BlockNode;

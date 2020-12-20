@@ -21,12 +21,12 @@
 */
 //@ts-check
 "use strict";
-const Primitives = require('./Primitives').Primitives;
+import { Primitives } from './Primitives.js';
 
-const u = require('../vm/Universe');
+import { universe } from '../vm/Universe.js';
 
 function _asString(_frame, args) {
-    return u.universe.newString(args[0].getString());
+    return universe.newString(args[0].getString());
 }
 
 class SymbolPrimitives extends Primitives {
@@ -39,4 +39,4 @@ class SymbolPrimitives extends Primitives {
     }
 }
 
-exports.prims = SymbolPrimitives;
+export const prims = SymbolPrimitives;

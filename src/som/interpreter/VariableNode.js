@@ -21,9 +21,9 @@
 */
 //@ts-check
 "use strict";
-const ContextualNode = require('./ContextualNode').ContextualNode;
+import { ContextualNode } from './ContextualNode.js';
 
-class VariableReadNode extends ContextualNode {
+export class VariableReadNode extends ContextualNode {
     constructor(contextLevel, local, source) {
         super(contextLevel, source);
         this.local = local;
@@ -35,7 +35,7 @@ class VariableReadNode extends ContextualNode {
     }
 }
 
-class VariableWriteNode extends ContextualNode {
+export class VariableWriteNode extends ContextualNode {
     constructor(contextLevel, local, valueExpr, source) {
         super(contextLevel, source);
         this.child_value = this.adopt(valueExpr);
@@ -50,6 +50,3 @@ class VariableWriteNode extends ContextualNode {
         return val;
     }
 }
-
-exports.VariableReadNode = VariableReadNode;
-exports.VariableWriteNode = VariableWriteNode;

@@ -21,9 +21,9 @@
 */
 //@ts-check
 "use strict";
-const u = require('../vm/Universe');
+import { universe } from '../vm/Universe.js';
 
-class SAbstractObject {
+export class SAbstractObject {
     toString() {
         const clazz = this.getClass();
         if (clazz === null) {
@@ -33,14 +33,14 @@ class SAbstractObject {
     }
 
     send(selectorString, callerFrame, args) {
-        const selector = u.universe.symbolFor(selectorString);
+        const selector = universe.symbolFor(selectorString);
         const invokable = args[0].getClass().lookupInvokable(selector);
         return invokable.invoke(callerFrame, args);
     }
 
     sendDoesNotUnderstand(selector, callerFrame, args) {
         // Allocate an array to hold the arguments, without receiver
-        const argsArray = new u.SArray(args.length - 1, args.slice(1));
+        const argsArray = universe.newArrayFrom(args.slice(1));
         const dnuArgs = [args[0], selector, argsArray];
         return this.send("doesNotUnderstand:arguments:", callerFrame, dnuArgs);
     }
@@ -55,5 +55,3 @@ class SAbstractObject {
         return this.send("escapedBlock:", callerFrame, args);
     }
 }
-
-exports.SAbstractObject = SAbstractObject;

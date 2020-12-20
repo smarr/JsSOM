@@ -57,7 +57,7 @@ const symStrings = [
   "KeywordSequence",
   "OperatorSequence"]
 
-const Sym = {
+export const Sym = {
     NONE             :  0,
     Integer          :  1,
     Double           :  2,
@@ -96,5 +96,3 @@ const Sym = {
       return symStrings[sym];
     }
 };
-
-exports.Sym = Sym;

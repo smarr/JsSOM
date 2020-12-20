@@ -21,12 +21,13 @@
 */
 //@ts-check
 "use strict";
-const isInIntRange = require('../../lib/platform').isInIntRange;
+import { isInIntRange } from '../../lib/platform.js';
 
-const SBigInteger = require('../vmobjects/numbers').SBigInteger;
-const Primitives = require('./Primitives').Primitives;
+import { SBigInteger } from '../vmobjects/numbers.js';
+import { Primitives } from './Primitives.js';
 
-const u = require('../vm/Universe');
+import { universe } from '../vm/Universe.js';
+import { SString } from '../vmobjects/SString.js';
 
 function toNumber(val) {
     if (val instanceof SBigInteger) {
@@ -43,14 +44,14 @@ function _asString(frame, args) {
 function _sqrt(frame, args) {
     var res = Math.sqrt(args[0].getEmbeddedInteger());
     if (res == Math.floor(res)) {
-        return u.universe.newInteger(Math.floor(res));
+        return universe.newInteger(Math.floor(res));
     } else {
-        return u.universe.newDouble(res);
+        return universe.newDouble(res);
     }
 }
 
 function _atRandom(frame, args) {
-    return u.universe.newInteger(Math.floor(args[0].getEmbeddedInteger()
+    return universe.newInteger(Math.floor(args[0].getEmbeddedInteger()
         * Math.random()));
 }
 
@@ -97,11 +98,11 @@ function _lessThan(frame, args) {
 
 function _fromString(frame, args) {
     var param = args[1];
-    if (!(param instanceof u.SString)) {
-        return u.nilObject;
+    if (!(param instanceof SString)) {
+        return universe.nilObject;
     }
     var intVal = parseInt(param.getEmbeddedString());
-    return u.universe.newInteger(intVal);
+    return universe.newInteger(intVal);
 }
 
 function _leftShift(frame, args) {
@@ -112,22 +113,22 @@ function _leftShift(frame, args) {
     if (Math.floor(l) != l || !isInIntRange(result) || !isInIntRange(l * Math.pow(2, r))) {
         var big = BigInt(l);
         big = big * BigInt(Math.pow(2, r));
-        return u.universe.newBigInteger(big);
+        return universe.newBigInteger(big);
     }
-    return u.universe.newInteger(result);
+    return universe.newInteger(result);
 }
 
 function _bitXor(frame, args) {
     const right = toNumber(args[1]);
     const left  = toNumber(args[0]);
 
-    return u.universe.newInteger(left ^ right);
+    return universe.newInteger(left ^ right);
 }
 
 function _rem(frame, args) {
     var right = args[1];
     var left  = args[0];
-    return u.universe.newInteger(left.getEmbeddedInteger()
+    return universe.newInteger(left.getEmbeddedInteger()
         % right.getEmbeddedInteger())
 }
 
@@ -142,7 +143,7 @@ function _as32BitSignedValue(frame, args) {
 function _unsignedRightShift(frame, args) {
     const right = toNumber(args[1]);
     const left  = toNumber(args[0]);
-    return u.universe.newInteger(left >>> right);
+    return universe.newInteger(left >>> right);
 }
 
 class IntegerPrimitives extends Primitives {
@@ -176,4 +177,4 @@ class IntegerPrimitives extends Primitives {
     }
 }
 
-exports.prims = IntegerPrimitives;
+export const prims = IntegerPrimitives;

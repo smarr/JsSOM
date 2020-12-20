@@ -21,11 +21,11 @@
 */
 //@ts-check
 "use strict";
-const assert = require('../../lib/assert').assert;
+import { assert } from '../../lib/assert.js';
 
-const SAbstractObject = require('./SAbstractObject').SAbstractObject;
+import { SAbstractObject } from './SAbstractObject.js';
 
-const u = require('../vm/Universe');
+import { universe } from '../vm/Universe.js';
 
 function computeSignatureString(numberOfArguments) {
     // Compute the signature string
@@ -44,15 +44,15 @@ function _value(frame, args) {
     return rcvrBlock.getMethod().invoke(frame, args);
 }
 
-function getBlockEvaluationPrimitive(numberOfArguments, rcvrClass) {
-    const sig = u.universe.symbolFor(computeSignatureString(numberOfArguments));
-    return u.universe.newPrimitive(sig, _value, rcvrClass);
+export function getBlockEvaluationPrimitive(numberOfArguments, rcvrClass) {
+    const sig = universe.symbolFor(computeSignatureString(numberOfArguments));
+    return universe.newPrimitive(sig, _value, rcvrClass);
 }
 
-class SBlock extends SAbstractObject {
+export class SBlock extends SAbstractObject {
     constructor(blockMethod, context) {
         super();
-        this.blockClass = u.blockClasses[blockMethod.getNumberOfArguments()];
+        this.blockClass = universe.blockClasses[blockMethod.getNumberOfArguments()];
         this.context = context;
         this.blockMethod = blockMethod;
     }
@@ -74,6 +74,3 @@ class SBlock extends SAbstractObject {
         return this.context.getReceiver();
     }
 }
-
-exports.SBlock = SBlock;
-exports.getBlockEvaluationPrimitive = getBlockEvaluationPrimitive;
