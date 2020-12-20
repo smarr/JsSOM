@@ -1,0 +1,93 @@
+<html>
+<head>
+  <style>
+    #repl-out {
+      width:600px;
+      height:200px;
+      padding:5px;
+      background-color:#000;
+      color:#fff;
+    }
+
+    .repl-input {
+        width:600px;
+        font-family:monospace;
+        margin:auto;
+    }
+
+    #repl-in {
+        border:0;
+        font-family:monospace;
+        box-shadow:none;
+        resize: none;
+        outline: none;
+        font-size: inherit;
+        height: 3ex;
+        background-color: inherit;
+        width:90%;
+        vertical-align: middle;
+    }
+
+    .som {
+      font-family: "Lucida Console", Monaco, monospace;
+      font-weight: 300;
+      font-size:   90%;
+    }
+
+    .content-section-even {
+      padding-top:50px;
+    }
+
+    figure {
+      margin:auto;
+      margin-top: 30px;
+    }
+    figure code {
+      display:table;
+      white-space: pre;
+      margin:auto;
+    }
+    figcaption {
+        margin-top: 10px;
+        text-align: center;
+    }
+
+    figcaption code {
+      display:inline;
+    }
+  </style>
+  <script type="module">
+    import { setOutHandler } from "./lib/platform.js";
+
+    setOutHandler(function(msg) {
+      document.getElementById("repl-out").innerHTML += msg;
+    });
+
+    import { handleReplInput, moveCaretToEnd } from "./web-repl.js";
+
+    document.handleReplInput = handleReplInput;
+
+    moveCaretToEnd(document.getElementById("repl-in"));
+
+    document.getElementById("example-div").style.display = "none";
+    document.getElementById("repl").style.display = "block";
+
+
+  </script>
+</head>
+<body>
+  <div id="example-div"></div>
+  <div id="repl">
+    <h1>JsSOM Read-Eval-Print Loop</h1>
+    <figure>
+    <code id="repl-out" class="stretch">SOM Shell.
+  </code>
+    <div class="repl-input stretch">---&gt; <textarea id="repl-in" row="1" autofocus oninput="handleReplInput(event)">1 to: 5 do: [:i | i println. ]</textarea></div>
+    <figcaption>Note, this REPL does accepts only simple expressions and does
+          not allow to define classes or methods.<br/>However, the
+          complete <a href="https://github.com/SOM-st/SOM/tree/master/Smalltalk">standard library</a> is available.
+    </figcaption>
+    </figure>
+  </div>
+  </div>
+</body>
