@@ -19,62 +19,57 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const SString = require('./SString').SString;
-const u = require('../vm/Universe');
+// @ts-check
 
-function SSymbol(value) {
-    SString.call(this, value);
-    var string = value,
-        numberOfSignatureArguments = determineNumberOfSignatureArguments();
+import { SString } from './SString.js';
+import { universe } from '../vm/Universe.js';
+import { isOperator } from '../compiler/Lexer.js';
 
-    this.getClass = function () {
-        return u.symbolClass;
-    };
+export class SSymbol extends SString {
+  constructor(value) {
+    super(value);
+    this.numberOfSignatureArguments = this.determineNumberOfSignatureArguments();
+  }
 
-    this.getString = function () {
-        // Get the string associated to this symbol
-        return string;
-    };
+  getClass() {
+    return universe.symbolClass;
+  }
 
-    function determineNumberOfSignatureArguments() {
-        // Check for binary signature
-        if (isBinarySignature()) {
-            return 2;
-        } else {
-            // Count the colons in the signature string
-            var numberOfColons = 0;
+  getString() {
+    // Get the string associated to this symbol
+    return this.value;
+  }
 
-            // Iterate through every character in the signature string
-            for (var i = 0; i < string.length; i++) {
-                if (string.charAt(i) == ':') { numberOfColons++; }
-            }
+  determineNumberOfSignatureArguments() {
+    // Check for binary signature
+    if (this.isBinarySignature()) {
+      return 2;
+    }
+    // Count the colons in the signature string
+    let numberOfColons = 0;
 
-            // The number of arguments is equal to the number of colons plus one
-            return numberOfColons + 1;
-        }
+    // Iterate through every character in the signature string
+    for (let i = 0; i < this.value.length; i += 1) {
+      if (this.value.charAt(i) === ':') { numberOfColons += 1; }
     }
 
-    this.toString = function () {
-        return "#" + string;
-    };
+    // The number of arguments is equal to the number of colons plus one
+    return numberOfColons + 1;
+  }
 
-    this.getNumberOfSignatureArguments = function () {
-        return numberOfSignatureArguments;
-    };
+  toString() {
+    return `#${this.value}`;
+  }
 
-    function isBinarySignature() {
-        // Check the individual characters of the string
-        for (var c in string) {
-            if (c != '~' && c != '&' && c != '|' && c != '*' && c != '/' && c != '@'
-                && c != '+' && c != '-' && c != '=' && c != '>' && c != '<'
-                && c != ',' && c != '%' && c != '\\') { return false; }
-        }
-        return true;
+  getNumberOfSignatureArguments() {
+    return this.numberOfSignatureArguments;
+  }
+
+  isBinarySignature() {
+    // Check the individual characters of the string
+    for (const c in this.value) {
+      if (!isOperator(c)) { return false; }
     }
-
-    Object.freeze(this);
+    return true;
+  }
 }
-
-SSymbol.prototype = Object.create(SString.prototype);
-
-exports.SSymbol = SSymbol;

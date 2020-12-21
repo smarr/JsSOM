@@ -19,153 +19,155 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const isInIntRange = require('../../lib/platform').isInIntRange;
+// @ts-check
 
-const Primitives = require('./Primitives').Primitives;
+import { isInIntRange } from '../../lib/platform.js';
 
-const u = require('../vm/Universe');
+import { SBigInteger } from '../vmobjects/numbers.js';
+import { Primitives } from './Primitives.js';
 
-function IntegerPrimitives() {
-    Primitives.call(this);
-    var _this = this;
+import { universe } from '../vm/Universe.js';
+import { SString } from '../vmobjects/SString.js';
 
-    function _asString(frame, args) {
-        return args[0].primAsString();
-    }
-
-    function _sqrt(frame, args) {
-        var res = Math.sqrt(args[0].getEmbeddedInteger());
-        if (res == Math.floor(res)) {
-            return u.universe.newInteger(Math.floor(res));
-        } else {
-            return u.universe.newDouble(res);
-        }
-    }
-
-    function _atRandom(frame, args) {
-        return u.universe.newInteger(Math.floor(args[0].getEmbeddedInteger()
-            * Math.random()));
-    }
-
-    function _plus(frame, args) {
-        return args[0].primAdd(args[1]);
-    }
-
-    function _minus(frame, args) {
-        return args[0].primSubtract(args[1]);
-    }
-
-    function _mult(frame, args) {
-        return args[0].primMultiply(args[1]);
-    }
-
-
-    function _doubleDiv(frame, args) {
-        return args[0].primDoubleDiv(args[1]);
-    }
-
-    function _intDiv(frame, args) {
-        return args[0].primIntDiv(args[1]);
-    }
-
-    function _mod(frame, args) {
-        return args[0].primModulo(args[1]);
-    }
-
-    function _and(frame, args) {
-        return args[0].primAnd(args[1]);
-    }
-
-    function _equals(frame, args) {
-        return args[0].primEquals(args[1]);
-    }
-
-    function _equalsEquals(frame, args) {
-        return args[0].primEquals(args[1]);
-    }
-
-    function _lessThan(frame, args) {
-        return args[0].primLessThan(args[1]);
-    }
-
-    function _fromString(frame, args) {
-        var param = args[1];
-        if (!(param instanceof u.SString)) {
-            return u.nilObject;
-        }
-        var intVal = parseInt(param.getEmbeddedString());
-        return u.universe.newInteger(intVal);
-    }
-
-    function _leftShift(frame, args) {
-        var rightObj = args[1];
-        var left     = args[0];
-
-        var l = left.getEmbeddedInteger();
-        var r = rightObj.getEmbeddedInteger();
-
-        var result = l << r;
-        if (Math.floor(l) != l || !isInIntRange(result) || !isInIntRange(l * Math.pow(2, r))) {
-            var big = BigInt(l);
-            big = big * BigInt(Math.pow(2, r));
-            return u.universe.newBigInteger(big);
-        }
-        return u.universe.newInteger(result);
-    }
-
-    function _bitXor(frame, args) {
-        var right = args[1];
-        var left  = args[0];
-        return u.universe.newInteger(left.getEmbeddedInteger()
-            ^ right.getEmbeddedInteger())
-    }
-
-    function _rem(frame, args) {
-        var right = args[1];
-        var left  = args[0];
-        return u.universe.newInteger(left.getEmbeddedInteger()
-            % right.getEmbeddedInteger())
-    }
-
-    function _as32BitUnsignedValue(frame, args) {
-        return args[0].prim32BitUnsignedValue();
-    }
-
-    function _as32BitSignedValue(frame, args) {
-        return args[0].prim32BitSignedValue();
-    }
-
-    function _unsignedRightShift(frame, args) {
-        var right = args[1];
-        var left  = args[0];
-        return u.universe.newInteger(
-            left.getEmbeddedInteger() >>> right.getEmbeddedInteger());
-    }
-
-    this.installPrimitives = function () {
-        _this.installInstancePrimitive("asString", _asString);
-        _this.installInstancePrimitive("sqrt",     _sqrt);
-        _this.installInstancePrimitive("atRandom", _atRandom);
-        _this.installInstancePrimitive("+",        _plus);
-        _this.installInstancePrimitive("-",        _minus);
-        _this.installInstancePrimitive("*",        _mult);
-        _this.installInstancePrimitive("//",       _doubleDiv);
-        _this.installInstancePrimitive("/",        _intDiv);
-        _this.installInstancePrimitive("%",        _mod);
-        _this.installInstancePrimitive("&",        _and);
-        _this.installInstancePrimitive("=",        _equals);
-        _this.installInstancePrimitive("==",       _equalsEquals, true);
-        _this.installInstancePrimitive("<",        _lessThan);
-        _this.installInstancePrimitive("<<",       _leftShift);
-        _this.installInstancePrimitive("bitXor:",  _bitXor);
-        _this.installInstancePrimitive("rem:",     _rem);
-        _this.installInstancePrimitive(">>>",      _unsignedRightShift);
-
-        _this.installInstancePrimitive("as32BitUnsignedValue", _as32BitUnsignedValue);
-        _this.installInstancePrimitive("as32BitSignedValue",   _as32BitSignedValue);
-
-        _this.installClassPrimitive("fromString:", _fromString);
-    }
+function toNumber(val) {
+  if (val instanceof SBigInteger) {
+    return Number(val.getEmbeddedBigInteger());
+  }
+  return val.getEmbeddedInteger();
 }
-IntegerPrimitives.prototype = Object.create(Primitives.prototype);
-exports.prims = IntegerPrimitives;
+
+function _asString(_frame, args) {
+  return args[0].primAsString();
+}
+
+function _sqrt(_frame, args) {
+  const res = Math.sqrt(args[0].getEmbeddedInteger());
+  if (res === Math.floor(res)) {
+    return universe.newInteger(Math.floor(res));
+  }
+  return universe.newDouble(res);
+}
+
+function _atRandom(_frame, args) {
+  return universe.newInteger(Math.floor(args[0].getEmbeddedInteger()
+        * Math.random()));
+}
+
+function _plus(_frame, args) {
+  return args[0].primAdd(args[1]);
+}
+
+function _minus(_frame, args) {
+  return args[0].primSubtract(args[1]);
+}
+
+function _mult(_frame, args) {
+  return args[0].primMultiply(args[1]);
+}
+
+function _doubleDiv(_frame, args) {
+  return args[0].primDoubleDiv(args[1]);
+}
+
+function _intDiv(_frame, args) {
+  return args[0].primIntDiv(args[1]);
+}
+
+function _mod(_frame, args) {
+  return args[0].primModulo(args[1]);
+}
+
+function _and(_frame, args) {
+  return args[0].primAnd(args[1]);
+}
+
+function _equals(_frame, args) {
+  return args[0].primEquals(args[1]);
+}
+
+function _equalsEquals(_frame, args) {
+  return args[0].primEquals(args[1]);
+}
+
+function _lessThan(_frame, args) {
+  return args[0].primLessThan(args[1]);
+}
+
+function _fromString(_frame, args) {
+  const param = args[1];
+  if (!(param instanceof SString)) {
+    return universe.nilObject;
+  }
+  const intVal = parseInt(param.getEmbeddedString(), 10);
+  return universe.newInteger(intVal);
+}
+
+function _leftShift(_frame, args) {
+  const r = toNumber(args[1]);
+  const l = toNumber(args[0]);
+
+  const result = l << r;
+  if (Math.floor(l) !== l || !isInIntRange(result) || !isInIntRange(l * (2 ** r))) {
+    let big = BigInt(l);
+    big *= BigInt(2 ** r);
+    return universe.newBigInteger(big);
+  }
+  return universe.newInteger(result);
+}
+
+function _bitXor(_frame, args) {
+  const right = toNumber(args[1]);
+  const left = toNumber(args[0]);
+
+  return universe.newInteger(left ^ right);
+}
+
+function _rem(_frame, args) {
+  const right = args[1];
+  const left = args[0];
+  return universe.newInteger(left.getEmbeddedInteger()
+        % right.getEmbeddedInteger());
+}
+
+function _as32BitUnsignedValue(_frame, args) {
+  return args[0].prim32BitUnsignedValue();
+}
+
+function _as32BitSignedValue(_frame, args) {
+  return args[0].prim32BitSignedValue();
+}
+
+function _unsignedRightShift(_frame, args) {
+  const right = toNumber(args[1]);
+  const left = toNumber(args[0]);
+  return universe.newInteger(left >>> right);
+}
+
+class IntegerPrimitives extends Primitives {
+  installPrimitives() {
+    this.installInstancePrimitive('asString', _asString);
+    this.installInstancePrimitive('sqrt', _sqrt);
+    this.installInstancePrimitive('atRandom', _atRandom);
+    this.installInstancePrimitive('+', _plus);
+    this.installInstancePrimitive('-', _minus);
+    this.installInstancePrimitive('*', _mult);
+    this.installInstancePrimitive('//', _doubleDiv);
+    this.installInstancePrimitive('/', _intDiv);
+    this.installInstancePrimitive('%', _mod);
+    this.installInstancePrimitive('&', _and);
+    this.installInstancePrimitive('=', _equals);
+    this.installInstancePrimitive('==', _equalsEquals, true);
+    this.installInstancePrimitive('<', _lessThan);
+    this.installInstancePrimitive('<<', _leftShift);
+    this.installInstancePrimitive('bitXor:', _bitXor);
+    this.installInstancePrimitive('rem:', _rem);
+    this.installInstancePrimitive('>>>', _unsignedRightShift);
+
+    this.installInstancePrimitive('as32BitUnsignedValue', _as32BitUnsignedValue);
+    this.installInstancePrimitive('as32BitSignedValue', _as32BitSignedValue);
+
+    this.installClassPrimitive('fromString:', _fromString);
+  }
+}
+
+export const prims = IntegerPrimitives;

@@ -19,56 +19,63 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const factory = require('../interpreter/NodeFactory');
+// @ts-check
+import {
+  createArgumentRead, createArgumentWrite, createSuperRead, createVariableRead, createVariableWrite,
+} from '../interpreter/NodeFactory.js';
 
-function Argument(name, index) {
-    var _this = this;
+export class Argument {
+  constructor(name, index) {
+    this.name = name;
+    this.index = index;
+  }
 
-    this.toString = function () {
-        return "Argument(" + name + ")";
-    };
+  toString() {
+    return `Argument(${this.name})`;
+  }
 
-    this.isSelf = function () {
-        return "self" == name || "$blockSelf" == name;
-    };
+  isSelf() {
+    return this.name === 'self' || this.name === '$blockSelf';
+  }
 
-    this.getReadNode = function (contextLevel, source) {
-        return factory.createArgumentRead(_this, contextLevel, source);
-    };
+  getReadNode(contextLevel, source) {
+    return createArgumentRead(this, contextLevel, source);
+  }
 
-    this.getWriteNode = function (contextLevel, valueExpr, source) {
-        return factory.createArgumentWrite(this, contextLevel, valueExpr, source);
-    }
+  getWriteNode(contextLevel, valueExpr, source) {
+    return createArgumentWrite(this, contextLevel, valueExpr, source);
+  }
 
-    this.getSuperReadNode = function (contextLevel, holderClass, classSide, source) {
-        return factory.createSuperRead(
-            _this, contextLevel, holderClass, classSide, source);
-    };
+  getSuperReadNode(contextLevel, holderClass, classSide, source) {
+    return createSuperRead(
+      this, contextLevel, holderClass, classSide, source,
+    );
+  }
 
-    this.getIndex = function () {
-        return index;
-    };
+  getIndex() {
+    return this.index;
+  }
 }
 
-function Local(name, index) {
-    var _this = this;
+export class Local {
+  constructor(name, index) {
+    this.name = name;
+    this.index = index;
+  }
 
-    this.getIndex = function () {
-        return index;
-    };
+  getIndex() {
+    return this.index;
+  }
 
-    this.toString = function () {
-        return "Local(" + name + ")";
-    };
+  toString() {
+    return `Local(${this.name})`;
+  }
 
-    this.getReadNode = function (contextLevel, source) {
-        return factory.createVariableRead(_this, contextLevel, source);
-    };
+  getReadNode(contextLevel, source) {
+    return createVariableRead(this, contextLevel, source);
+  }
 
-    this.getWriteNode = function (contextLevel, valueExpr, source) {
-        return factory.createVariableWrite(this, contextLevel, valueExpr, source);
-    }
+  getWriteNode(contextLevel, valueExpr, source) {
+    return createVariableWrite(this, contextLevel, valueExpr, source);
+  }
 }
-
-exports.Argument = Argument;
-exports.Local = Local;

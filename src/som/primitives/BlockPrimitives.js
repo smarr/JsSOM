@@ -19,40 +19,39 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const RuntimeException = require('../../lib/exceptions').RuntimeException;
+// @ts-check
 
-const Primitives = require('./Primitives').Primitives;
+import { RuntimeException } from '../../lib/exceptions.js';
 
-const u = require('../vm/Universe');
+import { Primitives } from './Primitives.js';
 
-function BlockPrimitives() {
-    Primitives.call(this);
-    var _this = this;
+import { universe } from '../vm/Universe.js';
 
-    function _restart(_frame, _args) {
-        throw new RuntimeException("Restart primitive is not supported, #whileTrue:"
-            + " and #whileTrue: are intrisified so that #restart "
-            + "is not needed.");
-    }
-
-    function _whileTrue(frame, args) {
-        var conditionBlock = args[0];
-        var bodyBlock = args[1];
-
-        var cond = conditionBlock.getMethod().invoke(frame, [conditionBlock]);
-
-        while (cond == u.trueObject) {
-            bodyBlock.getMethod().invoke(frame, [bodyBlock]);
-            cond = conditionBlock.getMethod().invoke(frame, [conditionBlock]);
-        }
-
-        return u.nilObject;
-    }
-
-    this.installPrimitives = function () {
-        _this.installInstancePrimitive("restart",    _restart);
-        _this.installInstancePrimitive("whileTrue:", _whileTrue);
-    }
+function _restart(_frame, _args) {
+  throw new RuntimeException('Restart primitive is not supported, #whileTrue:'
+        + ' and #whileTrue: are intrisified so that #restart '
+        + 'is not needed.');
 }
-BlockPrimitives.prototype = Object.create(Primitives.prototype);
-exports.prims = BlockPrimitives;
+
+function _whileTrue(frame, args) {
+  const conditionBlock = args[0];
+  const bodyBlock = args[1];
+
+  let cond = conditionBlock.getMethod().invoke(frame, [conditionBlock]);
+
+  while (cond === universe.trueObject) {
+    bodyBlock.getMethod().invoke(frame, [bodyBlock]);
+    cond = conditionBlock.getMethod().invoke(frame, [conditionBlock]);
+  }
+
+  return universe.nilObject;
+}
+
+class BlockPrimitives extends Primitives {
+  installPrimitives() {
+    this.installInstancePrimitive('restart', _restart);
+    this.installInstancePrimitive('whileTrue:', _whileTrue);
+  }
+}
+
+export const prims = BlockPrimitives;

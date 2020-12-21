@@ -19,15 +19,17 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const Node = require('./Node').Node;
+// @ts-check
 
-function LiteralNode(value, source) {
-    Node.call(this, source);
+import { Node } from './Node.js';
 
-    this.execute = function (_frame) {
-        return value;
-    }
+export class LiteralNode extends Node {
+  constructor(value, source) {
+    super(source);
+    this.value = value;
+  }
+
+  execute(_frame) {
+    return this.value;
+  }
 }
-LiteralNode.prototype = Object.create(Node.prototype);
-
-exports.LiteralNode = LiteralNode;

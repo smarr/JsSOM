@@ -19,43 +19,44 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const assert = require('../../lib/assert').assert;
+// @ts-check
 
-const Node = require('./Node').Node;
-const GenericDispatchNode = require('./DispatchNode').GenericDispatchNode;
-const UninitializedSuperDispatchNode = require('./DispatchNode').UninitializedSuperDispatchNode;
+import { assert } from '../../lib/assert.js';
 
-function MessageSendNode(selector, _argumentNodes, source) {
-    Node.call(this, source);
-    var _this = this;
-    _this._children_arguments = _this.adopt(_argumentNodes);
+import { Node } from './Node.js';
+import { GenericDispatchNode, UninitializedSuperDispatchNode } from './DispatchNode.js';
 
-    if (_argumentNodes[0].isSuperNode()) {
-        _this._child_dispatch = _this.adopt(new UninitializedSuperDispatchNode(
-            selector, _argumentNodes[0].getHolderClass(),
-            _argumentNodes[0].isClassSide()))
+export class MessageSendNode extends Node {
+  constructor(selector, argumentNodes, source) {
+    super(source);
+    this.selector = selector;
+    this.children_arguments = this.adopt(argumentNodes);
+
+    if (argumentNodes[0].isSuperNode()) {
+      this.child_dispatch = this.adopt(new UninitializedSuperDispatchNode(
+        selector, argumentNodes[0].getHolderClass(),
+        argumentNodes[0].isClassSide(),
+      ));
     } else {
-        _this._child_dispatch = _this.adopt(new GenericDispatchNode(selector));
+      this.child_dispatch = this.adopt(new GenericDispatchNode(selector));
     }
+  }
 
-    this.execute = function (frame) {
-        var args = evaluateArguments(frame);
-        return _this._child_dispatch.executeDispatch(frame, args);
-    };
+  execute(frame) {
+    const args = this.evaluateArguments(frame);
+    return this.child_dispatch.executeDispatch(frame, args);
+  }
 
-    function evaluateArguments(frame) {
-        var args = new Array(_this._children_arguments.length);
-        for (var i = 0; i < _this._children_arguments.length; i++) {
-            args[i] = _this._children_arguments[i].execute(frame);
-            assert(args[i] != null);
-        }
-        return args;
+  evaluateArguments(frame) {
+    const args = new Array(this.children_arguments.length);
+    for (let i = 0; i < this.children_arguments.length; i += 1) {
+      args[i] = this.children_arguments[i].execute(frame);
+      assert(args[i] != null);
     }
+    return args;
+  }
 
-    this.toString = function () {
-        return "MsgSend(" + selector.getString() + ")";
-    };
+  toString() {
+    return `MsgSend(${this.selector.getString()})`;
+  }
 }
-MessageSendNode.prototype = Object.create(Node.prototype);
-
-exports.MessageSendNode = MessageSendNode;

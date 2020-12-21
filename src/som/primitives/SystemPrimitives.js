@@ -19,86 +19,82 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const Primitives = require('./Primitives').Primitives;
-const u = require('../vm/Universe');
-const platform = require('../../lib/platform');
-const intOrBigInt = require('../vmobjects/numbers').intOrBigInt;
+// @ts-check
 
-function SystemPrimitives() {
-    Primitives.call(this);
-    var _this = this;
+import { Primitives } from './Primitives.js';
+import { universe } from '../vm/Universe.js';
+import { getMillisecondTicks, intOrBigInt } from '../../lib/platform.js';
 
-    function _load(frame, args) {
-        var symbol = args[1];
-        var result = u.universe.loadClass(symbol);
-        return (result != null) ? result : u.nilObject;
-    }
-
-    function _exit(frame, args) {
-        var error = args[1];
-        return u.universe.exit(error.getEmbeddedInteger());
-    }
-
-    function _global(frame, args) {
-        var symbol = args[1];
-        var result = u.universe.getGlobal(symbol);
-        return (result != null) ? result : u.nilObject;
-    }
-
-    function _hasGlobal(frame, args) {
-        if (u.universe.hasGlobal(args[1])) {
-            return u.trueObject;
-        } else {
-            return u.falseObject;
-        }
-    }
-
-    function _globalPut(frame, args) {
-        var value  = args[2];
-        var symbol = args[1];
-        u.universe.setGlobal(symbol, value);
-        return value;
-    }
-
-    function _printString(frame, args) {
-        var str = args[1];
-        u.universe.print(str.getEmbeddedString());
-        return args[0];
-    }
-
-    function _printNewline(frame, args) {
-        u.universe.println("");
-        return args[0];
-    }
-
-    function _time(_frame, _args) {
-        var diff = platform.getMillisecondTicks() - u.startTime;
-        return intOrBigInt(diff, u.universe);
-    }
-
-    function _ticks(_frame, _args) {
-        var diff = platform.getMillisecondTicks() - u.startTime;
-        return intOrBigInt(diff * 1000, u.universe);
-    }
-
-    function _fullGC(_frame, _args) {
-        /* not general way to do that in JS */
-        return u.falseObject;
-    }
-
-    this.installPrimitives = function () {
-        _this.installInstancePrimitive("load:",             _load);
-        _this.installInstancePrimitive("exit:",             _exit);
-        _this.installInstancePrimitive("hasGlobal:",        _hasGlobal);
-        _this.installInstancePrimitive("global:",           _global);
-        _this.installInstancePrimitive("global:put:",       _globalPut);
-        _this.installInstancePrimitive("printString:",      _printString);
-        _this.installInstancePrimitive("printNewline",      _printNewline);
-        _this.installInstancePrimitive("time",              _time);
-        _this.installInstancePrimitive("ticks",             _ticks);
-        _this.installInstancePrimitive("fullGC",            _fullGC);
-
-    }
+function _load(_frame, args) {
+  const symbol = args[1];
+  const result = universe.loadClass(symbol);
+  return (result != null) ? result : universe.nilObject;
 }
-SystemPrimitives.prototype = Object.create(Primitives.prototype);
-exports.prims = SystemPrimitives;
+
+function _exit(_frame, args) {
+  const error = args[1];
+  return universe.exit(error.getEmbeddedInteger());
+}
+
+function _global(_frame, args) {
+  const symbol = args[1];
+  const result = universe.getGlobal(symbol);
+  return (result != null) ? result : universe.nilObject;
+}
+
+function _hasGlobal(_frame, args) {
+  if (universe.hasGlobal(args[1])) {
+    return universe.trueObject;
+  }
+  return universe.falseObject;
+}
+
+function _globalPut(_frame, args) {
+  const value = args[2];
+  const symbol = args[1];
+  universe.setGlobal(symbol, value);
+  return value;
+}
+
+function _printString(_frame, args) {
+  const str = args[1];
+  universe.print(str.getEmbeddedString());
+  return args[0];
+}
+
+function _printNewline(_frame, args) {
+  universe.println('');
+  return args[0];
+}
+
+function _time(_frame, _args) {
+  const diff = getMillisecondTicks() - universe.startTime;
+  return intOrBigInt(diff, universe);
+}
+
+function _ticks(_frame, _args) {
+  const diff = getMillisecondTicks() - universe.startTime;
+  return intOrBigInt(diff * 1000, universe);
+}
+
+function _fullGC(_frame, _args) {
+  /* not general way to do that in JS */
+  return universe.falseObject;
+}
+
+class SystemPrimitives extends Primitives {
+  installPrimitives() {
+    this.installInstancePrimitive('load:', _load);
+    this.installInstancePrimitive('exit:', _exit);
+    this.installInstancePrimitive('hasGlobal:', _hasGlobal);
+    this.installInstancePrimitive('global:', _global);
+    this.installInstancePrimitive('global:put:', _globalPut);
+    this.installInstancePrimitive('printString:', _printString);
+    this.installInstancePrimitive('printNewline', _printNewline);
+    this.installInstancePrimitive('time', _time);
+    this.installInstancePrimitive('ticks', _ticks);
+    this.installInstancePrimitive('fullGC', _fullGC);
+  }
+}
+
+export const prims = SystemPrimitives;

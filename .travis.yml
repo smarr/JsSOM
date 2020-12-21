@@ -6,4 +6,5 @@ script:
   - ./som.sh -cp core-lib/Smalltalk core-lib/TestSuite/TestHarness.som
   - npm install .
   - npm run test
+  - npm run lint
   - npm run browserify

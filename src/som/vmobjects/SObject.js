@@ -19,44 +19,45 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const SAbstractObject = require('./SAbstractObject').SAbstractObject;
-const u = require('../vm/Universe');
+// @ts-check
 
-function SObject(instanceClass, numFields) {
-    SAbstractObject.call(this);
-    var clazz = instanceClass,
-        objectFields = new Array((instanceClass === null) ?
-            numFields : instanceClass.getNumberOfInstanceFields());
+import { SAbstractObject } from './SAbstractObject.js';
+import { universe } from '../vm/Universe.js';
 
-    for (var i = 0; i < objectFields.length; i++) {
-        objectFields[i] = u.nilObject;
+export class SObject extends SAbstractObject {
+  constructor(instanceClass, numFields) {
+    super();
+
+    this.clazz = instanceClass;
+    this.objectFields = new Array((instanceClass === null)
+      ? numFields : instanceClass.getNumberOfInstanceFields());
+
+    for (let i = 0; i < this.objectFields.length; i += 1) {
+      this.objectFields[i] = universe.nilObject;
     }
+  }
 
-    this.getNumberOfFields = function () {
-        return objectFields.length;
-    };
+  getNumberOfFields() {
+    return this.objectFields.length;
+  }
 
-    this.setClass = function (value) {
-        clazz = value;
-    };
+  setClass(value) {
+    this.clazz = value;
+  }
 
-    this.getClass = function () {
-        return clazz;
-    };
+  getClass() {
+    return this.clazz;
+  }
 
-    this.getFieldIndex = function (fieldNameSymbol) {
-        return clazz.lookupFieldIndex(fieldNameSymbol);
-    };
+  getFieldIndex(fieldNameSymbol) {
+    return this.clazz.lookupFieldIndex(fieldNameSymbol);
+  }
 
-    this.getField = function (index) {
-        return objectFields[index];
-    };
+  getField(index) {
+    return this.objectFields[index];
+  }
 
-    this.setField = function (idx, value) {
-        objectFields[idx] = value;
-    };
+  setField(idx, value) {
+    this.objectFields[idx] = value;
+  }
 }
-
-SObject.prototype = Object.create(SAbstractObject.prototype);
-
-exports.SObject = SObject;

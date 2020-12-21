@@ -32,4 +32,4 @@ for dir_name in sys.argv[1:]:
                 add_to_lib(core_lib, full_name, content)
 
 
-print("exports.loadCoreLib = function () { return %s; };" % json.dumps(core_lib))
+print("export function loadCoreLib() { return %s; };" % json.dumps(core_lib))

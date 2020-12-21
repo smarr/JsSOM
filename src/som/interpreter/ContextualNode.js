@@ -19,38 +19,40 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const Node = require('./Node').Node;
+// @ts-check
 
-function ContextualNode(contextLevel, source) {
-    Node.call(this, source);
+import { Node } from './Node.js';
 
-    this.getContextLevel = function() {
-        return contextLevel;
-    };
+export class ContextualNode extends Node {
+  constructor(contextLevel, source) {
+    super(source);
+    this.contextLevel = contextLevel;
+  }
 
-    this.determineContext = function (frame) {
-        if (contextLevel == 0) { return frame; }
+  getContextLevel() {
+    return this.contextLevel;
+  }
 
-        var self = frame.getReceiver();
-        var i = contextLevel - 1;
+  determineContext(frame) {
+    if (this.contextLevel === 0) { return frame; }
 
-        while (i > 0) {
-            self = self.getOuterSelf();
-            i--;
-        }
-        return self.getContext();
-    };
+    let self = frame.getReceiver();
+    let i = this.contextLevel - 1;
 
-    this.determineOuterSelf = function (frame) {
-        var self = frame.getReceiver();
-        var i = contextLevel;
-        while (i > 0) {
-            self = self.getOuterSelf();
-            i--;
-        }
-        return self;
-    };
+    while (i > 0) {
+      self = self.getOuterSelf();
+      i -= 1;
+    }
+    return self.getContext();
+  }
+
+  determineOuterSelf(frame) {
+    let self = frame.getReceiver();
+    let i = this.contextLevel;
+    while (i > 0) {
+      self = self.getOuterSelf();
+      i -= 1;
+    }
+    return self;
+  }
 }
-ContextualNode.prototype = Object.create(Node.prototype);
-
-exports.ContextualNode = ContextualNode;

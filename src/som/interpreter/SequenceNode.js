@@ -19,20 +19,20 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const Node = require('./Node').Node;
+// @ts-check
 
-function SequenceNode(_expressions, source) {
-    Node.call(this, source);
-    var _this = this;
-    _this._children_exprs = _expressions;
+import { Node } from './Node.js';
 
-    this.execute = function (frame) {
-        for (var i = 0; i < _this._children_exprs.length - 1; i++) {
-            _this._children_exprs[i].execute(frame);
-        }
-        return _this._children_exprs[_this._children_exprs.length - 1].execute(frame);
-    };
+export class SequenceNode extends Node {
+  constructor(expressions, source) {
+    super(source);
+    this.children_exprs = expressions;
+  }
+
+  execute(frame) {
+    for (let i = 0; i < this.children_exprs.length - 1; i += 1) {
+      this.children_exprs[i].execute(frame);
+    }
+    return this.children_exprs[this.children_exprs.length - 1].execute(frame);
+  }
 }
-SequenceNode.prototype = Object.create(Node.prototype);
-
-exports.SequenceNode = SequenceNode;

@@ -19,42 +19,42 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const u = require("../../src/som/vm/Universe");
-const universe = u.universe;
+import chai from 'chai';
+import { universe } from '../../src/som/vm/Universe.js';
 
-const expect = require('chai').expect;
+const expect = chai.expect;
 
-var tests = [
-    "ClassStructure",
-    "Array"         ,
-    "Block"         ,
-    "ClassLoading"  ,
-    "Closure"       ,
-    "Coercion"      ,
-    "CompilerReturn",
-    "Double"        ,
-    "DoesNotUnderstand",
-    "Global"        ,
-    "Empty"         ,
-    "Hash"          ,
-    "Integer"       ,
-    "Preliminary"   ,
-    "Reflection"    ,
-    "SelfBlock"     ,
-    "Super"         ,
-    "String"        ,
-    "Symbol"        ,
-    "System"        ,
-    "Vector"         ];
+const tests = [
+  'ClassStructure',
+  'Array',
+  'Block',
+  'ClassLoading',
+  'Closure',
+  'Coercion',
+  'CompilerReturn',
+  'Double',
+  'DoesNotUnderstand',
+  'Global',
+  'Empty',
+  'Hash',
+  'Integer',
+  'Preliminary',
+  'Reflection',
+  'SelfBlock',
+  'Super',
+  'String',
+  'Symbol',
+  'System',
+  'Vector'];
 
-describe("SomTests", function() {
-    for (const test of tests) {
-        it ("should pass " + test, function() {
-            const args = ["-cp", "core-lib/Smalltalk", "core-lib/TestSuite/TestHarness.som", test];
-            universe.setAvoidExit(true);
-            universe.interpret(args);
+describe('SomTests', () => {
+  for (const test of tests) {
+    it(`should pass ${test}`, () => {
+      const args = ['-cp', 'core-lib/Smalltalk', 'core-lib/TestSuite/TestHarness.som', test];
+      universe.setAvoidExit(true);
+      universe.interpret(args);
 
-            expect(universe.getLastExitCode()).to.equal(0);
-        });
-    }
+      expect(universe.getLastExitCode()).to.equal(0);
+    });
+  }
 });

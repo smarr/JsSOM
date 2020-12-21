@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 /*
 * Copyright (c) 2014-2019 Stefan Marr, mail@stefan-marr.de
 *
@@ -19,347 +20,347 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const RuntimeException = require('../../lib/exceptions').RuntimeException;
+// @ts-check
 
-const assert = require('../../lib/assert').assert;
-const notYetImplemented = require('../../lib/assert').notYetImplemented;
-const isInIntRange = require('../../lib/platform').isInIntRange;
-const intOrBigInt = require('../../lib/platform').intOrBigInt;
+import { RuntimeException } from '../../lib/exceptions.js';
 
-const SAbstractObject = require('./SAbstractObject').SAbstractObject;
-const u = require('../vm/Universe');
+import { assert, notYetImplemented } from '../../lib/assert.js';
+import { isInIntRange, intOrBigInt } from '../../lib/platform.js';
 
-function SInteger(intVal) {
-  assert(isInIntRange(intVal) && Math.floor(intVal) == intVal);
-  SAbstractObject.call(this);
+import { SAbstractObject } from './SAbstractObject.js';
+import { universe } from '../vm/Universe.js';
 
-  this.getEmbeddedInteger = function () {
-      return intVal;
-  };
-
-  this.getClass = function () {
-      return u.integerClass;
-  };
-
-  function toDouble() {
-      return u.universe.newDouble(intVal); // JS numbers are always doubles...
+export class SInteger extends SAbstractObject {
+  constructor(intVal) {
+    super();
+    assert(isInIntRange(intVal) && Math.floor(intVal) === intVal);
+    this.intVal = intVal;
   }
 
-  this.primLessThan = function (right) {
-      var result;
-      if (right instanceof SBigInteger) {
-          result = intVal < right.getEmbeddedBigInteger();
-      } else if (right instanceof SDouble) {
-          return toDouble.primLessThan(right);
-      } else {
-          result = intVal < right.getEmbeddedInteger();
-      }
-      return (result) ? u.trueObject : u.falseObject;
-  };
-
-  this.primAsString = function () {
-      return u.universe.newString(intVal.toString());
-  };
-
-  this.primAdd = function (right) {
-      if (right instanceof SBigInteger) {
-          return u.universe.newBigInteger(
-              right.getEmbeddedBigInteger() + BigInt(intVal));
-      } else if (right instanceof SDouble) {
-          return toDouble().primAdd(right);
-      } else {
-          var r = right.getEmbeddedInteger();
-          return intOrBigInt(intVal + r, u.universe);
-      }
-  };
-
-  this.primSubtract = function (right) {
-      if (right instanceof SBigInteger) {
-          return u.universe.newBigInteger(
-            BigInt(intVal) - right.getEmbeddedBigInteger());
-      } else if (right instanceof SDouble) {
-          return toDouble().primSubtract(right);
-      } else {
-          const r = right.getEmbeddedInteger();
-          return intOrBigInt(intVal - r, u.universe);
-      }
-  };
-
-  this.primMultiply = function (right) {
-      if (right instanceof SBigInteger) {
-          return u.universe.newBigInteger(
-              right.getEmbeddedBigInteger().multiply(intVal));
-      } else if (right instanceof SDouble) {
-          return toDouble().primMultiply(right);
-      } else {
-          var r = right.getEmbeddedInteger();
-          return intOrBigInt(intVal * r, u.universe);
-      }
-  };
-
-  this.primDoubleDiv = function (right) {
-      var result;
-      if (right instanceof SBigInteger) {
-          result = intVal / right.getEmbeddedBigInteger().toJSNumber();
-      } else if (right instanceof SDouble) {
-          result = intVal / right.getEmbeddedDouble();
-      } else {
-          result = intVal / right.getEmbeddedInteger();
-      }
-      return u.universe.newDouble(result);
-  };
-
-  this.primIntDiv = function (right) {
-      if (right instanceof SBigInteger) {
-          var result = BigInt(intVal).divide(right.getEmbeddedBigInteger());
-          return u.universe.newBigInteger(result);
-      } else if (right instanceof SDouble) {
-          return toDouble(intVal).primIntDiv(right);
-      } else {
-          var result = Math.floor(intVal / right.getEmbeddedInteger());
-          return u.universe.newInteger(result);
-      }
-  };
-
-  this.primModulo = function (right) {
-      if (right instanceof SBigInteger) {
-          var result = BigInt(intVal).mod(right.getEmbeddedBigInteger());
-          return u.universe.newBigInteger(result);
-      } else if (right instanceof SDouble) {
-          return toDouble(intVal).primModulo(right);
-      } else {
-          var r = right.getEmbeddedInteger();
-          // Java has Math.floorMod, JavaScript can use this
-          // but it is likely to be very inefficient
-          var result = Math.floor(((intVal % r) + r) % r);
-          return u.universe.newInteger(result);
-      }
-  };
-
-  this.primAnd = function (right) {
-      if (right instanceof SInteger) {
-          return u.universe.newInteger(intVal & right.getEmbeddedInteger());
-      }
-      notYetImplemented(); // not supported by the library and, not sure what semantics should be
-  };
-
-  this.primEquals = function (right) {
-      var result;
-      if (right instanceof SBigInteger) {
-          result = BigInt(intVal).equals(right.getEmbeddedBigInteger());
-      } else if (right instanceof SDouble) {
-          result = intVal == right.getEmbeddedDouble();
-      } else if (right instanceof SInteger) {
-          result = intVal == right.getEmbeddedInteger();
-      } else {
-          result = false;
-      }
-      return (result) ? u.trueObject : u.falseObject;
-  };
-
-  this.prim32BitUnsignedValue = function () {
-      var arr = new Uint32Array(1);
-      arr[0] = intVal;
-      return intOrBigInt(arr[0], u.universe);
+  getEmbeddedInteger() {
+    return this.intVal;
   }
 
-  this.prim32BitSignedValue = function () {
-      return u.universe.newInteger(intVal | 0);
-  }
-}
-SInteger.prototype = Object.create(SAbstractObject.prototype);
-
-function SDouble(doubleVal) {
-  SAbstractObject.call(this);
-
-  this.getEmbeddedDouble = function () {
-      return doubleVal;
-  };
-
-  this.getClass = function () {
-      return u.doubleClass;
-  };
-
-  function asFloat(obj) {
-      if (obj instanceof SDouble) {
-          return obj.getEmbeddedDouble();
-      } else if (obj instanceof SInteger) {
-          return obj.getEmbeddedInteger();
-      }
-      throw new RuntimeException("Cannot coerce " + obj + " to Double!");
+  getClass() {
+    return universe.integerClass;
   }
 
-  this.primMultiply = function (right) {
-      return u.universe.newDouble(doubleVal * asFloat(right));
-  };
+  toDouble() {
+    return universe.newDouble(this.intVal); // JS numbers are always doubles...
+  }
 
-  this.primAdd = function (right) {
-      return u.universe.newDouble(doubleVal + asFloat(right));
-  };
+  primLessThan(right) {
+    let result;
+    if (right instanceof SBigInteger) {
+      result = this.intVal < right.getEmbeddedBigInteger();
+    } else if (right instanceof SDouble) {
+      return this.toDouble().primLessThan(right);
+    } else {
+      result = this.intVal < right.getEmbeddedInteger();
+    }
+    return result ? universe.trueObject : universe.falseObject;
+  }
 
-  this.primAsInteger = function () {
-      var val = doubleVal > 0 ? Math.floor(doubleVal) : Math.ceil(doubleVal);
-      return u.universe.newInteger(val);
-  };
+  primAsString() {
+    return universe.newString(this.intVal.toString());
+  }
 
-  this.primAsString = function () {
-      return u.universe.newString(doubleVal.toString());
-  };
+  primAdd(right) {
+    if (right instanceof SBigInteger) {
+      return intOrBigInt(
+        right.getEmbeddedBigInteger() + BigInt(this.intVal), universe,
+      );
+    } if (right instanceof SDouble) {
+      return this.toDouble().primAdd(right);
+    }
+    const r = right.getEmbeddedInteger();
+    return intOrBigInt(this.intVal + r, universe);
+  }
 
-  this.primSubtract = function (right) {
-      return u.universe.newDouble(doubleVal - asFloat(right))
-  };
+  primSubtract(right) {
+    if (right instanceof SBigInteger) {
+      return intOrBigInt(
+        BigInt(this.intVal) - right.getEmbeddedBigInteger(), universe,
+      );
+    } if (right instanceof SDouble) {
+      return this.toDouble().primSubtract(right);
+    }
+    const r = right.getEmbeddedInteger();
+    return intOrBigInt(this.intVal - r, universe);
+  }
 
-  this.primDoubleDiv = function (right) {
-      return u.universe.newDouble(doubleVal / asFloat(right));
-  };
+  primMultiply(right) {
+    if (right instanceof SBigInteger) {
+      return intOrBigInt(
+        right.getEmbeddedBigInteger().multiply(this.intVal), universe,
+      );
+    } if (right instanceof SDouble) {
+      return this.toDouble().primMultiply(right);
+    }
+    const r = right.getEmbeddedInteger();
+    return intOrBigInt(this.intVal * r, universe);
+  }
 
-  this.primIntDiv = function (right) {
-      return u.universe.newInteger(Math.floor(doubleVal / asFloat(right)));
-  };
+  primDoubleDiv(right) {
+    let result;
+    if (right instanceof SBigInteger) {
+      result = this.intVal / Number(right.getEmbeddedBigInteger());
+    } else if (right instanceof SDouble) {
+      result = this.intVal / right.getEmbeddedDouble();
+    } else {
+      result = this.intVal / right.getEmbeddedInteger();
+    }
+    return universe.newDouble(result);
+  }
 
-  this.primModulo = function (right) {
-      return u.universe.newDouble(doubleVal % asFloat(right));
-  };
+  primIntDiv(right) {
+    if (right instanceof SBigInteger) {
+      const result = BigInt(this.intVal).divide(right.getEmbeddedBigInteger());
+      return universe.newBigInteger(result);
+    } if (right instanceof SDouble) {
+      return this.toDouble().primIntDiv(right);
+    }
+    const result = Math.floor(this.intVal / right.getEmbeddedInteger());
+    return universe.newInteger(result);
+  }
 
-  this.primEquals = function (right) {
-      return (doubleVal == asFloat(right)) ? u.trueObject : u.falseObject;
-  };
+  primModulo(right) {
+    if (right instanceof SBigInteger) {
+      const result = BigInt(this.intVal).mod(right.getEmbeddedBigInteger());
+      return universe.newBigInteger(result);
+    } if (right instanceof SDouble) {
+      return this.toDouble().primModulo(right);
+    }
+    const r = right.getEmbeddedInteger();
+    // Java has Math.floorMod, JavaScript can use this
+    // but it is likely to be very inefficient
+    const result = Math.floor(((this.intVal % r) + r) % r);
+    return universe.newInteger(result);
+  }
 
-  this.primLessThan = function (right) {
-      return (doubleVal < asFloat(right)) ? u.trueObject : u.falseObject;
+  primAnd(right) {
+    if (right instanceof SInteger) {
+      return universe.newInteger(this.intVal & right.getEmbeddedInteger());
+    }
+    notYetImplemented(); // not supported by the library and, not sure what semantics should be
+    return null;
+  }
+
+  primEquals(right) {
+    let result;
+    if (right instanceof SBigInteger) {
+      result = BigInt(this.intVal).equals(right.getEmbeddedBigInteger());
+    } else if (right instanceof SDouble) {
+      result = this.intVal === right.getEmbeddedDouble();
+    } else if (right instanceof SInteger) {
+      result = this.intVal === right.getEmbeddedInteger();
+    } else {
+      result = false;
+    }
+    return (result) ? universe.trueObject : universe.falseObject;
+  }
+
+  prim32BitUnsignedValue() {
+    const arr = new Uint32Array(1);
+    arr[0] = this.intVal;
+    return intOrBigInt(arr[0], universe);
+  }
+
+  prim32BitSignedValue() {
+    return universe.newInteger(this.intVal | 0);
   }
 }
-SDouble.prototype = Object.create(SAbstractObject.prototype);
 
-function SBigInteger(bigintVal) {
-  SAbstractObject.call(this);
+function asFloat(obj) {
+  if (obj instanceof SDouble) {
+    return obj.getEmbeddedDouble();
+  } if (obj instanceof SInteger) {
+    return obj.getEmbeddedInteger();
+  }
+  throw new RuntimeException(`Cannot coerce ${obj} to Double!`);
+}
 
-  this.getEmbeddedBigInteger = function () {
-      return bigintVal;
-  };
-
-  this.getClass = function () {
-      return u.integerClass;
-  };
-
-  this.primLessThan = function (right) {
-      var result;
-      if (right instanceof SDouble) {
-          result = bigintVal.toJSNumber() < right;
-      } else if (right instanceof SInteger) {
-          result = bigintVal < right.getEmbeddedInteger();
-      } else {
-          result = bigintVal < right.getEmbeddedBigInteger();
-      }
-      return (result) ? u.trueObject : u.falseObject;
-  };
-
-  this.primAsString = function () {
-      return u.universe.newString(bigintVal.toString());
-  };
-
-  this.primAdd = function (right) {
-      if (right instanceof SBigInteger) {
-          return u.universe.newBigInteger(right.getEmbeddedBigInteger() + bigintVal);
-      } else if (right instanceof SDouble) {
-          return u.universe.newDouble(bigintVal.toJSNumber() + right.getEmbeddedDouble());
-      } else {
-          return u.universe.newBigInteger(bigintVal + right.getEmbeddedInteger())
-      }
-  };
-
-  this.primSubtract = function (right) {
-      var result;
-      if (right instanceof SBigInteger) {
-          result = bigintVal - right.getEmbeddedBigInteger();
-      } else if (right instanceof SDouble) {
-          return u.universe.newDouble(bigintVal.toJSNumber() - right.getEmbeddedDouble());
-      } else {
-          result = bigintVal - BigInt(right.getEmbeddedInteger())
-      }
-      return u.universe.newBigInteger(result);
-  };
-
-  this.primMultiply = function (right) {
-      var result;
-      if (right instanceof SBigInteger) {
-          result = bigintVal * right.getEmbeddedBigInteger();
-      } else if (right instanceof SDouble) {
-          return u.universe.newDouble(bigintVal.toJSNumber() * right.getEmbeddedDouble());
-      } else {
-          result = bigintVal * right.getEmbeddedInteger()
-      }
-      return u.universe.newBigInteger(result);
-  };
-
-  this.primDoubleDiv = function (right) {
-      var result;
-      if (right instanceof SBigInteger) {
-          result = bigintVal.toJSNumber() / right.getEmbeddedBigInteger().toJSNumber();
-      } else if (right instanceof SDouble) {
-          result = bigintVal.toJSNumber() / right.getEmbeddedDouble();
-      } else {
-          result = bigintVal.toJSNumber() / right.getEmbeddedInteger();
-      }
-      return  u.universe.newDouble(result);
-  };
-
-  this.primIntDiv = function (right) {
-      var result;
-      if (right instanceof SBigInteger) {
-          result = bigintVal / right.getEmbeddedBigInteger();
-      } else if (right instanceof SDouble) {
-          return u.universe.newDouble(bigintVal.toJSNumber()).primIntDiv(right);
-      } else {
-          result = bigintVal / right.getEmbeddedInteger();
-      }
-      return u.universe.newBigInteger(result);
-  };
-
-  this.primModulo = function (right) {
-      var result;
-      if (right instanceof SBigInteger) {
-          result = bigintVal % right.getEmbeddedBigInteger();
-      } else if (right instanceof SDouble) {
-          return u.universe.newDouble(bigintVal.toJSNumber()).primModulo(right);
-      } else {
-          result = bigintVal % right.getEmbeddedInteger();
-      }
-      return u.universe.newBigInteger(result);
-  };
-
-  this.primAnd = function (right) {
-      notYetImplemented(); // not supported by the library and, not sure what semantics should be
-  };
-
-  this.primEquals = function (right) {
-      var result;
-      if (right instanceof SBigInteger) {
-          result = bigintVal == right.getEmbeddedBigInteger();
-      } else if (right instanceof SDouble) {
-          result = bigintVal.toJSNumber() == right.getEmbeddedDouble();
-      } else if (right instanceof SInteger) {
-          result = bigintVal == right.getEmbeddedInteger();
-      } else {
-          result = false;
-      }
-      return (result) ? u.trueObject : u.falseObject;
-  };
-
-  this.prim32BitUnsignedValue = function () {
-      return intOrBigInt(BigInt.asUintN(32, bigintVal), u.universe);
+export class SDouble extends SAbstractObject {
+  constructor(doubleVal) {
+    super();
+    this.doubleVal = doubleVal;
   }
 
-  this.prim32BitSignedValue = function () {
-      return intOrBigInt(BigInt.asIntN(32, bigintVal), u.universe);
+  getEmbeddedDouble() {
+    return this.doubleVal;
+  }
+
+  getClass() {
+    return universe.doubleClass;
+  }
+
+  primMultiply(right) {
+    return universe.newDouble(this.doubleVal * asFloat(right));
+  }
+
+  primAdd(right) {
+    return universe.newDouble(this.doubleVal + asFloat(right));
+  }
+
+  primAsInteger() {
+    const val = this.doubleVal > 0 ? Math.floor(this.doubleVal) : Math.ceil(this.doubleVal);
+    return universe.newInteger(val);
+  }
+
+  primAsString() {
+    return universe.newString(this.doubleVal.toString());
+  }
+
+  primSubtract(right) {
+    return universe.newDouble(this.doubleVal - asFloat(right));
+  }
+
+  primDoubleDiv(right) {
+    return universe.newDouble(this.doubleVal / asFloat(right));
+  }
+
+  primIntDiv(right) {
+    return universe.newInteger(Math.floor(this.doubleVal / asFloat(right)));
+  }
+
+  primModulo(right) {
+    return universe.newDouble(this.doubleVal % asFloat(right));
+  }
+
+  primEquals(right) {
+    return (this.doubleVal === asFloat(right)) ? universe.trueObject : universe.falseObject;
+  }
+
+  primLessThan(right) {
+    return (this.doubleVal < asFloat(right)) ? universe.trueObject : universe.falseObject;
   }
 }
-SBigInteger.prototype = Object.create(SAbstractObject.prototype);
 
-exports.SBigInteger = SBigInteger;
-exports.SInteger = SInteger;
-exports.SDouble = SDouble;
+export class SBigInteger extends SAbstractObject {
+  constructor(bigIntVal) {
+    super();
+    assert(typeof bigIntVal === 'bigint');
+    assert(!isInIntRange(bigIntVal));
+    this.bigIntVal = bigIntVal;
+  }
 
-exports.isInIntRange = isInIntRange;
-exports.intOrBigInt = intOrBigInt;
+  getEmbeddedBigInteger() {
+    return this.bigIntVal;
+  }
+
+  getClass() {
+    return universe.integerClass;
+  }
+
+  primLessThan(right) {
+    let result;
+    if (right instanceof SDouble) {
+      result = Number(this.bigIntVal) < right.getEmbeddedDouble();
+    } else if (right instanceof SInteger) {
+      result = this.bigIntVal < right.getEmbeddedInteger();
+    } else {
+      result = this.bigIntVal < right.getEmbeddedBigInteger();
+    }
+    return (result) ? universe.trueObject : universe.falseObject;
+  }
+
+  primAsString() {
+    return universe.newString(this.bigIntVal.toString());
+  }
+
+  primAdd(right) {
+    if (right instanceof SBigInteger) {
+      return universe.newBigInteger(right.getEmbeddedBigInteger() + this.bigIntVal);
+    } if (right instanceof SDouble) {
+      return universe.newDouble(Number(this.bigIntVal) + right.getEmbeddedDouble());
+    }
+    return intOrBigInt(this.bigIntVal + BigInt(right.getEmbeddedInteger()), universe);
+  }
+
+  primSubtract(right) {
+    let result;
+    if (right instanceof SBigInteger) {
+      result = this.bigIntVal - right.getEmbeddedBigInteger();
+    } else if (right instanceof SDouble) {
+      return universe.newDouble(Number(this.bigIntVal) - right.getEmbeddedDouble());
+    } else {
+      result = this.bigIntVal - BigInt(right.getEmbeddedInteger());
+    }
+    return universe.newBigInteger(result);
+  }
+
+  primMultiply(right) {
+    let result;
+    if (right instanceof SBigInteger) {
+      result = this.bigIntVal * right.getEmbeddedBigInteger();
+    } else if (right instanceof SDouble) {
+      return universe.newDouble(Number(this.bigIntVal) * right.getEmbeddedDouble());
+    } else {
+      result = this.bigIntVal * right.getEmbeddedInteger();
+    }
+    return universe.newBigInteger(result);
+  }
+
+  primDoubleDiv(right) {
+    let result;
+    const doubleVal = Number(this.bigIntVal);
+    if (right instanceof SBigInteger) {
+      result = doubleVal / Number(right.getEmbeddedBigInteger());
+    } else if (right instanceof SDouble) {
+      result = doubleVal / right.getEmbeddedDouble();
+    } else {
+      result = doubleVal / right.getEmbeddedInteger();
+    }
+    return universe.newDouble(result);
+  }
+
+  primIntDiv(right) {
+    let result;
+    if (right instanceof SBigInteger) {
+      result = this.bigIntVal / right.getEmbeddedBigInteger();
+    } else if (right instanceof SDouble) {
+      return universe.newDouble(Number(this.bigIntVal)).primIntDiv(right);
+    } else {
+      result = this.bigIntVal / right.getEmbeddedInteger();
+    }
+    return universe.newBigInteger(result);
+  }
+
+  primModulo(right) {
+    let result;
+    if (right instanceof SBigInteger) {
+      result = this.bigIntVal % right.getEmbeddedBigInteger();
+    } else if (right instanceof SDouble) {
+      return universe.newDouble(Number(this.bigIntVal)).primModulo(right);
+    } else {
+      result = this.bigIntVal % right.getEmbeddedInteger();
+    }
+    return universe.newBigInteger(result);
+  }
+
+  primAnd(_right) {
+    notYetImplemented(); // not supported by the library and, not sure what semantics should be
+  }
+
+  primEquals(right) {
+    let result;
+    if (right instanceof SBigInteger) {
+      result = this.bigIntVal === right.getEmbeddedBigInteger();
+    } else if (right instanceof SDouble) {
+      result = Number(this.bigIntVal) === right.getEmbeddedDouble();
+    } else if (right instanceof SInteger) {
+      result = this.bigIntVal === right.getEmbeddedInteger();
+    } else {
+      result = false;
+    }
+    return (result) ? universe.trueObject : universe.falseObject;
+  }
+
+  prim32BitUnsignedValue() {
+    return intOrBigInt(BigInt.asUintN(32, this.bigIntVal), universe);
+  }
+
+  prim32BitSignedValue() {
+    return intOrBigInt(BigInt.asIntN(32, this.bigIntVal), universe);
+  }
+}

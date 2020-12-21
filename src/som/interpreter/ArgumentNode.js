@@ -19,57 +19,59 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const assert = require('../../lib/assert').assert;
+// @ts-check
 
-const ContextualNode = require('./ContextualNode').ContextualNode;
+import { assert } from '../../lib/assert.js';
 
-function ArgumentReadNode(contextLevel, arg, source) {
-    ContextualNode.call(this, contextLevel, source);
-    var _this = this;
+import { ContextualNode } from './ContextualNode.js';
 
-    assert(arg.getIndex() >= 0);
-
-    this.execute = function (frame) {
-        var ctx = _this.determineContext(frame);
-        return ctx.getArgument(arg.getIndex());
-    };
-}
-ArgumentReadNode.prototype = Object.create(ContextualNode.prototype);
-
-function ArgumentWriteNode(contextLevel, arg, _valueExpr, source) {
-    ContextualNode.call(this, contextLevel, source);
-    var _this = this;
-    _this._child_value = _this.adopt(_valueExpr);
+export class ArgumentReadNode extends ContextualNode {
+  constructor(contextLevel, arg, source) {
+    super(contextLevel, source);
 
     assert(arg.getIndex() >= 0);
+    this.arg = arg;
+  }
 
-    this.execute = function (frame) {
-        var val = _this._child_value.execute(frame);
-
-        var ctx = _this.determineContext(frame);
-        ctx.setArgument(arg.getIndex(), val);
-        return val;
-    };
+  execute(frame) {
+    const ctx = this.determineContext(frame);
+    return ctx.getArgument(this.arg.getIndex());
+  }
 }
-ArgumentWriteNode.prototype = Object.create(ContextualNode.prototype);
 
-function SuperReadNode(holderClass, classSide, contextLevel, arg, source) {
-    ArgumentReadNode.call(this, contextLevel, arg, source);
+export class ArgumentWriteNode extends ContextualNode {
+  constructor(contextLevel, arg, valueExpr, source) {
+    super(contextLevel, source);
+    this.child_value = this.adopt(valueExpr);
 
-    this.getHolderClass = function () {
-        return holderClass;
-    };
+    assert(arg.getIndex() >= 0);
+    this.arg = arg;
+  }
 
-    this.isClassSide = function () {
-        return classSide;
-    };
-
-    this.isSuperNode = function () {
-        return true;
-    }
+  execute(frame) {
+    const val = this.child_value.execute(frame);
+    const ctx = this.determineContext(frame);
+    ctx.setArgument(this.arg.getIndex(), val);
+    return val;
+  }
 }
-SuperReadNode.prototype = Object.create(ArgumentReadNode.prototype);
 
-exports.ArgumentReadNode = ArgumentReadNode;
-exports.ArgumentWriteNode = ArgumentWriteNode;
-exports.SuperReadNode = SuperReadNode;
+export class SuperReadNode extends ArgumentReadNode {
+  constructor(holderClass, classSide, contextLevel, arg, source) {
+    super(contextLevel, arg, source);
+    this.holderClass = holderClass;
+    this.classSide = classSide;
+  }
+
+  getHolderClass() {
+    return this.holderClass;
+  }
+
+  isClassSide() {
+    return this.classSide;
+  }
+
+  isSuperNode() {
+    return true;
+  }
+}

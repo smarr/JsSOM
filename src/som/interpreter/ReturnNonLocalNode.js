@@ -19,58 +19,59 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const Node = require('./Node').Node;
-const ContextualNode = require('./ContextualNode').ContextualNode;
+// @ts-check
 
-function ReturnException(result, targetFrame) {
-    this.hasReachedTarget = function (current) {
-        return current === targetFrame;
-    };
-    this.getResult = function () {
-        return result;
-    }
+import { Node } from './Node.js';
+import { ContextualNode } from './ContextualNode.js';
+
+export class ReturnException {
+  constructor(result, targetFrame) {
+    this.result = result;
+    this.targetFrame = targetFrame;
+  }
+
+  hasReachedTarget(current) { return current === this.targetFrame; }
+
+  getResult() { return this.result; }
 }
 
-function ReturnNonLocalNode(exp, contextLevel, source) {
-    ContextualNode.call(this, contextLevel, source);
-    var _this = this;
-    _this._child_exp = _this.adopt(exp);
+export class ReturnNonLocalNode extends ContextualNode {
+  constructor(exp, contextLevel, source) {
+    super(contextLevel, source);
+    this.child_exp = this.adopt(exp);
+  }
 
-    this.execute = function (frame) {
-        var result = _this._child_exp.execute(frame);
+  execute(frame) {
+    const result = this.child_exp.execute(frame);
 
-        var ctx = _this.determineContext(frame);
-        if (ctx.isOnStack()) {
-            throw new ReturnException(result, ctx);
-        } else {
-            var outerReceiver = ctx.getReceiver();
-            return outerReceiver.sendEscapedBlock(frame.getReceiver(), frame);
+    const ctx = this.determineContext(frame);
+    if (ctx.isOnStack()) {
+      throw new ReturnException(result, ctx);
+    } else {
+      const outerReceiver = ctx.getReceiver();
+      return outerReceiver.sendEscapedBlock(frame.getReceiver(), frame);
+    }
+  }
+}
+
+export class CatchNonLocalReturnNode extends Node {
+  constructor(body) {
+    super(null);
+    this.child_body = this.adopt(body);
+  }
+
+  execute(frame) {
+    try {
+      return this.child_body.execute(frame);
+    } catch (e) {
+      if (e instanceof ReturnException) {
+        if (e.hasReachedTarget(frame)) {
+          return e.getResult();
         }
+      }
+      throw e;
+    } finally {
+      frame.dropFromStack();
     }
+  }
 }
-ReturnNonLocalNode.prototype = Object.create(ContextualNode.prototype);
-
-function CatchNonLocalReturnNode(_body) {
-    Node.call(this, null);
-    var _this = this;
-    this._child_body = _this.adopt(_body);
-
-    this.execute = function (frame) {
-        try {
-            return _this._child_body.execute(frame);
-        } catch (e) {
-            if (e instanceof ReturnException) {
-                if (e.hasReachedTarget(frame)) {
-                    return e.getResult();
-                }
-            }
-            throw e;
-        } finally {
-            frame.dropFromStack();
-        }
-    }
-}
-CatchNonLocalReturnNode.prototype = Object.create(Node.prototype);
-
-exports.ReturnNonLocalNode = ReturnNonLocalNode;
-exports.CatchNonLocalReturnNode = CatchNonLocalReturnNode;

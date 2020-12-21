@@ -19,25 +19,26 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-function AssertionFailedException() {
+// @ts-check
+class AssertionFailedException {
+  constructor() {
     // Use V8's native method if available, otherwise fallback
-    if ("captureStackTrace" in Error)
-        Error.captureStackTrace(this, AssertionFailedException);
-    else
-        this.stack = (new Error()).stack;
-}
-
-function assert(bool) {
-    if (!bool) {
-        throw new AssertionFailedException();
+    if ('captureStackTrace' in Error) {
+      Error.captureStackTrace(this, AssertionFailedException);
+    } else {
+      this.stack = (new Error()).stack;
     }
+  }
 }
 
-function NotYetImplementedException() {}
-
-function notYetImplemented() {
-    throw new NotYetImplementedException();
+export function assert(bool) {
+  if (!bool) {
+    throw new AssertionFailedException();
+  }
 }
 
-exports.assert = assert;
-exports.notYetImplemented = notYetImplemented;
+class NotYetImplementedException {}
+
+export function notYetImplemented() {
+  throw new NotYetImplementedException();
+}

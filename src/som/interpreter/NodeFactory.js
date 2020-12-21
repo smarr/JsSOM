@@ -19,96 +19,78 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const assert = require('../../lib/assert').assert;
+// @ts-check
 
-const ArgumentReadNode = require('./ArgumentNode').ArgumentReadNode;
-const ArgumentWriteNode = require('./ArgumentNode').ArgumentWriteNode;
-const SuperReadNode = require('./ArgumentNode').SuperReadNode;
-const BlockNode = require('./BlockNode').BlockNode;
-const MessageSendNode = require('./MessageSendNode').MessageSendNode;
-const UninitializedGlobalReadNode = require('./GlobalReadNode').UninitializedGlobalReadNode;
-const LiteralNode = require('./LiteralNode').LiteralNode;
-const ReturnNonLocalNode = require('./ReturnNonLocalNode').ReturnNonLocalNode;
-const CatchNonLocalReturnNode = require('./ReturnNonLocalNode').CatchNonLocalReturnNode;
-const SequenceNode = require('./SequenceNode').SequenceNode;
-const FieldReadNode = require('./FieldNode').FieldReadNode;
-const FieldWriteNode = require('./FieldNode').FieldWriteNode;
-const VariableReadNode = require('./VariableNode').VariableReadNode;
-const VariableWriteNode = require('./VariableNode').VariableWriteNode;
+import { assert } from '../../lib/assert.js';
 
-const SSymbol = require('../vmobjects/SSymbol').SSymbol;
+import { ArgumentReadNode, ArgumentWriteNode, SuperReadNode } from './ArgumentNode.js';
+import { BlockNode } from './BlockNode.js';
+import { MessageSendNode } from './MessageSendNode.js';
+import { UninitializedGlobalReadNode } from './GlobalReadNode.js';
+import { LiteralNode } from './LiteralNode.js';
+import { ReturnNonLocalNode, CatchNonLocalReturnNode } from './ReturnNonLocalNode.js';
+import { SequenceNode } from './SequenceNode.js';
+import { FieldReadNode, FieldWriteNode } from './FieldNode.js';
+import { VariableReadNode, VariableWriteNode } from './VariableNode.js';
 
-function createCatchNonLocalReturn(methodBody) {
-    return new CatchNonLocalReturnNode(methodBody);
+import { SSymbol } from '../vmobjects/SSymbol.js';
+
+export function createCatchNonLocalReturn(methodBody) {
+  return new CatchNonLocalReturnNode(methodBody);
 }
 
-function createFieldRead(self, fieldIndex, source) {
-    return new FieldReadNode(self, fieldIndex, source);
+export function createFieldRead(self, fieldIndex, source) {
+  return new FieldReadNode(self, fieldIndex, source);
 }
 
-function createGlobalRead(name, source) {
-    assert(name instanceof SSymbol);
-    return new UninitializedGlobalReadNode(name, source);
+export function createGlobalRead(name, source) {
+  assert(name instanceof SSymbol);
+  return new UninitializedGlobalReadNode(name, source);
 }
 
-function createFieldWrite(self, exp, fieldIndex, source) {
-    return new FieldWriteNode(self, exp, fieldIndex, source);
+export function createFieldWrite(self, exp, fieldIndex, source) {
+  return new FieldWriteNode(self, exp, fieldIndex, source);
 }
 
-function createArgumentRead(arg, contextLevel, source) {
-    return new ArgumentReadNode(contextLevel, arg, source);
+export function createArgumentRead(arg, contextLevel, source) {
+  return new ArgumentReadNode(contextLevel, arg, source);
 }
 
-function createArgumentWrite(arg, contextLevel, exp, source) {
-    return new ArgumentWriteNode(contextLevel, arg, exp, source);
+export function createArgumentWrite(arg, contextLevel, exp, source) {
+  return new ArgumentWriteNode(contextLevel, arg, exp, source);
 }
 
-function createVariableRead(local, contextLevel, source) {
-    return new VariableReadNode(contextLevel, local, source);
+export function createVariableRead(local, contextLevel, source) {
+  return new VariableReadNode(contextLevel, local, source);
 }
 
-function createSuperRead(variable, contextLevel, holderClass, classSide, source) {
-    assert(holderClass instanceof SSymbol);
-    return new SuperReadNode(
-        holderClass, classSide, contextLevel, variable, source);
+export function createSuperRead(variable, contextLevel, holderClass, classSide, source) {
+  assert(holderClass instanceof SSymbol);
+  return new SuperReadNode(
+    holderClass, classSide, contextLevel, variable, source,
+  );
 }
 
-function createVariableWrite(variable, contextLevel, exp, source) {
-    return new VariableWriteNode(contextLevel, variable, exp, source);
+export function createVariableWrite(variable, contextLevel, exp, source) {
+  return new VariableWriteNode(contextLevel, variable, exp, source);
 }
 
-function createSequence(exps, source) {
-    return new SequenceNode(exps, source);
+export function createSequence(exps, source) {
+  return new SequenceNode(exps, source);
 }
 
-function createBlockNode(blockMethod, source) {
-    return new BlockNode(blockMethod, source);
+export function createBlockNode(blockMethod, source) {
+  return new BlockNode(blockMethod, source);
 }
 
-function createMessageSend(msg, exprs, source) {
-    return new MessageSendNode(msg, exprs, source);
+export function createMessageSend(msg, exprs, source) {
+  return new MessageSendNode(msg, exprs, source);
 }
 
-function createNonLocalReturn(exp, contextLevel, source) {
-    return new ReturnNonLocalNode(exp, contextLevel, source);
+export function createNonLocalReturn(exp, contextLevel, source) {
+  return new ReturnNonLocalNode(exp, contextLevel, source);
 }
 
-function createLiteralNode(somVal, source) {
-    return new LiteralNode(somVal, source);
+export function createLiteralNode(somVal, source) {
+  return new LiteralNode(somVal, source);
 }
-
-exports.createArgumentRead = createArgumentRead;
-exports.createCatchNonLocalReturn = createCatchNonLocalReturn;
-exports.createFieldRead = createFieldRead;
-exports.createFieldWrite = createFieldWrite;
-exports.createGlobalRead = createGlobalRead;
-exports.createArgumentWrite = createArgumentWrite;
-exports.createSuperRead = createSuperRead;
-exports.createVariableRead = createVariableRead;
-exports.createVariableWrite = createVariableWrite;
-exports.createSequence = createSequence;
-exports.createBlockNode = createBlockNode;
-exports.createMessageSend = createMessageSend;
-exports.createNonLocalReturn = createNonLocalReturn;
-exports.createLiteralNode = createLiteralNode;
-

@@ -19,56 +19,58 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const assert = require('../../lib/assert').assert;
+// @ts-check
 
-const SAbstractObject = require('./SAbstractObject').SAbstractObject;
+import { assert } from '../../lib/assert.js';
 
-const u = require('../vm/Universe');
+import { SAbstractObject } from './SAbstractObject.js';
 
-function getBlockEvaluationPrimitive(numberOfArguments, rcvrClass) {
-    function _value(frame, args) {
-        var rcvrBlock = args[0];
-        return rcvrBlock.getMethod().invoke(frame, args);
-    }
+import { universe } from '../vm/Universe.js';
 
-    function computeSignatureString() {
-        // Compute the signature string
-        var signatureString = "value";
-        if (numberOfArguments > 1) { signatureString += ":"; }
+function computeSignatureString(numberOfArguments) {
+  // Compute the signature string
+  let signatureString = 'value';
+  if (numberOfArguments > 1) { signatureString += ':'; }
 
-        // Add extra value: selector elements if necessary
-        for (var i = 2; i < numberOfArguments; i++) {
-            signatureString += "with:";
-        }
-        return signatureString;
-    }
-
-    var sig = u.universe.symbolFor(computeSignatureString(numberOfArguments));
-    return u.universe.newPrimitive(sig, _value, rcvrClass);
+  // Add extra value: selector elements if necessary
+  for (let i = 2; i < numberOfArguments; i += 1) {
+    signatureString += 'with:';
+  }
+  return signatureString;
 }
 
-function SBlock(blockMethod, context) {
-    SAbstractObject.call(this);
-    const blockClass = u.blockClasses[blockMethod.getNumberOfArguments()];
-
-    this.getClass = function () {
-        return blockClass;
-    };
-
-    this.getMethod = function () {
-        return blockMethod;
-    };
-
-    this.getContext = function () {
-        return context;
-    };
-
-    this.getOuterSelf = function () {
-        assert(context != null);
-        return context.getReceiver();
-    };
+function _value(frame, args) {
+  const rcvrBlock = args[0];
+  return rcvrBlock.getMethod().invoke(frame, args);
 }
-SBlock.prototype = Object.create(SAbstractObject.prototype);
 
-exports.SBlock = SBlock;
-exports.getBlockEvaluationPrimitive = getBlockEvaluationPrimitive;
+export function getBlockEvaluationPrimitive(numberOfArguments, rcvrClass) {
+  const sig = universe.symbolFor(computeSignatureString(numberOfArguments));
+  return universe.newPrimitive(sig, _value, rcvrClass);
+}
+
+export class SBlock extends SAbstractObject {
+  constructor(blockMethod, context) {
+    super();
+    this.blockClass = universe.blockClasses[blockMethod.getNumberOfArguments()];
+    this.context = context;
+    this.blockMethod = blockMethod;
+  }
+
+  getClass() {
+    return this.blockClass;
+  }
+
+  getMethod() {
+    return this.blockMethod;
+  }
+
+  getContext() {
+    return this.context;
+  }
+
+  getOuterSelf() {
+    assert(this.context != null);
+    return this.context.getReceiver();
+  }
+}

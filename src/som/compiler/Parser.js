@@ -19,802 +19,805 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const RuntimeException = require('../../lib/exceptions').RuntimeException;
+// @ts-check
 
-const Lexer = require('./Lexer').Lexer;
-const Sym = require('./Symbol').Sym;
-const MethodGenerationContext = require('./MethodGenerationContext').MethodGenerationContext;
-const SourceSection = require('./SourceSection').SourceSection;
+import { RuntimeException } from '../../lib/exceptions.js';
 
-const factory = require('../interpreter/NodeFactory');
+import { Lexer } from './Lexer.js';
+import { Sym } from './Symbol.js';
+import { MethodGenerationContext } from './MethodGenerationContext.js';
+import { SourceSection } from './SourceSection.js';
 
-const u = require('../vm/Universe');
+import {
+  createGlobalRead, createSequence, createBlockNode, createMessageSend, createLiteralNode,
+} from '../interpreter/NodeFactory.js';
 
-const isInIntRange = require('../../lib/platform').isInIntRange;
-const intOrBigInt = require('../../lib/platform').intOrBigInt;
+import { universe } from '../vm/Universe.js';
 
+import { intOrBigInt } from '../../lib/platform.js';
 
 function isIdentifier(sym) {
-    return sym == Sym.Identifier || sym == Sym.Primitive;
+  return sym === Sym.Identifier || sym === Sym.Primitive;
 }
 
 function printableSymbol(sym) {
-    return sym == Sym.Integer || sym == Sym.Double || sym >= Sym.STString;
+  return sym === Sym.Integer || sym === Sym.Double || sym >= Sym.STString;
 }
 
-function ParseError(message, expected, parser) {
-    var sourceCoordinate = parser.getCoordinate(),
-        text             = parser.getText(),
-        currentLine      = parser.getLexer().getCurrentLine(),
-        fileName         = parser.getFileName(),
-        found            = parser.getSym(),
-        _this            = this;
+class ParseError {
+  constructor(message, expected, parser) {
+    this.message = message;
+    this.expected = expected;
 
-    this.expectedSymbolAsString = function () {
-        return Sym.toString(expected);
-    };
+    this.sourceCoordinate = parser.getCoordinate();
+    this.text = parser.getText();
+    this.currentLine = parser.getLexer().getCurrentLine();
+    this.fileName = parser.getFileName();
+    this.found = parser.getSym();
+  }
 
-    this.toString = function () {
-        var msg = "%(file)s:%(line)d:%(column)d: error: " + message;
-        var foundStr;
-        if (printableSymbol(found)) {
-            foundStr = Sym.toString(found) + " (" + text + ")";
-        } else {
-            foundStr = Sym.toString(found);
-        }
-        msg += ": " + currentLine;
-        var expectedStr = _this.expectedSymbolAsString();
+  expectedSymbolAsString() {
+    return Sym.toString(this.expected);
+  }
 
-        msg = msg.replace("%(file)s",     fileName);
-        msg = msg.replace("%(line)d",     sourceCoordinate.startLine);
-        msg = msg.replace("%(column)d",   sourceCoordinate.startColumn);
-        msg = msg.replace("%(expected)s", expectedStr);
-        msg = msg.replace("%(found)s",    foundStr);
-        return msg;
+  toString() {
+    let msg = `%(file)s:%(line)d:%(column)d: error: ${this.message}`;
+    let foundStr;
+    if (printableSymbol(this.found)) {
+      foundStr = `${Sym.toString(this.found)} (${this.text})`;
+    } else {
+      foundStr = Sym.toString(this.found);
     }
+    msg += `: ${this.currentLine}`;
+    const expectedStr = this.expectedSymbolAsString();
+
+    msg = msg.replace('%(file)s', this.fileName);
+    msg = msg.replace('%(line)d', this.sourceCoordinate.startLine);
+    msg = msg.replace('%(column)d', this.sourceCoordinate.startColumn);
+    msg = msg.replace('%(expected)s', expectedStr);
+    msg = msg.replace('%(found)s', foundStr);
+    return msg;
+  }
 }
 
-function ParseErrorWithSymbolList (message, expected, parser) {
-    ParseError.call(this, message, null, parser);
-
-    this.expectedSymbolAsString = function () {
-        var sb = "";
-        var deliminator = "";
-
-        expected.forEach(function (s) {
-            sb += deliminator;
-            sb += s;
-            deliminator = ", "
-        });
-        return sb;
-    }
-}
-ParseErrorWithSymbolList.prototype = Object.create(ParseError.prototype);
-
-function Parser(fileContent, fileName) {
-    var lexer = new Lexer(fileContent),
-        sym = Sym.NONE,
-        text = null,
-        nextSym = Sym.NONE,
-        lastMethodsSourceSection = null,
-        singleOpSyms = [Sym.Not,   Sym.And,  Sym.Or,    Sym.Star, Sym.Div,
-                        Sym.Mod,   Sym.Plus, Sym.Equal, Sym.More, Sym.Less,
-                        Sym.Comma, Sym.At,   Sym.Per,   Sym.NONE],
-        binaryOpSyms = [Sym.Or,   Sym.Comma, Sym.Minus, Sym.Equal, Sym.Not,
-                        Sym.And,  Sym.Or,    Sym.Star,  Sym.Div,   Sym.Mod,
-                        Sym.Plus, Sym.Equal, Sym.More,  Sym.Less,  Sym.Comma,
-                        Sym.At,   Sym.Per,   Sym.NONE],
-        keywordSelectorSyms = [Sym.Keyword, Sym.KeywordSequence],
-        _this = this;
-
-    this.getText = function () {
-        return text;
-    };
-
-    this.getLexer = function () {
-        return lexer;
-    };
-
-    this.getFileName = function () {
-        return fileName;
-    };
-
-    this.getSym = function () {
-        return sym;
-    };
-
-    this.toString = function () {
-        return "Parser(" + source.getName() + ", "
-            + _this.getCoordinate().toString() + ")";
-    };
-
-    this.getCoordinate = function () {
-        return lexer.getStartCoordinate();
-    };
-
-    this.classdef = function (cgenc) {
-        cgenc.setName(u.universe.symbolFor(text));
-        expect(Sym.Identifier);
-        expect(Sym.Equal);
-
-        superclass(cgenc);
-
-        expect(Sym.NewTerm);
-        instanceFields(cgenc);
-
-        while (isIdentifier(sym) || sym == Sym.Keyword
-            || sym == Sym.OperatorSequence || symIn(binaryOpSyms)) {
-            var mgenc = new MethodGenerationContext(cgenc, null, false);
-            var methodBody = method(mgenc);
-            cgenc.addInstanceMethod(
-                mgenc.assemble(methodBody, lastMethodsSourceSection));
-        }
-
-        if (accept(Sym.Separator)) {
-            cgenc.setClassSide(true);
-            classFields(cgenc);
-            while (isIdentifier(sym) || sym == Sym.Keyword
-                || sym == Sym.OperatorSequence || symIn(binaryOpSyms)) {
-                var mgenc = new MethodGenerationContext(cgenc, null, false);
-                var methodBody = method(mgenc);
-                cgenc.addClassMethod(
-                    mgenc.assemble(methodBody, lastMethodsSourceSection));
-            }
-        }
-        expect(Sym.EndTerm);
-    }
-
-    function superclass(cgenc) {
-        var superName;
-        if (sym == Sym.Identifier) {
-            superName = u.universe.symbolFor(text);
-            accept(Sym.Identifier);
-        } else {
-            superName = u.universe.symbolFor("Object");
-        }
-        cgenc.setSuperName(superName);
-
-        // Load the super class, if it is not nil (break the dependency cycle)
-        if (superName.getString() != "nil") {
-            var superClass = u.universe.loadClass(superName);
-            if (superClass == null) {
-                throw new ParseError("Super class " + superName.getString() +
-                    " could not be loaded", Sym.NONE, _this);
-            }
-
-            cgenc.setInstanceFieldsOfSuper(superClass.getInstanceFields());
-            cgenc.setClassFieldsOfSuper(superClass.getClass().getInstanceFields());
-        }
-    }
-
-    function symIn(ss) {
-        return ss.indexOf(sym) != -1;
-    }
-
-    function accept(s) {
-        if (sym == s) {
-            getSymbolFromLexer();
-            return true;
-        }
-        return false;
-    }
-
-    function acceptOneOf(ss) {
-        if (symIn(ss)) {
-            getSymbolFromLexer();
-            return true;
-        }
-        return false;
-    }
-
-    function expect(s) {
-        if (accept(s)) { return true; }
-
-        throw new ParseError("Unexpected symbol. Expected %(expected)s, but found "
-            + "%(found)s", s, _this);
-    }
-
-    function expectOneOf(ss) {
-        if (acceptOneOf(ss)) { return true; }
-
-        throw new ParseErrorWithSymbolList("Unexpected symbol. Expected one of " +
-            "%(expected)s, but found %(found)s", ss, _this);
-    }
-
-    function instanceFields(cgenc) {
-        if (accept(Sym.Or)) {
-            while (isIdentifier(sym)) {
-                var v = variable();
-                cgenc.addInstanceField(u.universe.symbolFor(v));
-            }
-            expect(Sym.Or);
-        }
-    }
-
-    function classFields(cgenc) {
-        if (accept(Sym.Or)) {
-            while (isIdentifier(sym)) {
-                var v = variable();
-                cgenc.addClassField(u.universe.symbolFor(v));
-            }
-            expect(Sym.Or);
-        }
-    }
-
-    function getSource(coord) {
-        return new SourceSection('method', coord.startLine, coord.startColumn,
-            coord.charIndex, lexer.getNumberOfCharactersRead() - coord.charIndex);
-    }
-
-    function method(mgenc) {
-        pattern(mgenc);
-        expect(Sym.Equal);
-        if (sym == Sym.Primitive) {
-            mgenc.markAsPrimitive();
-            primitiveBlock();
-            return null;
-        } else {
-            return methodBlock(mgenc);
-        }
-    }
-
-    function primitiveBlock() {
-        expect(Sym.Primitive);
-    }
-
-    function pattern(mgenc) {
-        mgenc.addArgumentIfAbsent("self"); // TODO: can we do that optionally?
-        switch (sym) {
-            case Sym.Identifier:
-            case Sym.Primitive:
-                unaryPattern(mgenc);
-                break;
-            case Sym.Keyword:
-                keywordPattern(mgenc);
-                break;
-            default:
-                binaryPattern(mgenc);
-                break;
-        }
-    }
-
-    function unaryPattern(mgenc) {
-        mgenc.setSignature(unarySelector());
-    }
-
-    function binaryPattern(mgenc) {
-        mgenc.setSignature(binarySelector());
-        mgenc.addArgumentIfAbsent(argument());
-    }
-
-    function keywordPattern(mgenc) {
-        var kw = "";
-        do {
-            kw += keyword();
-            mgenc.addArgumentIfAbsent(argument());
-        }
-        while (sym == Sym.Keyword);
-
-        mgenc.setSignature(u.universe.symbolFor(kw.toString()));
-    }
-
-    function methodBlock(mgenc) {
-        expect(Sym.NewTerm);
-        var coord = _this.getCoordinate();
-        var methodBody = blockContents(mgenc);
-        lastMethodsSourceSection = getSource(coord);
-        expect(Sym.EndTerm);
-
-        return methodBody;
-    }
-
-    function unarySelector() {
-        return u.universe.symbolFor(identifier());
-    }
-
-    function binarySelector() {
-        var s = text;
-
-        if (accept(Sym.Or)) {
-        } else if (accept(Sym.Comma)) {
-        } else if (accept(Sym.Minus)) {
-        } else if (accept(Sym.Equal)) {
-        } else if (acceptOneOf(singleOpSyms)) {
-        } else if (accept(Sym.OperatorSequence)) {
-        } else { expect(Sym.NONE); }
-
-        return u.universe.symbolFor(s);
-    }
-
-    function identifier() {
-        var s = text;
-        var isPrimitive = accept(Sym.Primitive);
-        if (!isPrimitive) {
-            expect(Sym.Identifier);
-        }
-        return s;
-    }
-
-    function keyword() {
-        var s = text;
-        expect(Sym.Keyword);
-
-        return s;
-    }
-
-    function argument() {
-        return variable();
-    }
-
-    function blockContents(mgenc) {
-        if (accept(Sym.Or)) {
-            locals(mgenc);
-            expect(Sym.Or);
-        }
-        return blockBody(mgenc);
-    }
-
-    function locals(mgenc) {
-        while (isIdentifier(sym)) {
-            mgenc.addLocalIfAbsent(variable());
-        }
-    }
-
-    function blockBody(mgenc) {
-        var coord = _this.getCoordinate();
-        var expressions = [];
-
-        while (true) {
-            if (accept(Sym.Exit)) {
-                expressions.push(result(mgenc));
-                return createSequenceNode(coord, expressions);
-            } else if (sym == Sym.EndBlock) {
-                return createSequenceNode(coord, expressions);
-            } else if (sym == Sym.EndTerm) {
-                // the end of the method has been found (EndTerm) - make it implicitly
-                // return "self"
-                var self = variableRead(mgenc, "self", getSource(_this.getCoordinate()));
-                expressions.push(self);
-                return createSequenceNode(coord, expressions);
-            }
-
-            expressions.push(expression(mgenc));
-            accept(Sym.Period);
-        }
-    }
-
-    function createSequenceNode(coord, expressions) {
-        if (expressions.length == 0) {
-            return factory.createGlobalRead(u.universe.symbolFor("nil"), getSource(coord));
-        } else if (expressions.length == 1) {
-            return expressions[0];
-        }
-        return factory.createSequence(expressions.slice(), getSource(coord));
-    }
-
-    function result(mgenc) {
-        var coord = _this.getCoordinate();
-
-        var exp = expression(mgenc);
-        accept(Sym.Period);
-
-        if (mgenc.isBlockMethod()) {
-            return mgenc.getNonLocalReturn(exp, getSource(coord));
-        } else {
-            return exp;
-        }
-    }
-
-    function expression(mgenc) {
-        peekForNextSymbolFromLexer();
-
-        if (nextSym == Sym.Assign) {
-            return assignation(mgenc);
-        } else {
-            return evaluation(mgenc);
-        }
-    }
-
-    function assignation(mgenc) {
-        return assignments(mgenc);
-    }
-
-    function assignments(mgenc) {
-        var coord = _this.getCoordinate();
-
-        if (!isIdentifier(sym)) {
-            throw new ParseError("Assignments should always target variables or" +
-                    " fields, but found instead a %(found)s",
-                Sym.Identifier, _this);
-        }
-        var variable = assignment();
-
-        peekForNextSymbolFromLexer();
-
-        var value;
-        if (nextSym == Sym.Assign) {
-            value = assignments(mgenc);
-        } else {
-            value = evaluation(mgenc);
-        }
-
-        return variableWrite(mgenc, variable, value, getSource(coord));
-    }
-
-    function assignment() {
-        var v = variable();
-        expect(Sym.Assign);
-        return v;
-    }
-
-    function evaluation(mgenc) {
-        var exp = primary(mgenc);
-        if (isIdentifier(sym) || sym == Sym.Keyword
-            || sym == Sym.OperatorSequence || symIn(binaryOpSyms)) {
-            exp = messages(mgenc, exp);
-        }
-        return exp;
-    }
-
-    function primary(mgenc) {
-        switch (sym) {
-            case Sym.Identifier:
-            case Sym.Primitive: {
-                var coord = _this.getCoordinate();
-                var v = variable();
-                return variableRead(mgenc, v, getSource(coord));
-            }
-            case Sym.NewTerm: {
-                return nestedTerm(mgenc);
-            }
-            case Sym.NewBlock: {
-                var coord = _this.getCoordinate();
-                var bgenc = new MethodGenerationContext(mgenc.getHolder(), mgenc, true);
-
-                var blockBody = nestedBlock(bgenc);
-
-                var blockMethod = bgenc.assemble(blockBody, lastMethodsSourceSection);
-
-                return factory.createBlockNode(blockMethod, getSource(coord));
-            }
-            default: {
-                return literal();
-            }
-        }
-    }
-
-    function variable() {
-        return identifier();
-    }
-
-    function messages(mgenc, receiver) {
-        var msg;
-        if (isIdentifier(sym)) {
-            msg = unaryMessage(receiver);
-
-            while (isIdentifier(sym)) {
-                msg = unaryMessage(msg);
-            }
-
-            while (sym == Sym.OperatorSequence || symIn(binaryOpSyms)) {
-                msg = binaryMessage(mgenc, msg);
-            }
-
-            if (sym == Sym.Keyword) {
-                msg = keywordMessage(mgenc, msg);
-            }
-        } else if (sym == Sym.OperatorSequence || symIn(binaryOpSyms)) {
-            msg = binaryMessage(mgenc, receiver);
-
-            while (sym == Sym.OperatorSequence || symIn(binaryOpSyms)) {
-                msg = binaryMessage(mgenc, msg);
-            }
-
-            if (sym == Sym.Keyword) {
-                msg = keywordMessage(mgenc, msg);
-            }
-        } else {
-            msg = keywordMessage(mgenc, receiver);
-        }
-        return msg;
-    }
-
-    function unaryMessage(receiver) {
-        var coord = _this.getCoordinate();
-        var selector = unarySelector();
-        return factory.createMessageSend(selector, [receiver], getSource(coord));
-    }
-
-    function binaryMessage(mgenc, receiver) {
-        var coord = _this.getCoordinate();
-        var msg = binarySelector();
-        var operand = binaryOperand(mgenc);
-
-        return factory.createMessageSend(msg, [receiver, operand], getSource(coord));
-    }
-
-    function binaryOperand(mgenc) {
-        var operand = primary(mgenc);
-
-        // a binary operand can receive unaryMessages
-        // Example: 2 * 3 asString
-        //   is evaluated as 2 * (3 asString)
-        while (isIdentifier(sym)) {
-            operand = unaryMessage(operand);
-        }
-        return operand;
-    }
-
-    function keywordMessage(mgenc, receiver) {
-        var coord = _this.getCoordinate();
-        var args  = [];
-        var kw    = "";
-
-        args.push(receiver);
-
-        do {
-            kw += keyword();
-            args.push(formula(mgenc));
-        }
-        while (sym == Sym.Keyword);
-
-        var msg = u.universe.symbolFor(kw);
-
-        return factory.createMessageSend(msg, args.slice(), getSource(coord));
-    }
-
-    function formula(mgenc) {
-        var operand = binaryOperand(mgenc);
-
-        while (sym == Sym.OperatorSequence || symIn(binaryOpSyms)) {
-            operand = binaryMessage(mgenc, operand);
-        }
-        return operand;
-    }
-
-    function nestedTerm(mgenc) {
-        expect(Sym.NewTerm);
-        var exp = expression(mgenc);
-        expect(Sym.EndTerm);
-        return exp;
-    }
-
-    function getObjectForCurrentLiteral(coord) {
-        switch (sym) {
-            case Sym.Pound: {
-                peekForNextSymbolFromLexerIfNecessary();
-                if (nextSym == Sym.NewTerm) {
-                    return literalArray();
-                } else {
-                    return literalSymbol();
-                }
-            }
-            case Sym.STString:
-                return literalString();
-            default:
-                return literalNumber();
-        }
-    }
-
-    function literal() {
-        const coord = _this.getCoordinate();
-        const value = getObjectForCurrentLiteral(coord);
-        const source = getSource(coord);
-        return factory.createLiteralNode(value, source);
-    }
-
-    function literalNumber() {
-        if (sym == Sym.Minus) {
-            return negativeDecimal();
-        } else {
-            return literalDecimal(false);
-        }
-    }
-
-    function literalDecimal(isNegative) {
-        if (sym == Sym.Integer) {
-            return literalInteger(isNegative);
-        } else {
-            return literalDouble(isNegative);
-        }
-    }
-
-    function negativeDecimal() {
-        expect(Sym.Minus);
-        return literalDecimal(true);
-    }
-
-    function isNegativeNumber() {
-        var isNegative  = false;
-        if (sym === Sym.Minus) {
-            expect(Sym.Minus);
-            _this.isNegative = true;
-        }
-        return isNegative;
-    }
-
-    function literalInteger(isNegative) {
-        let i;
-
-        try {
-            i = BigInt(text);
-        } catch (e) {
-            throw new ParseError("Could not parse integer. Expected a number " +
-                "but got '" + text + "'", Sym.NONE, _this);
-        }
-
-        if (isNegative) {
-            i = 0n - i;
-        }
-        expect(Sym.Integer);
-
-        return intOrBigInt(i, u.universe);
-    }
-
-    function literalDouble(isNegative) {
-        var d = parseFloat(text);
-        if (isNaN(d)) {
-            throw new ParseError("Could not parse double. Expected a number " +
-                "but got '" + text + "'", Sym.NONE, _this);
-        }
-
-        if (isNegative) {
-            d = 0.0 - d;
-        }
-        expect(Sym.Double);
-        return u.universe.newDouble(d);
-    }
-
-    function literalSymbol() {
-        expect(Sym.Pound);
-        if (sym == Sym.STString) {
-            var s = string();
-            return u.universe.symbolFor(s);
-        } else {
-            return selector();
-        }
-    }
-
-    function literalString() {
-        var s = string();
-        return u.universe.newString(s);
-    }
-
-    function literalArray() {
-        const literals = [];
-        expect(Sym.Pound);
-        expect(Sym.NewTerm);
-
-        while (sym != Sym.EndTerm) {
-            literals.push(getObjectForCurrentLiteral());
-        }
-
-        expect(Sym.EndTerm);
-        return u.universe.newArrayFrom(literals);
-    }
-
-    function selector() {
-        if (sym == Sym.OperatorSequence || symIn(singleOpSyms)) {
-            return binarySelector();
-        } else if (sym == Sym.Keyword || sym == Sym.KeywordSequence) {
-            return keywordSelector();
-        } else {
-            return unarySelector();
-        }
-    }
-
-    function keywordSelector() {
-        var s = text;
-        expectOneOf(keywordSelectorSyms);
-        return u.universe.symbolFor(s);
-    }
-
-    function string() {
-        var s = text;
-        expect(Sym.STString);
-        return s;
-    }
-
-    function nestedBlock(mgenc) {
-        expect(Sym.NewBlock);
-        var coord = _this.getCoordinate();
-
-        mgenc.addArgumentIfAbsent("$blockSelf");
-
-        if (sym == Sym.Colon) {
-            blockPattern(mgenc);
-        }
-
-        // generate Block signature
-        var blockSig = "$blockMethod@" + lexer.getCurrentLineNumber() + "@" + lexer.getCurrentColumn();
-        var argSize = mgenc.getNumberOfArguments();
-        for (var i = 1; i < argSize; i++) {
-            blockSig += ":";
-        }
-
-        mgenc.setSignature(u.universe.symbolFor(blockSig));
-
-        var expressions = blockContents(mgenc);
-
-        lastMethodsSourceSection = getSource(coord);
-
-        expect(Sym.EndBlock);
-
-        return expressions;
-    }
-
-    function blockPattern(mgenc) {
-        blockArguments(mgenc);
-        expect(Sym.Or);
-    }
-
-    function blockArguments(mgenc) {
-        do {
-            expect(Sym.Colon);
-            mgenc.addArgumentIfAbsent(argument());
-        }
-        while (sym == Sym.Colon);
-    }
-
-    function variableRead(mgenc, variableName, source) {
-        // we need to handle super special here
-        if ("super" == variableName) {
-            return mgenc.getSuperReadNode(source);
-        }
-
-        // now look up first local variables, or method arguments
-        var variable = mgenc.getVariable(variableName);
-        if (variable != null) {
-            return mgenc.getLocalReadNode(variableName, source);
-        }
-
-        // then object fields
-        var varName = u.universe.symbolFor(variableName);
-        var fieldRead = mgenc.getObjectFieldRead(varName, source);
-
-        if (fieldRead != null) {
-            return fieldRead;
-        }
-
-        // and finally assume it is a global
-        return mgenc.getGlobalRead(varName, source);
-    }
-
-    function variableWrite(mgenc, variableName, exp, source) {
-        var variable = mgenc.getVariable(variableName);
-        if (variable != null) {
-            return mgenc.getLocalWriteNode(variableName, exp, source);
-        }
-
-        var fieldName = u.universe.symbolFor(variableName);
-        var fieldWrite = mgenc.getObjectFieldWrite(fieldName, exp, source);
-
-        if (fieldWrite != null) {
-            return fieldWrite;
-        } else {
-            throw new RuntimeException("Neither a variable nor a field found "
-                + "in current scope that is named " + variableName
-                + ". Arguments are read-only.");
-        }
-    }
-
-    function getSymbolFromLexer() {
-        sym  = lexer.getSym();
-        text = lexer.getText();
-    }
-
-    function peekForNextSymbolFromLexer() {
-        nextSym = lexer.peek();
-    }
-
-    function peekForNextSymbolFromLexerIfNecessary() {
-        if (!lexer.getPeekDone()) {
-            peekForNextSymbolFromLexer();
-        }
-    }
-
-    // init...
-    getSymbolFromLexer();
+class ParseErrorWithSymbolList extends ParseError {
+  expectedSymbolAsString() {
+    let sb = '';
+    let deliminator = '';
+
+    for (const s of this.expected) {
+      sb += deliminator;
+      sb += s;
+      deliminator = ', ';
+    }
+    return sb;
+  }
 }
 
-exports.Parser = Parser;
+const singleOpSyms = [Sym.Not, Sym.And, Sym.Or, Sym.Star, Sym.Div,
+  Sym.Mod, Sym.Plus, Sym.Equal, Sym.More, Sym.Less,
+  Sym.Comma, Sym.At, Sym.Per, Sym.NONE];
+
+const binaryOpSyms = [Sym.Or, Sym.Comma, Sym.Minus, Sym.Equal, Sym.Not,
+  Sym.And, Sym.Or, Sym.Star, Sym.Div, Sym.Mod,
+  Sym.Plus, Sym.Equal, Sym.More, Sym.Less, Sym.Comma,
+  Sym.At, Sym.Per, Sym.NONE];
+
+const keywordSelectorSyms = [Sym.Keyword, Sym.KeywordSequence];
+
+export class Parser {
+  constructor(fileContent, fileName) {
+    this.fileName = fileName;
+    this.lexer = new Lexer(fileContent);
+    this.sym = Sym.NONE;
+    this.text = null;
+    this.nextSym = Sym.NONE;
+    this.lastMethodsSourceSection = null;
+
+    this.getSymbolFromLexer();
+  }
+
+  getText() {
+    return this.text;
+  }
+
+  getLexer() {
+    return this.lexer;
+  }
+
+  getFileName() {
+    return this.fileName;
+  }
+
+  getSym() {
+    return this.sym;
+  }
+
+  toString() {
+    return `Parser(${this.fileName}, ${
+      this.getCoordinate().toString()})`;
+  }
+
+  getCoordinate() {
+    return this.lexer.getStartCoordinate();
+  }
+
+  classdef(cgenc) {
+    cgenc.setName(universe.symbolFor(this.text));
+    this.expect(Sym.Identifier);
+    this.expect(Sym.Equal);
+
+    this.superclass(cgenc);
+
+    this.expect(Sym.NewTerm);
+    this.instanceFields(cgenc);
+
+    while (isIdentifier(this.sym) || this.sym === Sym.Keyword
+            || this.sym === Sym.OperatorSequence || this.symIn(binaryOpSyms)) {
+      const mgenc = new MethodGenerationContext(cgenc, null, false);
+      const methodBody = this.method(mgenc);
+      cgenc.addInstanceMethod(
+        mgenc.assemble(methodBody, this.lastMethodsSourceSection),
+      );
+    }
+
+    if (this.accept(Sym.Separator)) {
+      cgenc.setClassSide(true);
+      this.classFields(cgenc);
+      while (isIdentifier(this.sym) || this.sym === Sym.Keyword
+                || this.sym === Sym.OperatorSequence || this.symIn(binaryOpSyms)) {
+        const mgenc = new MethodGenerationContext(cgenc, null, false);
+        const methodBody = this.method(mgenc);
+        cgenc.addClassMethod(
+          mgenc.assemble(methodBody, this.lastMethodsSourceSection),
+        );
+      }
+    }
+    this.expect(Sym.EndTerm);
+  }
+
+  superclass(cgenc) {
+    let superName;
+    if (this.sym === Sym.Identifier) {
+      superName = universe.symbolFor(this.text);
+      this.accept(Sym.Identifier);
+    } else {
+      superName = universe.symbolFor('Object');
+    }
+    cgenc.setSuperName(superName);
+
+    // Load the super class, if it is not nil (break the dependency cycle)
+    if (superName.getString() !== 'nil') {
+      const superClass = universe.loadClass(superName);
+      if (superClass === null) {
+        throw new ParseError(`Super class ${superName.getString()
+        } could not be loaded`, Sym.NONE, this);
+      }
+
+      cgenc.setInstanceFieldsOfSuper(superClass.getInstanceFields());
+      cgenc.setClassFieldsOfSuper(superClass.getClass().getInstanceFields());
+    }
+  }
+
+  symIn(ss) {
+    return ss.indexOf(this.sym) !== -1;
+  }
+
+  accept(s) {
+    if (this.sym === s) {
+      this.getSymbolFromLexer();
+      return true;
+    }
+    return false;
+  }
+
+  acceptOneOf(ss) {
+    if (this.symIn(ss)) {
+      this.getSymbolFromLexer();
+      return true;
+    }
+    return false;
+  }
+
+  expect(s) {
+    if (this.accept(s)) { return true; }
+
+    throw new ParseError('Unexpected symbol. Expected %(expected)s, but found '
+            + '%(found)s', s, this);
+  }
+
+  expectOneOf(ss) {
+    if (this.acceptOneOf(ss)) { return true; }
+
+    throw new ParseErrorWithSymbolList('Unexpected symbol. Expected one of '
+            + '%(expected)s, but found %(found)s', ss, this);
+  }
+
+  instanceFields(cgenc) {
+    if (this.accept(Sym.Or)) {
+      while (isIdentifier(this.sym)) {
+        const v = this.variable();
+        cgenc.addInstanceField(universe.symbolFor(v));
+      }
+      this.expect(Sym.Or);
+    }
+  }
+
+  classFields(cgenc) {
+    if (this.accept(Sym.Or)) {
+      while (isIdentifier(this.sym)) {
+        const v = this.variable();
+        cgenc.addClassField(universe.symbolFor(v));
+      }
+      this.expect(Sym.Or);
+    }
+  }
+
+  getSource(coord) {
+    return new SourceSection(
+      'method', coord.startLine, coord.startColumn, coord.charIndex,
+      this.lexer.getNumberOfCharactersRead() - coord.charIndex,
+    );
+  }
+
+  method(mgenc) {
+    this.pattern(mgenc);
+    this.expect(Sym.Equal);
+    if (this.sym === Sym.Primitive) {
+      mgenc.markAsPrimitive();
+      this.primitiveBlock();
+      return null;
+    }
+    return this.methodBlock(mgenc);
+  }
+
+  primitiveBlock() {
+    this.expect(Sym.Primitive);
+  }
+
+  pattern(mgenc) {
+    mgenc.addArgumentIfAbsent('self'); // TODO: can we do that optionally?
+    switch (this.sym) {
+      case Sym.Identifier:
+      case Sym.Primitive:
+        this.unaryPattern(mgenc);
+        break;
+      case Sym.Keyword:
+        this.keywordPattern(mgenc);
+        break;
+      default:
+        this.binaryPattern(mgenc);
+        break;
+    }
+  }
+
+  unaryPattern(mgenc) {
+    mgenc.setSignature(this.unarySelector());
+  }
+
+  binaryPattern(mgenc) {
+    mgenc.setSignature(this.binarySelector());
+    mgenc.addArgumentIfAbsent(this.argument());
+  }
+
+  keywordPattern(mgenc) {
+    let kw = '';
+    do {
+      kw += this.keyword();
+      mgenc.addArgumentIfAbsent(this.argument());
+    }
+    while (this.sym === Sym.Keyword);
+
+    mgenc.setSignature(universe.symbolFor(kw.toString()));
+  }
+
+  methodBlock(mgenc) {
+    this.expect(Sym.NewTerm);
+    const coord = this.getCoordinate();
+    const methodBody = this.blockContents(mgenc);
+    this.lastMethodsSourceSection = this.getSource(coord);
+    this.expect(Sym.EndTerm);
+
+    return methodBody;
+  }
+
+  unarySelector() {
+    return universe.symbolFor(this.identifier());
+  }
+
+  binarySelector() {
+    const s = this.text;
+
+    if (this.accept(Sym.Or)) { /* noop */
+    } else if (this.accept(Sym.Comma)) { /* noop */
+    } else if (this.accept(Sym.Minus)) { /* noop */
+    } else if (this.accept(Sym.Equal)) { /* noop */
+    } else if (this.acceptOneOf(singleOpSyms)) { /* noop */
+    } else if (this.accept(Sym.OperatorSequence)) { /* noop */
+    } else { this.expect(Sym.NONE); }
+
+    return universe.symbolFor(s);
+  }
+
+  identifier() {
+    const s = this.text;
+    const isPrimitive = this.accept(Sym.Primitive);
+    if (!isPrimitive) {
+      this.expect(Sym.Identifier);
+    }
+    return s;
+  }
+
+  keyword() {
+    const s = this.text;
+    this.expect(Sym.Keyword);
+    return s;
+  }
+
+  argument() {
+    return this.variable();
+  }
+
+  blockContents(mgenc) {
+    if (this.accept(Sym.Or)) {
+      this.locals(mgenc);
+      this.expect(Sym.Or);
+    }
+    return this.blockBody(mgenc);
+  }
+
+  locals(mgenc) {
+    while (isIdentifier(this.sym)) {
+      mgenc.addLocalIfAbsent(this.variable());
+    }
+  }
+
+  blockBody(mgenc) {
+    const coord = this.getCoordinate();
+    const expressions = [];
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      if (this.accept(Sym.Exit)) {
+        expressions.push(this.result(mgenc));
+        return this.createSequenceNode(coord, expressions);
+      } if (this.sym === Sym.EndBlock) {
+        return this.createSequenceNode(coord, expressions);
+      } if (this.sym === Sym.EndTerm) {
+        // the end of the method has been found (EndTerm) - make it implicitly
+        // return "self"
+        const self = this.variableRead(mgenc, 'self', this.getSource(this.getCoordinate()));
+        expressions.push(self);
+        return this.createSequenceNode(coord, expressions);
+      }
+
+      expressions.push(this.expression(mgenc));
+      this.accept(Sym.Period);
+    }
+  }
+
+  createSequenceNode(coord, expressions) {
+    if (expressions.length === 0) {
+      return createGlobalRead(universe.symbolFor('nil'), this.getSource(coord));
+    } if (expressions.length === 1) {
+      return expressions[0];
+    }
+    return createSequence(expressions.slice(), this.getSource(coord));
+  }
+
+  result(mgenc) {
+    const coord = this.getCoordinate();
+    const exp = this.expression(mgenc);
+    this.accept(Sym.Period);
+
+    if (mgenc.isBlockMethod()) {
+      return mgenc.getNonLocalReturn(exp, this.getSource(coord));
+    }
+    return exp;
+  }
+
+  expression(mgenc) {
+    this.peekForNextSymbolFromLexer();
+
+    if (this.nextSym === Sym.Assign) {
+      return this.assignation(mgenc);
+    }
+    return this.evaluation(mgenc);
+  }
+
+  assignation(mgenc) {
+    return this.assignments(mgenc);
+  }
+
+  assignments(mgenc) {
+    const coord = this.getCoordinate();
+
+    if (!isIdentifier(this.sym)) {
+      throw new ParseError('Assignments should always target variables or'
+                + ' fields, but found instead a %(found)s',
+      Sym.Identifier, this);
+    }
+    const variable = this.assignment();
+
+    this.peekForNextSymbolFromLexer();
+
+    let value;
+    if (this.nextSym === Sym.Assign) {
+      value = this.assignments(mgenc);
+    } else {
+      value = this.evaluation(mgenc);
+    }
+
+    return this.variableWrite(mgenc, variable, value, this.getSource(coord));
+  }
+
+  assignment() {
+    const v = this.variable();
+    this.expect(Sym.Assign);
+    return v;
+  }
+
+  evaluation(mgenc) {
+    let exp = this.primary(mgenc);
+    if (isIdentifier(this.sym) || this.sym === Sym.Keyword
+            || this.sym === Sym.OperatorSequence || this.symIn(binaryOpSyms)) {
+      exp = this.messages(mgenc, exp);
+    }
+    return exp;
+  }
+
+  primary(mgenc) {
+    switch (this.sym) {
+      case Sym.Identifier:
+      case Sym.Primitive: {
+        const coord = this.getCoordinate();
+        const v = this.variable();
+        return this.variableRead(mgenc, v, this.getSource(coord));
+      }
+      case Sym.NewTerm: {
+        return this.nestedTerm(mgenc);
+      }
+      case Sym.NewBlock: {
+        const coord = this.getCoordinate();
+        const bgenc = new MethodGenerationContext(mgenc.getHolder(), mgenc, true);
+        const blockBody = this.nestedBlock(bgenc);
+        const blockMethod = bgenc.assemble(blockBody, this.lastMethodsSourceSection);
+
+        return createBlockNode(blockMethod, this.getSource(coord));
+      }
+      default: {
+        return this.literal();
+      }
+    }
+  }
+
+  variable() {
+    return this.identifier();
+  }
+
+  messages(mgenc, receiver) {
+    let msg;
+    if (isIdentifier(this.sym)) {
+      msg = this.unaryMessage(receiver);
+
+      while (isIdentifier(this.sym)) {
+        msg = this.unaryMessage(msg);
+      }
+
+      while (this.sym === Sym.OperatorSequence || this.symIn(binaryOpSyms)) {
+        msg = this.binaryMessage(mgenc, msg);
+      }
+
+      if (this.sym === Sym.Keyword) {
+        msg = this.keywordMessage(mgenc, msg);
+      }
+    } else if (this.sym === Sym.OperatorSequence || this.symIn(binaryOpSyms)) {
+      msg = this.binaryMessage(mgenc, receiver);
+
+      while (this.sym === Sym.OperatorSequence || this.symIn(binaryOpSyms)) {
+        msg = this.binaryMessage(mgenc, msg);
+      }
+
+      if (this.sym === Sym.Keyword) {
+        msg = this.keywordMessage(mgenc, msg);
+      }
+    } else {
+      msg = this.keywordMessage(mgenc, receiver);
+    }
+    return msg;
+  }
+
+  unaryMessage(receiver) {
+    const coord = this.getCoordinate();
+    const selector = this.unarySelector();
+    return createMessageSend(
+      selector, [receiver], this.getSource(coord),
+    );
+  }
+
+  binaryMessage(mgenc, receiver) {
+    const coord = this.getCoordinate();
+    const msg = this.binarySelector();
+    const operand = this.binaryOperand(mgenc);
+
+    return createMessageSend(
+      msg, [receiver, operand], this.getSource(coord),
+    );
+  }
+
+  binaryOperand(mgenc) {
+    let operand = this.primary(mgenc);
+
+    // a binary operand can receive unaryMessages
+    // Example: 2 * 3 asString
+    //   is evaluated as 2 * (3 asString)
+    while (isIdentifier(this.sym)) {
+      operand = this.unaryMessage(operand);
+    }
+    return operand;
+  }
+
+  keywordMessage(mgenc, receiver) {
+    const coord = this.getCoordinate();
+    const args = [];
+    let kw = '';
+
+    args.push(receiver);
+
+    do {
+      kw += this.keyword();
+      args.push(this.formula(mgenc));
+    }
+    while (this.sym === Sym.Keyword);
+
+    const msg = universe.symbolFor(kw);
+
+    return createMessageSend(
+      msg, args.slice(), this.getSource(coord),
+    );
+  }
+
+  formula(mgenc) {
+    let operand = this.binaryOperand(mgenc);
+
+    while (this.sym === Sym.OperatorSequence || this.symIn(binaryOpSyms)) {
+      operand = this.binaryMessage(mgenc, operand);
+    }
+    return operand;
+  }
+
+  nestedTerm(mgenc) {
+    this.expect(Sym.NewTerm);
+    const exp = this.expression(mgenc);
+    this.expect(Sym.EndTerm);
+    return exp;
+  }
+
+  getObjectForCurrentLiteral() {
+    switch (this.sym) {
+      case Sym.Pound: {
+        this.peekForNextSymbolFromLexerIfNecessary();
+        if (this.nextSym === Sym.NewTerm) {
+          return this.literalArray();
+        }
+        return this.literalSymbol();
+      }
+      case Sym.STString:
+        return this.literalString();
+      default:
+        return this.literalNumber();
+    }
+  }
+
+  literal() {
+    const coord = this.getCoordinate();
+    const value = this.getObjectForCurrentLiteral();
+    const source = this.getSource(coord);
+    return createLiteralNode(value, source);
+  }
+
+  literalNumber() {
+    if (this.sym === Sym.Minus) {
+      return this.negativeDecimal();
+    }
+    return this.literalDecimal(false);
+  }
+
+  literalDecimal(isNegative) {
+    if (this.sym === Sym.Integer) {
+      return this.literalInteger(isNegative);
+    }
+    return this.literalDouble(isNegative);
+  }
+
+  negativeDecimal() {
+    this.expect(Sym.Minus);
+    return this.literalDecimal(true);
+  }
+
+  isNegativeNumber() {
+    let isNegative = false;
+    if (this.sym === Sym.Minus) {
+      this.expect(Sym.Minus);
+      isNegative = true;
+    }
+    return isNegative;
+  }
+
+  literalInteger(isNegative) {
+    let i;
+
+    try {
+      i = BigInt(this.text);
+    } catch (e) {
+      throw new ParseError(`${'Could not parse integer. Expected a number '
+                + "but got '"}${this.text}'`, Sym.NONE, this);
+    }
+
+    if (isNegative) {
+      i = 0n - i;
+    }
+    this.expect(Sym.Integer);
+
+    return intOrBigInt(i, universe);
+  }
+
+  literalDouble(isNegative) {
+    let d = parseFloat(this.text);
+    if (Number.isNaN(d)) {
+      throw new ParseError(`${'Could not parse double. Expected a number '
+                + "but got '"}${this.text}'`, Sym.NONE, this);
+    }
+
+    if (isNegative) {
+      d = 0.0 - d;
+    }
+    this.expect(Sym.Double);
+    return universe.newDouble(d);
+  }
+
+  literalSymbol() {
+    this.expect(Sym.Pound);
+    if (this.sym === Sym.STString) {
+      const s = this.string();
+      return universe.symbolFor(s);
+    }
+    return this.selector();
+  }
+
+  literalString() {
+    const s = this.string();
+    return universe.newString(s);
+  }
+
+  literalArray() {
+    const literals = [];
+    this.expect(Sym.Pound);
+    this.expect(Sym.NewTerm);
+
+    while (this.sym !== Sym.EndTerm) {
+      literals.push(this.getObjectForCurrentLiteral());
+    }
+
+    this.expect(Sym.EndTerm);
+    return universe.newArrayFrom(literals);
+  }
+
+  selector() {
+    if (this.sym === Sym.OperatorSequence || this.symIn(singleOpSyms)) {
+      return this.binarySelector();
+    } if (this.sym === Sym.Keyword || this.sym === Sym.KeywordSequence) {
+      return this.keywordSelector();
+    }
+    return this.unarySelector();
+  }
+
+  keywordSelector() {
+    const s = this.text;
+    this.expectOneOf(keywordSelectorSyms);
+    return universe.symbolFor(s);
+  }
+
+  string() {
+    const s = this.text;
+    this.expect(Sym.STString);
+    return s;
+  }
+
+  nestedBlock(mgenc) {
+    this.expect(Sym.NewBlock);
+    const coord = this.getCoordinate();
+
+    mgenc.addArgumentIfAbsent('$blockSelf');
+
+    if (this.sym === Sym.Colon) {
+      this.blockPattern(mgenc);
+    }
+
+    // generate Block signature
+    let blockSig = `$blockMethod@${this.lexer.getCurrentLineNumber()}@${this.lexer.getCurrentColumn()}`;
+    const argSize = mgenc.getNumberOfArguments();
+    for (let i = 1; i < argSize; i += 1) {
+      blockSig += ':';
+    }
+
+    mgenc.setSignature(universe.symbolFor(blockSig));
+
+    const expressions = this.blockContents(mgenc);
+
+    this.lastMethodsSourceSection = this.getSource(coord);
+
+    this.expect(Sym.EndBlock);
+
+    return expressions;
+  }
+
+  blockPattern(mgenc) {
+    this.blockArguments(mgenc);
+    this.expect(Sym.Or);
+  }
+
+  blockArguments(mgenc) {
+    do {
+      this.expect(Sym.Colon);
+      mgenc.addArgumentIfAbsent(this.argument());
+    }
+    while (this.sym === Sym.Colon);
+  }
+
+  variableRead(mgenc, variableName, source) {
+    // we need to handle super special here
+    if (variableName === 'super') {
+      return mgenc.getSuperReadNode(source);
+    }
+
+    // now look up first local variables, or method arguments
+    const variable = mgenc.getVariable(variableName);
+    if (variable !== null) {
+      return mgenc.getLocalReadNode(variableName, source);
+    }
+
+    // then object fields
+    const varName = universe.symbolFor(variableName);
+    const fieldRead = mgenc.getObjectFieldRead(varName, source);
+
+    if (fieldRead !== null) {
+      return fieldRead;
+    }
+
+    // and finally assume it is a global
+    return mgenc.getGlobalRead(varName, source);
+  }
+
+  variableWrite(mgenc, variableName, exp, source) {
+    const variable = mgenc.getVariable(variableName);
+    if (variable !== null) {
+      return mgenc.getLocalWriteNode(variableName, exp, source);
+    }
+
+    const fieldName = universe.symbolFor(variableName);
+    const fieldWrite = mgenc.getObjectFieldWrite(fieldName, exp, source);
+
+    if (fieldWrite !== null) {
+      return fieldWrite;
+    }
+    throw new RuntimeException(`${'Neither a variable nor a field found '
+                + 'in current scope that is named '}${variableName
+    }. Arguments are read-only.`);
+  }
+
+  getSymbolFromLexer() {
+    this.sym = this.lexer.getSym();
+    this.text = this.lexer.getText();
+  }
+
+  peekForNextSymbolFromLexer() {
+    this.nextSym = this.lexer.peek();
+  }
+
+  peekForNextSymbolFromLexerIfNecessary() {
+    if (!this.lexer.getPeekDone()) {
+      this.peekForNextSymbolFromLexer();
+    }
+  }
+}

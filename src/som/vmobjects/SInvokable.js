@@ -19,88 +19,93 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const SAbstractObject = require('./SAbstractObject').SAbstractObject;
-const Frame = require('../interpreter/Frame').Frame;
-const u = require('../vm/Universe');
+// @ts-check
 
-function SInvokable(signature, _holder) {
-    SAbstractObject.call(this);
-    var holder = _holder;
+import { SAbstractObject } from './SAbstractObject.js';
+import { Frame } from '../interpreter/Frame.js';
+import { universe } from '../vm/Universe.js';
 
-    this.getHolder = function () {
-        return holder;
-    };
+class SInvokable extends SAbstractObject {
+  constructor(signature, holder) {
+    super();
+    this.holder = holder;
+    this.signature = signature;
+  }
 
-    this.setHolder = function (value) {
-        holder = value;
-    };
+  getHolder() {
+    return this.holder;
+  }
 
-    this.getSignature = function () {
-        return signature;
-    };
+  setHolder(value) {
+    this.holder = value;
+  }
 
-    this.getNumberOfArguments = function () {
-        return signature.getNumberOfSignatureArguments();
-    };
+  getSignature() {
+    return this.signature;
+  }
+
+  getNumberOfArguments() {
+    return this.signature.getNumberOfSignatureArguments();
+  }
 }
-SInvokable.prototype = Object.create(SAbstractObject.prototype);
 
-function SMethod(signature, sourceSection, bodyNode, numberOfTemps) {
-    SInvokable.call(this, signature, null);
-    var _this = this;
+export class SMethod extends SInvokable {
+  constructor(signature, sourceSection, bodyNode, numberOfTemps) {
+    super(signature, null);
+    this.sourceSection = sourceSection;
+    this.bodyNode = bodyNode;
+    this.numberOfTemps = numberOfTemps;
+  }
 
-    this.getClass = function () {
-        return u.methodClass;
-    };
+  getClass() {
+    return universe.methodClass;
+  }
 
-    this.isPrimitive = function () {
-        return false;
-    };
+  isPrimitive() {
+    return false;
+  }
 
-    this.invoke = function(frame, args) {
-        var newFrame = new Frame(frame, args, numberOfTemps);
-        return bodyNode.execute(newFrame, args);
-    };
+  invoke(frame, args) {
+    const newFrame = new Frame(args, this.numberOfTemps);
+    return this.bodyNode.execute(newFrame, args);
+  }
 
-    this.toString = function () {
-        var holder = _this.getHolder();
-        if (holder == null) {
-            return "Method(nil>>" + signature.toString() + ")";
-        }
+  toString() {
+    const holder = this.holder;
+    if (holder == null) {
+      return `Method(nil>>${this.signature.toString()})`;
+    }
 
-        return "Method(" + holder.getName().getString() + ">>" +
-            signature().toString() + ")";
-    };
+    return `Method(${holder.getName().getString()}>>${
+      this.signature.toString()})`;
+  }
 }
-SMethod.prototype = Object.create(SInvokable.prototype);
 
-function SPrimitive(signature, primFun, _holder) {
-    SInvokable.call(this, signature, _holder);
-    var _this = this;
+export class SPrimitive extends SInvokable {
+  constructor(signature, primFun, holder) {
+    super(signature, holder);
+    this.primFun = primFun;
+  }
 
-    this.getClass = function () {
-        return u.primitiveClass;
-    };
+  getClass() {
+    return universe.primitiveClass;
+  }
 
-    this.isPrimitive = function () {
-        return true;
-    };
+  isPrimitive() {
+    return true;
+  }
 
-    this.invoke = function (frame, args) {
-        return primFun(frame, args);
-    };
+  invoke(frame, args) {
+    return this.primFun(frame, args);
+  }
 
-    this.toString = function () {
-        var holder = _this.getHolder();
-        if (holder == null) {
-            return "Primitive(nil>>" + signature.toString() + ")";
-        }
+  toString() {
+    const holder = this.holder;
+    if (holder == null) {
+      return `Primitive(nil>>${this.signature.toString()})`;
+    }
 
-        return "Primitive(" + holder.getName().getString() + ">>" +
-            signature().toString() + ")";
-    };
+    return `Primitive(${holder.getName().getString()}>>${
+      this.signature.toString()})`;
+  }
 }
-SPrimitive.prototype = Object.create(SInvokable.prototype);
-
-exports.SMethod = SMethod;
-exports.SPrimitive = SPrimitive;

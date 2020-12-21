@@ -19,39 +19,41 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const Node = require('./Node').Node;
-const u = require('../vm/Universe');
+// @ts-check
 
-function UninitializedGlobalReadNode(globalName, source) {
-    Node.call(this, source);
-    var _this = this;
+import { Node } from './Node.js';
+import { universe } from '../vm/Universe.js';
 
-    function executeUnknownGlobal(frame) {
-        var self = frame.getReceiver();
-        return self.sendUnknownGlobal(globalName, frame);
+export class UninitializedGlobalReadNode extends Node {
+  constructor(globalName, source) {
+    super(source);
+    this.globalName = globalName;
+  }
+
+  executeUnknownGlobal(frame) {
+    const self = frame.getReceiver();
+    return self.sendUnknownGlobal(this.globalName, frame);
+  }
+
+  execute(frame) {
+    // Get the global from the universe
+    const assoc = universe.getGlobalsAssociation(this.globalName);
+    if (assoc != null) {
+      // eslint-disable-next-line no-use-before-define
+      return this.replace(new CachedGlobalReadNode(assoc, this.source))
+        .execute(frame);
     }
-
-    this.execute = function (frame) {
-        // Get the global from the universe
-        var assoc = u.universe.getGlobalsAssociation(globalName);
-        if (assoc != null) {
-            return _this.replace(new CachedGlobalReadNode(assoc, source)).
-                execute(frame);
-        } else {
-            return executeUnknownGlobal(frame);
-        }
-    };
+    return this.executeUnknownGlobal(frame);
+  }
 }
-UninitializedGlobalReadNode.prototype = Object.create(Node.prototype);
 
+class CachedGlobalReadNode extends Node {
+  constructor(assoc, source) {
+    super(source);
+    this.assoc = assoc;
+  }
 
-function CachedGlobalReadNode(assoc, source) {
-    Node.call(this, source);
-
-    this.execute = function (_frame) {
-        return assoc.getValue();
-    };
+  execute(_frame) {
+    return this.assoc.getValue();
+  }
 }
-CachedGlobalReadNode.prototype = Object.create(Node.prototype);
-
-exports.UninitializedGlobalReadNode = UninitializedGlobalReadNode;

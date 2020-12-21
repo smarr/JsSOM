@@ -19,41 +19,39 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const u = require('../vm/Universe');
+// @ts-check
 
-function SAbstractObject() {
-    var _this = this;
+import { universe } from '../vm/Universe.js';
 
-    this.toString = function () {
-        var clazz = _this.getClass();
-        if (clazz === null) {
-            return "an Object(clazz==null)";
-        }
-        return "a " + clazz.getName().getString();
-    };
+export class SAbstractObject {
+  toString() {
+    const clazz = this.getClass();
+    if (clazz === null) {
+      return 'an Object(clazz==null)';
+    }
+    return `a ${clazz.getName().getString()}`;
+  }
 
-    this.send = function (selectorString, callerFrame, args) {
-        var selector = u.universe.symbolFor(selectorString);
-        var invokable = args[0].getClass().lookupInvokable(selector);
-        return invokable.invoke(callerFrame, args);
-    };
+  send(selectorString, callerFrame, args) {
+    const selector = universe.symbolFor(selectorString);
+    const invokable = args[0].getClass().lookupInvokable(selector);
+    return invokable.invoke(callerFrame, args);
+  }
 
-    this.sendDoesNotUnderstand = function (selector, callerFrame, args) {
-        // Allocate an array to hold the arguments, without receiver
-        var argsArray = new u.SArray(args.length - 1, args.slice(1));
-        var dnuArgs = [args[0], selector, argsArray];
-        return _this.send("doesNotUnderstand:arguments:", callerFrame, dnuArgs);
-    };
+  sendDoesNotUnderstand(selector, callerFrame, args) {
+    // Allocate an array to hold the arguments, without receiver
+    const argsArray = universe.newArrayFrom(args.slice(1));
+    const dnuArgs = [args[0], selector, argsArray];
+    return this.send('doesNotUnderstand:arguments:', callerFrame, dnuArgs);
+  }
 
-    this.sendUnknownGlobal = function (globalName, callerFrame) {
-        var args = [_this, globalName];
-        return _this.send("unknownGlobal:", callerFrame, args);
-    };
+  sendUnknownGlobal(globalName, callerFrame) {
+    const args = [this, globalName];
+    return this.send('unknownGlobal:', callerFrame, args);
+  }
 
-    this.sendEscapedBlock = function (block, callerFrame) {
-        var args = [_this, block];
-        return _this.send("escapedBlock:", callerFrame, args);
-    };
+  sendEscapedBlock(block, callerFrame) {
+    const args = [this, block];
+    return this.send('escapedBlock:', callerFrame, args);
+  }
 }
-
-exports.SAbstractObject = SAbstractObject;

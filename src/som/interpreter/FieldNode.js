@@ -19,40 +19,39 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const assert = require('../../lib/assert').assert;
+// @ts-check
 
-const Node = require('./Node').Node;
+import { assert } from '../../lib/assert.js';
 
-function FieldReadNode(_selfExp, fieldIdx, source) {
-    Node.call(this, source);
+import { Node } from './Node.js';
+
+export class FieldReadNode extends Node {
+  constructor(selfExp, fieldIdx, source) {
+    super(source);
     assert(fieldIdx >= 0);
-    var _this = this;
+    this.child_self = this.adopt(selfExp);
+    this.fieldIdx = fieldIdx;
+  }
 
-    _this._child_self = _this.adopt(_selfExp);
-
-    this.execute = function (frame) {
-        var self = _this._child_self.execute(frame);
-        return self.getField(fieldIdx);
-    }
+  execute(frame) {
+    const self = this.child_self.execute(frame);
+    return self.getField(this.fieldIdx);
+  }
 }
-FieldReadNode.prototype = Object.create(Node.prototype);
 
-function FieldWriteNode(_selfExp, _valueExp, fieldIdx, source) {
-    Node.call(this, source);
+export class FieldWriteNode extends Node {
+  constructor(selfExp, valueExp, fieldIdx, source) {
+    super(source);
     assert(fieldIdx >= 0);
-    var _this = this;
+    this.child_self = this.adopt(selfExp);
+    this.child_value = this.adopt(valueExp);
+    this.fieldIdx = fieldIdx;
+  }
 
-    _this._child_self  = _this.adopt(_selfExp);
-    _this._child_value = _this.adopt(_valueExp);
-
-    this.execute = function (frame) {
-        var self  = _this._child_self.execute(frame);
-        var value = _this._child_value.execute(frame);
-        self.setField(fieldIdx, value);
-        return value;
-    };
+  execute(frame) {
+    const self = this.child_self.execute(frame);
+    const value = this.child_value.execute(frame);
+    self.setField(this.fieldIdx, value);
+    return value;
+  }
 }
-FieldWriteNode.prototype = Object.create(Node.prototype);
-
-exports.FieldReadNode = FieldReadNode;
-exports.FieldWriteNode = FieldWriteNode;

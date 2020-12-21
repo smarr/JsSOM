@@ -19,113 +19,109 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const Primitives = require('./Primitives').Primitives;
-const u = require('../vm/Universe');
+// @ts-check
 
-const SString = require('../vmobjects/SString').SString;
+import { Primitives } from './Primitives.js';
+import { universe } from '../vm/Universe.js';
 
-function StringPrimitives() {
-    Primitives.call(this);
-    var _this = this;
+import { SString } from '../vmobjects/SString.js';
 
-    function _concat(frame, args) {
-        var argument = args[1];
-        return u.universe.newString(args[0].getEmbeddedString()
-            + argument.getEmbeddedString());
-    }
-
-    function _asSymbol(frame, args) {
-        return u.universe.symbolFor(args[0].getEmbeddedString());
-    }
-
-    function _length(frame, args) {
-        return u.universe.newInteger(args[0].getEmbeddedString().length);
-    }
-
-    function _equals(frame, args) {
-        var op1 = args[1];
-        var op2 = args[0];
-        if (op1 instanceof SString) {
-            if (op1.getEmbeddedString() == op2.getEmbeddedString()) {
-                return u.trueObject;
-            }
-        }
-        return u.falseObject;
-    }
-
-    function _substring(frame, args) {
-        var end   = args[2];
-        var start = args[1];
-
-        var s = start.getEmbeddedInteger() - 1;
-        var e = end.getEmbeddedInteger();
-        var string = args[0].getEmbeddedString();
-
-        if (s < 0  ||  s >= string.length  ||  e > string.length  ||  e < s) {
-            return u.universe.newString("Error - index out of bounds");
-        } else {
-            return u.universe.newString(string.substring(s, e));
-        }
-    }
-
-    function _hashcode(frame, args) {
-        var s = args[0].getEmbeddedString();
-
-        // hash code from: http://stackoverflow.com/a/7616484/916546
-        var hash = 0, i, chr, len;
-        if (s.length == 0) {
-            return u.universe.newInteger(hash);
-        }
-
-        for (i = 0, len = s.length; i < len; i++) {
-            chr   = s.charCodeAt(i);
-            hash  = ((hash << 5) - hash) + chr;
-            hash |= 0; // Convert to 32bit integer
-        }
-        return u.universe.newInteger(hash);
-    }
-
-    function _isWhiteSpace(frame, args) {
-        const s = args[0].getEmbeddedString();
-
-        if (s.match(/^\s+$/) !== null) {
-            return u.trueObject;
-        } else {
-            return u.falseObject;
-        }
-    }
-
-    function _isLetters(frame, args) {
-        const s = args[0].getEmbeddedString();
-
-        if (RegExp(/^\p{L}+$/,'u').test(s)) {
-            return u.trueObject;
-        } else {
-            return u.falseObject;
-        }
-    }
-
-    function _isDigits(frame, args) {
-        const s = args[0].getEmbeddedString();
-
-        if (s.match(/^\d+$/) !== null) {
-            return u.trueObject;
-        } else {
-            return u.falseObject;
-        }
-    }
-
-    this.installPrimitives = function () {
-        _this.installInstancePrimitive("concatenate:",          _concat);
-        _this.installInstancePrimitive("asSymbol",              _asSymbol);
-        _this.installInstancePrimitive("length",                _length);
-        _this.installInstancePrimitive("=",                     _equals);
-        _this.installInstancePrimitive("primSubstringFrom:to:", _substring);
-        _this.installInstancePrimitive("hashcode",              _hashcode);
-        _this.installInstancePrimitive("isWhiteSpace",          _isWhiteSpace);
-        _this.installInstancePrimitive("isLetters",             _isLetters);
-        _this.installInstancePrimitive("isDigits",              _isDigits);
-    };
+function _concat(_frame, args) {
+  const argument = args[1];
+  return universe.newString(args[0].getEmbeddedString()
+        + argument.getEmbeddedString());
 }
-StringPrimitives.prototype = Object.create(Primitives.prototype);
-exports.prims = StringPrimitives;
+
+function _asSymbol(_frame, args) {
+  return universe.symbolFor(args[0].getEmbeddedString());
+}
+
+function _length(_frame, args) {
+  return universe.newInteger(args[0].getEmbeddedString().length);
+}
+
+function _equals(_frame, args) {
+  const op1 = args[1];
+  const op2 = args[0];
+  if (op1 instanceof SString) {
+    if (op1.getEmbeddedString() === op2.getEmbeddedString()) {
+      return universe.trueObject;
+    }
+  }
+  return universe.falseObject;
+}
+
+function _substring(_frame, args) {
+  const end = args[2];
+  const start = args[1];
+
+  const s = start.getEmbeddedInteger() - 1;
+  const e = end.getEmbeddedInteger();
+  const string = args[0].getEmbeddedString();
+
+  if (s < 0 || s >= string.length || e > string.length || e < s) {
+    return universe.newString('Error - index out of bounds');
+  }
+  return universe.newString(string.substring(s, e));
+}
+
+function _hashcode(_frame, args) {
+  const s = args[0].getEmbeddedString();
+
+  // hash code from: http://stackoverflow.com/a/7616484/916546
+  let hash = 0; let i; let chr; let
+    len;
+  if (s.length === 0) {
+    return universe.newInteger(hash);
+  }
+
+  for (i = 0, len = s.length; i < len; i += 1) {
+    chr = s.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return universe.newInteger(hash);
+}
+
+function _isWhiteSpace(_frame, args) {
+  const s = args[0].getEmbeddedString();
+
+  if (s.match(/^\s+$/) !== null) {
+    return universe.trueObject;
+  }
+  return universe.falseObject;
+}
+
+function _isLetters(_frame, args) {
+  const s = args[0].getEmbeddedString();
+
+  if (RegExp(/^\p{L}+$/, 'u').test(s)) {
+    return universe.trueObject;
+  }
+  return universe.falseObject;
+}
+
+function _isDigits(_frame, args) {
+  const s = args[0].getEmbeddedString();
+
+  if (s.match(/^\d+$/) !== null) {
+    return universe.trueObject;
+  }
+  return universe.falseObject;
+}
+
+class StringPrimitives extends Primitives {
+  installPrimitives() {
+    this.installInstancePrimitive('concatenate:', _concat);
+    this.installInstancePrimitive('asSymbol', _asSymbol);
+    this.installInstancePrimitive('length', _length);
+    this.installInstancePrimitive('=', _equals);
+    this.installInstancePrimitive('primSubstringFrom:to:', _substring);
+    this.installInstancePrimitive('hashcode', _hashcode);
+    this.installInstancePrimitive('isWhiteSpace', _isWhiteSpace);
+    this.installInstancePrimitive('isLetters', _isLetters);
+    this.installInstancePrimitive('isDigits', _isDigits);
+  }
+}
+
+export const prims = StringPrimitives;

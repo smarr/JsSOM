@@ -19,20 +19,22 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const SAbstractObject = require('./SAbstractObject').SAbstractObject;
-const u = require('../vm/Universe');
+// @ts-check
 
-function SString(value) {
-    SAbstractObject.call(this);
+import { SAbstractObject } from './SAbstractObject.js';
+import { universe } from '../vm/Universe.js';
 
-    this.getEmbeddedString = function () {
-        return value;
-    };
+export class SString extends SAbstractObject {
+  constructor(value) {
+    super();
+    this.value = value;
+  }
 
-    this.getClass = function () {
-        return u.stringClass;
-    };
+  getEmbeddedString() {
+    return this.value;
+  }
+
+  getClass() {
+    return universe.stringClass;
+  }
 }
-SString.prototype = Object.create(SAbstractObject.prototype);
-
-exports.SString = SString;

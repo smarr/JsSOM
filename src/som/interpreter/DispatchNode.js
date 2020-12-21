@@ -19,69 +19,75 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const RuntimeException = require('../../lib/exceptions').RuntimeException;
+// @ts-check
 
-const assert = require('../../lib/assert').assert;
+import { RuntimeException } from '../../lib/exceptions.js';
 
-const Node = require('./Node').Node;
+import { assert } from '../../lib/assert.js';
 
-const SClass = require('../vmobjects/SClass').SClass;
-const SSymbol = require('../vmobjects/SSymbol').SSymbol;
+import { Node } from './Node.js';
 
-const u = require('../vm/Universe');
+import { SClass } from '../vmobjects/SClass.js';
+import { SSymbol } from '../vmobjects/SSymbol.js';
 
-function GenericDispatchNode(selector) {
-    Node.call(this, null);
+import { universe } from '../vm/Universe.js';
 
-    this.executeDispatch = function (frame, args) {
-        var rcvr = args[0];
-        var rcvrClass = rcvr.getClass();
+export class GenericDispatchNode extends Node {
+  constructor(selector) {
+    super(null);
+    this.selector = selector;
+  }
 
-        var method = rcvrClass.lookupInvokable(selector);
-        if (method != null) {
-            return method.invoke(frame, args);
-        } else {
-            return rcvr.sendDoesNotUnderstand(selector, frame, args);
-        }
-    };
-}
-GenericDispatchNode.prototype = Object.create(Node.prototype);
+  executeDispatch(frame, args) {
+    const rcvr = args[0];
+    const rcvrClass = rcvr.getClass();
 
-function UninitializedSuperDispatchNode(selector, holderClass, classSide) {
-    Node.call(this, null);
-    var _this = this;
-    assert(holderClass instanceof SSymbol);
-
-    function getLookupClass() {
-        var clazz = u.universe.getGlobal(holderClass);
-        if (classSide) {
-            clazz = clazz.getClass();
-        }
-        return clazz.getSuperClass();
+    const method = rcvrClass.lookupInvokable(this.selector);
+    if (method !== null) {
+      return method.invoke(frame, args);
     }
-
-    this.executeDispatch = function (frame, args) {
-        var lookupClass = getLookupClass();
-        return _this.replace(new CachedSuperDispatchNode(selector, lookupClass)).
-            executeDispatch(frame, args);
-    };
+    return rcvr.sendDoesNotUnderstand(this.selector, frame, args);
+  }
 }
-UninitializedSuperDispatchNode.prototype = Object.create(Node.prototype);
 
-function CachedSuperDispatchNode(selector, lookupClass) {
-    Node.call(this, null);
+export class UninitializedSuperDispatchNode extends Node {
+  constructor(selector, holderClass, classSide) {
+    super(null);
+    assert(holderClass instanceof SSymbol);
+    this.selector = selector;
+    this.classSide = classSide;
+    this.holderClass = holderClass;
+  }
+
+  getLookupClass() {
+    let clazz = universe.getGlobal(this.holderClass);
+    if (this.classSide) {
+      clazz = clazz.getClass();
+    }
+    return clazz.getSuperClass();
+  }
+
+  executeDispatch(frame, args) {
+    const lookupClass = this.getLookupClass();
+    // eslint-disable-next-line no-use-before-define
+    return this.replace(new CachedSuperDispatchNode(this.selector, lookupClass))
+      .executeDispatch(frame, args);
+  }
+}
+
+class CachedSuperDispatchNode extends Node {
+  constructor(selector, lookupClass) {
+    super(null);
     assert(lookupClass instanceof SClass);
-    var method = lookupClass.lookupInvokable(selector);
+    const method = lookupClass.lookupInvokable(selector);
 
     if (method == null) {
-        throw new RuntimeException("Currently #dnu with super sent is not yet implemented. ");
+      throw new RuntimeException('Currently #dnu with super sent is not yet implemented. ');
     }
+    this.method = method;
+  }
 
-    this.executeDispatch = function (frame, args) {
-        return method.invoke(frame, args);
-    };
+  executeDispatch(frame, args) {
+    return this.method.invoke(frame, args);
+  }
 }
-CachedSuperDispatchNode.prototype = Object.create(Node.prototype);
-
-exports.GenericDispatchNode = GenericDispatchNode;
-exports.UninitializedSuperDispatchNode = UninitializedSuperDispatchNode;

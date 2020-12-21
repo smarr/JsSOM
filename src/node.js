@@ -19,7 +19,6 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-
-const universe = require('./som/vm/Universe').universe;
+import { universe } from './som/vm/Universe.js';
 
 universe.interpret(process.argv.slice(2));

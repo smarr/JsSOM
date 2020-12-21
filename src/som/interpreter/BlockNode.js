@@ -19,17 +19,19 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const Node = require('./Node').Node;
+// @ts-check
 
-const u = require('../vm/Universe');
+import { Node } from './Node.js';
 
-function BlockNode(blockMethod, source) {
-    Node.call(this, source);
+import { universe } from '../vm/Universe.js';
 
-    this.execute = function(frame) {
-        return u.universe.newBlock(blockMethod, frame);
-    };
+export class BlockNode extends Node {
+  constructor(blockMethod, source) {
+    super(source);
+    this.blockMethod = blockMethod;
+  }
+
+  execute(frame) {
+    return universe.newBlock(this.blockMethod, frame);
+  }
 }
-BlockNode.prototype = Object.create(Node.prototype);
-
-exports.BlockNode = BlockNode;

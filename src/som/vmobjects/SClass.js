@@ -19,210 +19,224 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-const assert = require('../../lib/assert').assert;
-const isBrowser = require('../../lib/platform').isBrowser;
-const SObject = require('./SObject').SObject;
-const SArray = require('./SArray').SArray;
+// @ts-check
 
-const u = require('../vm/Universe');
+import { assert } from '../../lib/assert.js';
+import { SObject } from './SObject.js';
+import { SArray } from './SArray.js';
 
-let browserPrimitives = null;
-if (isBrowser) {
-    browserPrimitives = require('../primitives/in-browser');
-}
+import { universe } from '../vm/Universe.js';
 
-function SClass(_clazz, numberOfFields) {
-    SObject.call(this, _clazz, numberOfFields);
+import { prims as ArrayPrims } from '../primitives/ArrayPrimitives.js';
+import { prims as BlockPrims } from '../primitives/BlockPrimitives.js';
+import { prims as ClassPrims } from '../primitives/ClassPrimitives.js';
+import { prims as DoublePrims } from '../primitives/DoublePrimitives.js';
+import { prims as IntegerPrims } from '../primitives/IntegerPrimitives.js';
+import { prims as MethodPrims } from '../primitives/MethodPrimitives.js';
+import { prims as ObjectPrims } from '../primitives/ObjectPrimitives.js';
+import { prims as PrimitivePrims } from '../primitives/PrimitivePrimitives.js';
+import { prims as StringPrims } from '../primitives/StringPrimitives.js';
+import { prims as SymbolPrims } from '../primitives/SymbolPrimitives.js';
+import { prims as SystemPrims } from '../primitives/SystemPrimitives.js';
 
-    var invokablesTable    = {},
-        superclass         = null,
-        name               = null,
-        instanceInvokables = null,
-        instanceFields     = null,
-        _this              = this;
+const prims = {
+  Array: ArrayPrims,
+  Block: BlockPrims,
+  Class: ClassPrims,
+  Double: DoublePrims,
+  Integer: IntegerPrims,
+  Method: MethodPrims,
+  Object: ObjectPrims,
+  Primitive: PrimitivePrims,
+  String: StringPrims,
+  Symbol: SymbolPrims,
+  System: SystemPrims,
+};
 
-    this.getSuperClass = function () {
-        return (superclass == null) ? u.nilObject : superclass;
-    };
+export class SClass extends SObject {
+  constructor(clazz, numberOfFields) {
+    super(clazz, numberOfFields);
 
-    this.setSuperClass = function (value) {
-        superclass = value;
-    };
+    this.invokablesTable = new Map();
+    this.superclass = null;
+    this.name = null;
+    this.instanceInvokables = null;
+    this.instanceFields = null;
+  }
 
-    this.hasSuperClass = function () {
-        return superclass != null;
-    };
+  getSuperClass() {
+    return this.superclass == null ? universe.nilObject : this.superclass;
+  }
 
-    this.getName = function () {
-        return name;
-    };
+  setSuperClass(value) {
+    this.superclass = value;
+  }
 
-    this.setName = function (value) {
-        name = value;
-    };
+  hasSuperClass() {
+    return this.superclass != null;
+  }
 
-    this.getInstanceFields = function () {
-        return instanceFields;
-    };
+  getName() {
+    return this.name;
+  }
 
-    this.setInstanceFields = function (fieldsArray) {
-        assert(fieldsArray instanceof SArray);
-        instanceFields = fieldsArray;
-    };
+  setName(value) {
+    this.name = value;
+  }
 
-    this.getInstanceInvokables = function () {
-        return instanceInvokables;
-    };
+  getInstanceFields() {
+    return this.instanceFields;
+  }
 
-    this.getNumberOfInstanceInvokables = function () {
-        // Return the number of instance invokables in this class
-        return instanceInvokables.getNumberOfIndexableFields();
-    };
+  setInstanceFields(fieldsArray) {
+    assert(fieldsArray instanceof SArray);
+    this.instanceFields = fieldsArray;
+  }
 
-    this.setInstanceInvokables = function (arr) {
-        assert(arr instanceof SArray);
-        instanceInvokables = arr;
+  getInstanceInvokables() {
+    return this.instanceInvokables;
+  }
 
-        // Make sure this class is the holder of all invokables in the array
-        var num = _this.getNumberOfInstanceInvokables();
-        for (var i = 0; i < num; i++) {
-            instanceInvokables.getIndexableField(i).setHolder(this);
-        }
-    };
+  getNumberOfInstanceInvokables() {
+    // Return the number of instance invokables in this class
+    return this.instanceInvokables.getNumberOfIndexableFields();
+  }
 
-    this.getInstanceInvokable = function (index) {
-        return instanceInvokables.getIndexableField(index);
-    };
+  setInstanceInvokables(arr) {
+    assert(arr instanceof SArray);
+    this.instanceInvokables = arr;
 
-    this.setInstanceInvokable = function (index, value) {
-        // Set this class as the holder of the given invokable
-        value.setHolder(_this);
+    // Make sure this class is the holder of all invokables in the array
+    const num = arr.getNumberOfIndexableFields();
+    for (let i = 0; i < num; i += 1) {
+      arr.getIndexableField(i).setHolder(this);
+    }
+  }
 
-        instanceInvokables.setIndexableField(index, value);
+  getInstanceInvokable(index) {
+    return this.instanceInvokables.getIndexableField(index);
+  }
 
-        if (invokablesTable[value.getSignature()] == undefined) {
-            invokablesTable[value.getSignature()] = value;
-        }
-    };
+  setInstanceInvokable(index, value) {
+    // Set this class as the holder of the given invokable
+    value.setHolder(this);
 
-    this.lookupInvokable = function (selector) {
-        // Lookup invokable and return if found
-        var invokable = invokablesTable[selector];
-        if (invokable != null) { return invokable; }
+    this.instanceInvokables.setIndexableField(index, value);
 
-        // Lookup invokable with given signature in array of instance invokables
-        var num = _this.getNumberOfInstanceInvokables();
-        for (var i = 0; i < num; i++) {
-            // Get the next invokable in the instance invokable array
-            invokable = _this.getInstanceInvokable(i);
+    if (!this.invokablesTable.has(value.getSignature())) {
+      this.invokablesTable.set(value.getSignature(), value);
+    }
+  }
 
-            // Return the invokable if the signature matches
-            if (invokable.getSignature() == selector) {
-                invokablesTable[selector] = invokable;
-                return invokable;
-            }
-        }
+  lookupInvokable(selector) {
+    // Lookup invokable and return if found
+    let invokable = this.invokablesTable.get(selector);
+    if (invokable != null) { return invokable; }
 
-        // Traverse the super class chain by calling lookup on the super class
-        if (_this.hasSuperClass()) {
-            invokable = _this.getSuperClass().lookupInvokable(selector);
-            if (invokable != null) {
-                invokablesTable[selector] = invokable;
-                return invokable;
-            }
-        }
+    // Lookup invokable with given signature in array of instance invokables
+    const num = this.getNumberOfInstanceInvokables();
+    for (let i = 0; i < num; i += 1) {
+      // Get the next invokable in the instance invokable array
+      invokable = this.getInstanceInvokable(i);
 
-        // Invokable not found
-        return null;
-    };
-
-    this.lookupFieldIndex = function (fieldName) {
-        // Lookup field with given name in array of instance fields
-        var num = _this.getNumberOfInstanceFields();
-        for (var i = num - 1; i >= 0; i--) {
-            // Return the current index if the name matches
-            if (fieldName == _this.getInstanceFieldName(i)) { return i; }
-        }
-        return -1;  // Field not found
-    };
-
-    function addInstanceInvokable(value) {
-        // Add the given invokable to the array of instance invokables
-        var num = _this.getNumberOfInstanceInvokables();
-        for (var i = 0; i < num; i++) {
-            // Get the next invokable in the instance invokable array
-            var invokable = _this.getInstanceInvokable(i);
-
-            // Replace the invokable with the given one if the signature matches
-            if (invokable.getSignature() == value.getSignature()) {
-                _this.setInstanceInvokable(i, value);
-                return false;
-            }
-        }
-
-        _this.setInstanceInvokable(num, value);
-        return true;
+      // Return the invokable if the signature matches
+      if (invokable.getSignature() === selector) {
+        this.invokablesTable.set(selector, invokable);
+        return invokable;
+      }
     }
 
-    this.addInstancePrimitive = function (value, suppressWarning) {
-        if (addInstanceInvokable(value) && suppressWarning !== true) {
-            u.universe.print("Warning: Primitive " + value.getSignature().getString());
-            u.universe.println(" is not in class definition for class "
-                + _this.getName().getString());
-        }
-    };
+    // Traverse the super class chain by calling lookup on the super class
+    if (this.hasSuperClass()) {
+      invokable = this.getSuperClass().lookupInvokable(selector);
+      if (invokable != null) {
+        this.invokablesTable.set(selector, invokable);
+        return invokable;
+      }
+    }
 
-    this.getInstanceFieldName = function (index) {
-        return instanceFields.getIndexableField(index);
-    };
+    // Invokable not found
+    return null;
+  }
 
-    this.getNumberOfInstanceFields = function () {
-        return instanceFields.getNumberOfIndexableFields();
-    };
+  lookupFieldIndex(fieldName) {
+    // Lookup field with given name in array of instance fields
+    const num = this.getNumberOfInstanceFields();
+    for (let i = num - 1; i >= 0; i -= 1) {
+      // Return the current index if the name matches
+      if (fieldName === this.getInstanceFieldName(i)) { return i; }
+    }
+    return -1; // Field not found
+  }
 
-    function includesPrimitives(clazz) {
-        // Lookup invokable with given signature in array of instance invokables
-        for (var i = 0; i < clazz.getNumberOfInstanceInvokables(); i++) {
-            // Get the next invokable in the instance invokable array
-            if (clazz.getInstanceInvokable(i).isPrimitive()) {
-                return true;
-            }
-        }
+  /**
+     * @param {SInvokable} invokable
+     */
+  addInstanceInvokable(invokable) {
+    // Add the given invokable to the array of instance invokables
+    const num = this.getNumberOfInstanceInvokables();
+    for (let i = 0; i < num; i += 1) {
+      // Get the next invokable in the instance invokable array
+      const currentInvokable = this.getInstanceInvokable(i);
+
+      // Replace the invokable with the given one if the signature matches
+      if (invokable.getSignature() === currentInvokable.getSignature()) {
+        this.setInstanceInvokable(i, invokable);
         return false;
+      }
     }
 
-    this.hasPrimitives = function () {
-        return includesPrimitives(this) || includesPrimitives(_this.getClass());
-    };
+    this.setInstanceInvokable(num, invokable);
+    return true;
+  }
 
-    this.loadPrimitives = function (displayWarning) {
-        const primModuleName = "../primitives/" + name.getString() + "Primitives";
+  addInstancePrimitive(value, suppressWarning) {
+    if (this.addInstanceInvokable(value) && suppressWarning !== true) {
+      universe.print(`Warning: Primitive ${value.getSignature().getString()}`);
+      universe.println(` is not in class definition for class ${
+        this.getName().getString()}`);
+    }
+  }
 
-        try {
-            let prims = null;
-            if (isBrowser) {
-                prims = browserPrimitives[name.getString()].prims;
-            } else {
-                prims = require(primModuleName).prims;
-            }
+  getInstanceFieldName(index) {
+    return this.instanceFields.getIndexableField(index);
+  }
 
-            if (prims !== undefined) {
-                (new prims()).
-                    installPrimitivesIn(this);
-            } else {
-                if (displayWarning) {
-                    u.universe.println("Primitives class " + name.getString() + " not found");
-                }
-            }
-        } catch (Error) {
-            // NO OP, class does not have primitive
-        }
-    };
+  getNumberOfInstanceFields() {
+    return this.instanceFields.getNumberOfIndexableFields();
+  }
 
-    this.toString = function () {
-        return "Class(" + name.getString() + ")";
-    };
+  includesPrimitives(clazz) {
+    // Lookup invokable with given signature in array of instance invokables
+    for (let i = 0; i < clazz.getNumberOfInstanceInvokables(); i += 1) {
+      // Get the next invokable in the instance invokable array
+      if (clazz.getInstanceInvokable(i).isPrimitive()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  hasPrimitives() {
+    return this.includesPrimitives(this) || this.includesPrimitives(this.getClass());
+  }
+
+  loadPrimitives(displayWarning) {
+    try {
+      const Primitives = prims[this.name.getString()];
+
+      if (Primitives !== undefined) {
+        (new Primitives())
+          .installPrimitivesIn(this);
+      } else if (displayWarning) {
+        universe.println(`Primitives class ${this.name.getString()} not found`);
+      }
+    } catch (Error) {
+      // NO OP, class does not have primitive
+    }
+  }
+
+  toString() {
+    return `Class(${this.name.getString()})`;
+  }
 }
-SClass.prototype = Object.create(SObject.prototype);
-
-exports.SClass = SClass;
