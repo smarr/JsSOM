@@ -18,9 +18,9 @@
   },
   "scripts": {
     "browserify": "mkdir -p build && npm run core-lib && npm run browserify:main && npm run browserify:som-core && npm run browserify:core-lib-loader",
-    "browserify:main": "cp -R src/ build",
+    "browserify:main": "cp -r src/. build",
     "browserify:som-core": "./libs/jsify-core-lib.py core-lib > build/core-lib-data.js",
-    "browserify:core-lib-loader": "mv build/lib/core-lib-browser.js build/lib/core-lib.js ",
+    "browserify:core-lib-loader": "cp build/lib/core-lib-browser.js build/lib/core-lib.js",
 
     "clean": "rm -Rf build/*.js",
     "clobber": "rm -Rf build/",
