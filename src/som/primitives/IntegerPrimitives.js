@@ -98,7 +98,7 @@ function _fromString(_frame, args) {
   if (!(param instanceof SString)) {
     return universe.nilObject;
   }
-  const intVal = parseInt(param.getEmbeddedString());
+  const intVal = parseInt(param.getEmbeddedString(), 10);
   return universe.newInteger(intVal);
 }
 
@@ -107,9 +107,9 @@ function _leftShift(_frame, args) {
   const l = toNumber(args[0]);
 
   const result = l << r;
-  if (Math.floor(l) !== l || !isInIntRange(result) || !isInIntRange(l * Math.pow(2, r))) {
+  if (Math.floor(l) !== l || !isInIntRange(result) || !isInIntRange(l * (2 ** r))) {
     let big = BigInt(l);
-    big *= BigInt(Math.pow(2, r));
+    big *= BigInt(2 ** r);
     return universe.newBigInteger(big);
   }
   return universe.newInteger(result);

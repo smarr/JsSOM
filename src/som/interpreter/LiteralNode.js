@@ -19,17 +19,17 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { Node } from './Node.js';
 
 export class LiteralNode extends Node {
-    constructor(value, source) {
-        super(source);
-        this.value = value;
-    }
+  constructor(value, source) {
+    super(source);
+    this.value = value;
+  }
 
-    execute(_frame) {
-        return this.value;
-    }
+  execute(_frame) {
+    return this.value;
+  }
 }

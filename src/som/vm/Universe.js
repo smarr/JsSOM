@@ -288,8 +288,9 @@ class Universe {
         continue; // continue searching in the class path
       }
       if (this.printAST) {
-        dump(result.getClass());
-        dump(result);
+        // TODO
+        // dump(result.getClass());
+        // dump(result);
       }
       return result;
     }

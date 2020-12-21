@@ -19,40 +19,40 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { Node } from './Node.js';
 
 export class ContextualNode extends Node {
-    constructor(contextLevel, source) {
-        super(source);
-        this.contextLevel = contextLevel;
+  constructor(contextLevel, source) {
+    super(source);
+    this.contextLevel = contextLevel;
+  }
+
+  getContextLevel() {
+    return this.contextLevel;
+  }
+
+  determineContext(frame) {
+    if (this.contextLevel === 0) { return frame; }
+
+    let self = frame.getReceiver();
+    let i = this.contextLevel - 1;
+
+    while (i > 0) {
+      self = self.getOuterSelf();
+      i -= 1;
     }
+    return self.getContext();
+  }
 
-    getContextLevel() {
-        return this.contextLevel;
+  determineOuterSelf(frame) {
+    let self = frame.getReceiver();
+    let i = this.contextLevel;
+    while (i > 0) {
+      self = self.getOuterSelf();
+      i -= 1;
     }
-
-    determineContext(frame) {
-        if (this.contextLevel == 0) { return frame; }
-
-        let self = frame.getReceiver();
-        let i = this.contextLevel - 1;
-
-        while (i > 0) {
-            self = self.getOuterSelf();
-            i--;
-        }
-        return self.getContext();
-    }
-
-    determineOuterSelf(frame) {
-        let self = frame.getReceiver();
-        let i = this.contextLevel;
-        while (i > 0) {
-            self = self.getOuterSelf();
-            i--;
-        }
-        return self;
-    }
+    return self;
+  }
 }

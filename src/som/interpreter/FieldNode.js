@@ -19,39 +19,39 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { assert } from '../../lib/assert.js';
 
 import { Node } from './Node.js';
 
 export class FieldReadNode extends Node {
-    constructor(selfExp, fieldIdx, source) {
-        super(source);
-        assert(fieldIdx >= 0);
-        this.child_self = this.adopt(selfExp);
-        this.fieldIdx = fieldIdx;
-    }
+  constructor(selfExp, fieldIdx, source) {
+    super(source);
+    assert(fieldIdx >= 0);
+    this.child_self = this.adopt(selfExp);
+    this.fieldIdx = fieldIdx;
+  }
 
-    execute(frame) {
-        const self = this.child_self.execute(frame);
-        return self.getField(this.fieldIdx);
-    }
+  execute(frame) {
+    const self = this.child_self.execute(frame);
+    return self.getField(this.fieldIdx);
+  }
 }
 
 export class FieldWriteNode extends Node {
-    constructor(selfExp, valueExp, fieldIdx, source) {
-        super(source);
-        assert(fieldIdx >= 0);
-        this.child_self = this.adopt(selfExp);
-        this.child_value = this.adopt(valueExp);
-        this.fieldIdx = fieldIdx;
-    }
+  constructor(selfExp, valueExp, fieldIdx, source) {
+    super(source);
+    assert(fieldIdx >= 0);
+    this.child_self = this.adopt(selfExp);
+    this.child_value = this.adopt(valueExp);
+    this.fieldIdx = fieldIdx;
+  }
 
-    execute(frame) {
-        const self = this.child_self.execute(frame);
-        const value = this.child_value.execute(frame);
-        self.setField(this.fieldIdx, value);
-        return value;
-    }
+  execute(frame) {
+    const self = this.child_self.execute(frame);
+    const value = this.child_value.execute(frame);
+    self.setField(this.fieldIdx, value);
+    return value;
+  }
 }

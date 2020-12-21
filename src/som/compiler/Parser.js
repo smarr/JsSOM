@@ -376,6 +376,7 @@ export class Parser {
     const coord = this.getCoordinate();
     const expressions = [];
 
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       if (this.accept(Sym.Exit)) {
         expressions.push(this.result(mgenc));

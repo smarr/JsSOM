@@ -24,12 +24,12 @@
 import { universe } from '../vm/Universe.js';
 import { Primitives } from './Primitives.js';
 
-function _at(frame, args) {
+function _at(_frame, args) {
   const i = args[1];
   return args[0].getIndexableField(i.getEmbeddedInteger() - 1);
 }
 
-function _atPut(frame, args) {
+function _atPut(_frame, args) {
   const value = args[2];
   const index = args[1];
 
@@ -37,24 +37,24 @@ function _atPut(frame, args) {
   return value;
 }
 
-function _length(frame, args) {
+function _length(_frame, args) {
   return universe.newInteger(
     args[0].getNumberOfIndexableFields(),
   );
 }
 
-function _new(frame, args) {
+function _new(_frame, args) {
   const length = args[1];
   return universe.newArrayWithLength(length.getEmbeddedInteger());
 }
 
-function _doIndexes(frame, args) {
+function _doIndexes(_frame, args) {
   const block = args[1];
   const blockMethod = block.getMethod();
 
   const length = args[0].getNumberOfIndexableFields();
   for (let i = 1; i <= length; i += 1) { // i is propagated to Smalltalk, so, start with 1
-    blockMethod.invoke(frame, [block, universe.newInteger(i)]);
+    blockMethod.invoke(_frame, [block, universe.newInteger(i)]);
   }
   return args[0];
 }
@@ -71,10 +71,6 @@ function _do(frame, args) {
 }
 
 class ArrayPrimitives extends Primitives {
-  constructor() {
-    super();
-  }
-
   installPrimitives() {
     this.installInstancePrimitive('at:', _at);
     this.installInstancePrimitive('at:put:', _atPut);

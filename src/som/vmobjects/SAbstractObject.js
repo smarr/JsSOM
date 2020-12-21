@@ -19,39 +19,39 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { universe } from '../vm/Universe.js';
 
 export class SAbstractObject {
-    toString() {
-        const clazz = this.getClass();
-        if (clazz === null) {
-            return "an Object(clazz==null)";
-        }
-        return "a " + clazz.getName().getString();
+  toString() {
+    const clazz = this.getClass();
+    if (clazz === null) {
+      return 'an Object(clazz==null)';
     }
+    return `a ${clazz.getName().getString()}`;
+  }
 
-    send(selectorString, callerFrame, args) {
-        const selector = universe.symbolFor(selectorString);
-        const invokable = args[0].getClass().lookupInvokable(selector);
-        return invokable.invoke(callerFrame, args);
-    }
+  send(selectorString, callerFrame, args) {
+    const selector = universe.symbolFor(selectorString);
+    const invokable = args[0].getClass().lookupInvokable(selector);
+    return invokable.invoke(callerFrame, args);
+  }
 
-    sendDoesNotUnderstand(selector, callerFrame, args) {
-        // Allocate an array to hold the arguments, without receiver
-        const argsArray = universe.newArrayFrom(args.slice(1));
-        const dnuArgs = [args[0], selector, argsArray];
-        return this.send("doesNotUnderstand:arguments:", callerFrame, dnuArgs);
-    }
+  sendDoesNotUnderstand(selector, callerFrame, args) {
+    // Allocate an array to hold the arguments, without receiver
+    const argsArray = universe.newArrayFrom(args.slice(1));
+    const dnuArgs = [args[0], selector, argsArray];
+    return this.send('doesNotUnderstand:arguments:', callerFrame, dnuArgs);
+  }
 
-    sendUnknownGlobal(globalName, callerFrame) {
-        const args = [this, globalName];
-        return this.send("unknownGlobal:", callerFrame, args);
-    }
+  sendUnknownGlobal(globalName, callerFrame) {
+    const args = [this, globalName];
+    return this.send('unknownGlobal:', callerFrame, args);
+  }
 
-    sendEscapedBlock = function (block, callerFrame) {
-        const args = [this, block];
-        return this.send("escapedBlock:", callerFrame, args);
-    }
+  sendEscapedBlock(block, callerFrame) {
+    const args = [this, block];
+    return this.send('escapedBlock:', callerFrame, args);
+  }
 }

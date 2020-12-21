@@ -1,4 +1,5 @@
 // @ts-check
+// eslint-disable-next-line import/no-unresolved
 import { loadCoreLib } from '../core-lib-data.js';
 
 const somCoreLibData = loadCoreLib();

@@ -19,8 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { assert } from '../../lib/assert.js';
 
 import { ArgumentReadNode, ArgumentWriteNode, SuperReadNode } from './ArgumentNode.js';
@@ -36,60 +36,61 @@ import { VariableReadNode, VariableWriteNode } from './VariableNode.js';
 import { SSymbol } from '../vmobjects/SSymbol.js';
 
 export function createCatchNonLocalReturn(methodBody) {
-    return new CatchNonLocalReturnNode(methodBody);
+  return new CatchNonLocalReturnNode(methodBody);
 }
 
 export function createFieldRead(self, fieldIndex, source) {
-    return new FieldReadNode(self, fieldIndex, source);
+  return new FieldReadNode(self, fieldIndex, source);
 }
 
 export function createGlobalRead(name, source) {
-    assert(name instanceof SSymbol);
-    return new UninitializedGlobalReadNode(name, source);
+  assert(name instanceof SSymbol);
+  return new UninitializedGlobalReadNode(name, source);
 }
 
 export function createFieldWrite(self, exp, fieldIndex, source) {
-    return new FieldWriteNode(self, exp, fieldIndex, source);
+  return new FieldWriteNode(self, exp, fieldIndex, source);
 }
 
 export function createArgumentRead(arg, contextLevel, source) {
-    return new ArgumentReadNode(contextLevel, arg, source);
+  return new ArgumentReadNode(contextLevel, arg, source);
 }
 
 export function createArgumentWrite(arg, contextLevel, exp, source) {
-    return new ArgumentWriteNode(contextLevel, arg, exp, source);
+  return new ArgumentWriteNode(contextLevel, arg, exp, source);
 }
 
 export function createVariableRead(local, contextLevel, source) {
-    return new VariableReadNode(contextLevel, local, source);
+  return new VariableReadNode(contextLevel, local, source);
 }
 
 export function createSuperRead(variable, contextLevel, holderClass, classSide, source) {
-    assert(holderClass instanceof SSymbol);
-    return new SuperReadNode(
-        holderClass, classSide, contextLevel, variable, source);
+  assert(holderClass instanceof SSymbol);
+  return new SuperReadNode(
+    holderClass, classSide, contextLevel, variable, source,
+  );
 }
 
 export function createVariableWrite(variable, contextLevel, exp, source) {
-    return new VariableWriteNode(contextLevel, variable, exp, source);
+  return new VariableWriteNode(contextLevel, variable, exp, source);
 }
 
 export function createSequence(exps, source) {
-    return new SequenceNode(exps, source);
+  return new SequenceNode(exps, source);
 }
 
 export function createBlockNode(blockMethod, source) {
-    return new BlockNode(blockMethod, source);
+  return new BlockNode(blockMethod, source);
 }
 
 export function createMessageSend(msg, exprs, source) {
-    return new MessageSendNode(msg, exprs, source);
+  return new MessageSendNode(msg, exprs, source);
 }
 
 export function createNonLocalReturn(exp, contextLevel, source) {
-    return new ReturnNonLocalNode(exp, contextLevel, source);
+  return new ReturnNonLocalNode(exp, contextLevel, source);
 }
 
 export function createLiteralNode(somVal, source) {
-    return new LiteralNode(somVal, source);
+  return new LiteralNode(somVal, source);
 }

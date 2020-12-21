@@ -19,59 +19,59 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { assert } from '../../lib/assert.js';
 
 import { ContextualNode } from './ContextualNode.js';
 
 export class ArgumentReadNode extends ContextualNode {
-    constructor(contextLevel, arg, source) {
-        super(contextLevel, source);
+  constructor(contextLevel, arg, source) {
+    super(contextLevel, source);
 
-        assert(arg.getIndex() >= 0);
-        this.arg = arg;
-    }
+    assert(arg.getIndex() >= 0);
+    this.arg = arg;
+  }
 
-    execute(frame) {
-        const ctx = this.determineContext(frame);
-        return ctx.getArgument(this.arg.getIndex());
-    }
+  execute(frame) {
+    const ctx = this.determineContext(frame);
+    return ctx.getArgument(this.arg.getIndex());
+  }
 }
 
 export class ArgumentWriteNode extends ContextualNode {
-    constructor(contextLevel, arg, valueExpr, source) {
-        super(contextLevel, source);
-        this.child_value = this.adopt(valueExpr);
+  constructor(contextLevel, arg, valueExpr, source) {
+    super(contextLevel, source);
+    this.child_value = this.adopt(valueExpr);
 
-        assert(arg.getIndex() >= 0);
-        this.arg = arg;
-    }
+    assert(arg.getIndex() >= 0);
+    this.arg = arg;
+  }
 
-    execute(frame) {
-        const val = this.child_value.execute(frame);
-        const ctx = this.determineContext(frame);
-        ctx.setArgument(this.arg.getIndex(), val);
-        return val;
-    }
+  execute(frame) {
+    const val = this.child_value.execute(frame);
+    const ctx = this.determineContext(frame);
+    ctx.setArgument(this.arg.getIndex(), val);
+    return val;
+  }
 }
 
-export class SuperReadNode extends ArgumentReadNode{
-    constructor(holderClass, classSide, contextLevel, arg, source) {
-        super(contextLevel, arg, source);
-        this.holderClass = holderClass;
-        this.classSide = classSide;
-    }
+export class SuperReadNode extends ArgumentReadNode {
+  constructor(holderClass, classSide, contextLevel, arg, source) {
+    super(contextLevel, arg, source);
+    this.holderClass = holderClass;
+    this.classSide = classSide;
+  }
 
-    getHolderClass() {
-        return this.holderClass;
-    }
+  getHolderClass() {
+    return this.holderClass;
+  }
 
-    isClassSide() {
-        return this.classSide;
-    }
+  isClassSide() {
+    return this.classSide;
+  }
 
-    isSuperNode() {
-        return true;
-    }
+  isSuperNode() {
+    return true;
+  }
 }

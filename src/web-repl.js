@@ -5,7 +5,8 @@ import { universe } from './som/vm/Universe.js';
 
 export function moveCaretToEnd(el) {
   if (typeof el.selectionStart === 'number') {
-    el.selectionStart = el.selectionEnd = el.value.length;
+    el.selectionEnd = el.value.length;
+    el.selectionStart = el.selectionEnd;
   } else if (typeof el.createTextRange !== 'undefined') {
     el.focus();
     const range = el.createTextRange();
@@ -32,8 +33,8 @@ export function handleReplInput(e) {
     const shellMethod = myClass.lookupInvokable(universe.symbolFor('run:'));
     try {
       it = shellMethod.invoke(null, [myObject, it]);
-    } catch (e) {
-      document.getElementById('repl-out').innerHTML += `Error: ${e.toString()}`;
+    } catch (ex) {
+      document.getElementById('repl-out').innerHTML += `Error: ${ex.toString()}`;
     }
   }
 }

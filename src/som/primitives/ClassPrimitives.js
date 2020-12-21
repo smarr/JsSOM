@@ -19,43 +19,39 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { Primitives } from './Primitives.js';
 import { universe } from '../vm/Universe.js';
 
-function _new(frame, args) {
-    return universe.newInstance(args[0]);
+function _new(_frame, args) {
+  return universe.newInstance(args[0]);
 }
 
-function _name(frame, args) {
-    return args[0].getName();
+function _name(_frame, args) {
+  return args[0].getName();
 }
 
-function _superClass(frame, args) {
-    return args[0].getSuperClass();
+function _superClass(_frame, args) {
+  return args[0].getSuperClass();
 }
 
-function _methods(frame, args) {
-    return args[0].getInstanceInvokables();
+function _methods(_frame, args) {
+  return args[0].getInstanceInvokables();
 }
 
-function _fields(frame, args) {
-    return args[0].getInstanceFields();
+function _fields(_frame, args) {
+  return args[0].getInstanceFields();
 }
 
 class ClassPrimitives extends Primitives {
-    constructor() {
-        super();
-    }
-
-    installPrimitives() {
-        this.installInstancePrimitive("new", _new);
-        this.installInstancePrimitive("name", _name);
-        this.installInstancePrimitive("superclass", _superClass);
-        this.installInstancePrimitive("methods", _methods);
-        this.installInstancePrimitive("fields", _fields);
-    }
+  installPrimitives() {
+    this.installInstancePrimitive('new', _new);
+    this.installInstancePrimitive('name', _name);
+    this.installInstancePrimitive('superclass', _superClass);
+    this.installInstancePrimitive('methods', _methods);
+    this.installInstancePrimitive('fields', _fields);
+  }
 }
 
 export const prims = ClassPrimitives;

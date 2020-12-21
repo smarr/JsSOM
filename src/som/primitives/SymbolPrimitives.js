@@ -19,24 +19,20 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { Primitives } from './Primitives.js';
 
 import { universe } from '../vm/Universe.js';
 
 function _asString(_frame, args) {
-    return universe.newString(args[0].getString());
+  return universe.newString(args[0].getString());
 }
 
 class SymbolPrimitives extends Primitives {
-    constructor() {
-        super();
-    }
-
-    installPrimitives() {
-        this.installInstancePrimitive("asString", _asString);
-    }
+  installPrimitives() {
+    this.installInstancePrimitive('asString', _asString);
+  }
 }
 
 export const prims = SymbolPrimitives;

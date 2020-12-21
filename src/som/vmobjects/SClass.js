@@ -223,10 +223,10 @@ export class SClass extends SObject {
 
   loadPrimitives(displayWarning) {
     try {
-      const primitives = prims[this.name.getString()];
+      const Primitives = prims[this.name.getString()];
 
-      if (primitives !== undefined) {
-        (new primitives())
+      if (Primitives !== undefined) {
+        (new Primitives())
           .installPrimitivesIn(this);
       } else if (displayWarning) {
         universe.println(`Primitives class ${this.name.getString()} not found`);

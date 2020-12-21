@@ -19,19 +19,19 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { Node } from './Node.js';
 
 import { universe } from '../vm/Universe.js';
 
 export class BlockNode extends Node {
-    constructor(blockMethod, source) {
-        super(source);
-        this.blockMethod = blockMethod;
-    }
+  constructor(blockMethod, source) {
+    super(source);
+    this.blockMethod = blockMethod;
+  }
 
-    execute = function (frame) {
-        return universe.newBlock(this.blockMethod, frame);
-    }
+  execute(frame) {
+    return universe.newBlock(this.blockMethod, frame);
+  }
 }

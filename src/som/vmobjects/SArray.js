@@ -20,7 +20,6 @@
 * THE SOFTWARE.
 */
 // @ts-check
-
 import { SAbstractObject } from './SAbstractObject.js';
 
 import { universe } from '../vm/Universe.js';

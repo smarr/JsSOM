@@ -19,92 +19,89 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { Primitives } from './Primitives.js';
 import { universe } from '../vm/Universe.js';
 
-function _asInteger(frame, args) {
-    return args[0].primAsInteger();
+function _asInteger(_frame, args) {
+  return args[0].primAsInteger();
 }
 
-function _asString(frame, args) {
-    return args[0].primAsString();
+function _asString(_frame, args) {
+  return args[0].primAsString();
 }
 
-function _sqrt(frame, args) {
-    return universe.newDouble(
-        Math.sqrt(args[0].getEmbeddedDouble()));
+function _sqrt(_frame, args) {
+  return universe.newDouble(
+    Math.sqrt(args[0].getEmbeddedDouble()),
+  );
 }
 
-function _plus(frame, args) {
-    return args[0].primAdd(args[1]);
+function _plus(_frame, args) {
+  return args[0].primAdd(args[1]);
 }
 
-function _minus(frame, args) {
-    return args[0].primSubtract(args[1]);
+function _minus(_frame, args) {
+  return args[0].primSubtract(args[1]);
 }
 
-function _mult(frame, args) {
-    return args[0].primMultiply(args[1]);
+function _mult(_frame, args) {
+  return args[0].primMultiply(args[1]);
 }
 
-function _doubleDiv(frame, args) {
-    return args[0].primDoubleDiv(args[1]);
+function _doubleDiv(_frame, args) {
+  return args[0].primDoubleDiv(args[1]);
 }
 
-function _mod(frame, args) {
-    return args[0].primModulo(args[1]);
+function _mod(_frame, args) {
+  return args[0].primModulo(args[1]);
 }
 
-function _equals(frame, args) {
-    return args[0].primEquals(args[1]);
+function _equals(_frame, args) {
+  return args[0].primEquals(args[1]);
 }
 
-function _lessThan(frame, args) {
-    return args[0].primLessThan(args[1]);
+function _lessThan(_frame, args) {
+  return args[0].primLessThan(args[1]);
 }
 
-function _round(frame, args) {
-    var intVal = Math.round(args[0].getEmbeddedDouble());
-    return universe.newInteger(intVal);
+function _round(_frame, args) {
+  const intVal = Math.round(args[0].getEmbeddedDouble());
+  return universe.newInteger(intVal);
 }
 
-function _sin(frame, args) {
-    var val = Math.sin(args[0].getEmbeddedDouble());
-    return universe.newDouble(val);
+function _sin(_frame, args) {
+  const val = Math.sin(args[0].getEmbeddedDouble());
+  return universe.newDouble(val);
 }
 
-function _cos(frame, args) {
-    var val = Math.cos(args[0].getEmbeddedDouble());
-    return universe.newDouble(val);
+function _cos(_frame, args) {
+  const val = Math.cos(args[0].getEmbeddedDouble());
+  return universe.newDouble(val);
 }
 
 function _positiveInfinity(_frame, _args) {
-    return universe.newDouble(Number.POSITIVE_INFINITY);
+  return universe.newDouble(Number.POSITIVE_INFINITY);
 }
 class DoublePrimitives extends Primitives {
-    constructor() {
-        super();
-    }
+  installPrimitives() {
+    this.installInstancePrimitive('asInteger', _asInteger);
+    this.installInstancePrimitive('asString', _asString);
+    this.installInstancePrimitive('round', _round);
+    this.installInstancePrimitive('sqrt', _sqrt);
+    this.installInstancePrimitive('+', _plus);
+    this.installInstancePrimitive('-', _minus);
+    this.installInstancePrimitive('*', _mult);
+    this.installInstancePrimitive('//', _doubleDiv);
+    this.installInstancePrimitive('%', _mod);
+    this.installInstancePrimitive('=', _equals);
+    this.installInstancePrimitive('<', _lessThan);
+    this.installInstancePrimitive('sin', _sin);
+    this.installInstancePrimitive('cos', _cos);
 
-    installPrimitives() {
-        this.installInstancePrimitive("asInteger", _asInteger);
-        this.installInstancePrimitive("asString", _asString);
-        this.installInstancePrimitive("round", _round);
-        this.installInstancePrimitive("sqrt", _sqrt);
-        this.installInstancePrimitive("+", _plus);
-        this.installInstancePrimitive("-", _minus);
-        this.installInstancePrimitive("*", _mult);
-        this.installInstancePrimitive("//", _doubleDiv);
-        this.installInstancePrimitive("%", _mod);
-        this.installInstancePrimitive("=", _equals);
-        this.installInstancePrimitive("<", _lessThan);
-        this.installInstancePrimitive("sin", _sin);
-        this.installInstancePrimitive("cos", _cos);
-
-        this.installClassPrimitive("PositiveInfinity", _positiveInfinity);
-    }
+    this.installClassPrimitive('PositiveInfinity', _positiveInfinity);
+  }
 }
 
 export const prims = DoublePrimitives;

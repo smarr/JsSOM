@@ -19,41 +19,41 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { Node } from './Node.js';
 import { universe } from '../vm/Universe.js';
 
 export class UninitializedGlobalReadNode extends Node {
-    constructor(globalName, source) {
-        super(source);
-        this.globalName = globalName;
-    }
+  constructor(globalName, source) {
+    super(source);
+    this.globalName = globalName;
+  }
 
-    executeUnknownGlobal(frame) {
-        const self = frame.getReceiver();
-        return self.sendUnknownGlobal(this.globalName, frame);
-    }
+  executeUnknownGlobal(frame) {
+    const self = frame.getReceiver();
+    return self.sendUnknownGlobal(this.globalName, frame);
+  }
 
-    execute(frame) {
-        // Get the global from the universe
-        const assoc = universe.getGlobalsAssociation(this.globalName);
-        if (assoc != null) {
-            return this.replace(new CachedGlobalReadNode(assoc, this.source)).
-                execute(frame);
-        } else {
-            return this.executeUnknownGlobal(frame);
-        }
+  execute(frame) {
+    // Get the global from the universe
+    const assoc = universe.getGlobalsAssociation(this.globalName);
+    if (assoc != null) {
+      // eslint-disable-next-line no-use-before-define
+      return this.replace(new CachedGlobalReadNode(assoc, this.source))
+        .execute(frame);
     }
+    return this.executeUnknownGlobal(frame);
+  }
 }
 
 class CachedGlobalReadNode extends Node {
-    constructor(assoc, source) {
-        super(source);
-        this.assoc = assoc;
-    }
+  constructor(assoc, source) {
+    super(source);
+    this.assoc = assoc;
+  }
 
-    execute(_frame) {
-        return this.assoc.getValue();
-    }
+  execute(_frame) {
+    return this.assoc.getValue();
+  }
 }

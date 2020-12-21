@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 /*
 * Copyright (c) 2014-2019 Stefan Marr, mail@stefan-marr.de
 *
@@ -142,6 +143,7 @@ export class SInteger extends SAbstractObject {
       return universe.newInteger(this.intVal & right.getEmbeddedInteger());
     }
     notYetImplemented(); // not supported by the library and, not sure what semantics should be
+    return null;
   }
 
   primEquals(right) {
@@ -336,7 +338,7 @@ export class SBigInteger extends SAbstractObject {
     return universe.newBigInteger(result);
   }
 
-  primAnd(right) {
+  primAnd(_right) {
     notYetImplemented(); // not supported by the library and, not sure what semantics should be
   }
 

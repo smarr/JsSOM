@@ -23,6 +23,7 @@
 
 import { SString } from './SString.js';
 import { universe } from '../vm/Universe.js';
+import { isOperator } from '../compiler/Lexer.js';
 
 export class SSymbol extends SString {
   constructor(value) {
@@ -67,9 +68,7 @@ export class SSymbol extends SString {
   isBinarySignature() {
     // Check the individual characters of the string
     for (const c in this.value) {
-      if (c !== '~' && c !== '&' && c !== '|' && c !== '*' && c !== '/' && c !== '@'
-                && c !== '+' && c !== '-' && c !== '=' && c !== '>' && c !== '<'
-                && c !== ',' && c !== '%' && c !== '\\') { return false; }
+      if (!isOperator(c)) { return false; }
     }
     return true;
   }

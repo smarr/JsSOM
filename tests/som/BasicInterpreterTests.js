@@ -123,7 +123,7 @@ function assertEqualsSomValue(expectedValue, expectedType, actualValue) {
     expect(actualValue.getName().getString()).to.equal(expectedValue);
     return;
   }
-  fail('SOM Value handler missing');
+  throw new Error('SOM Value handler missing');
 }
 
 describe('BasicInterpreterTests', () => {
@@ -134,6 +134,7 @@ describe('BasicInterpreterTests', () => {
     const expectedResultType = test[3];
 
     it(`should pass ${testClass}>>#${testMethod}`, () => {
+      // eslint-disable-next-line no-unused-expressions
       expect(universe).not.to.be.null;
 
       universe.setAvoidExit(true);
