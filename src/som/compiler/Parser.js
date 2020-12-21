@@ -592,7 +592,7 @@ export class Parser {
     return exp;
   }
 
-  getObjectForCurrentLiteral(coord) {
+  getObjectForCurrentLiteral() {
     switch (this.sym) {
       case Sym.Pound: {
         this.peekForNextSymbolFromLexerIfNecessary();
@@ -610,7 +610,7 @@ export class Parser {
 
   literal() {
     const coord = this.getCoordinate();
-    const value = this.getObjectForCurrentLiteral(coord);
+    const value = this.getObjectForCurrentLiteral();
     const source = this.getSource(coord);
     return createLiteralNode(value, source);
   }

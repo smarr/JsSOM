@@ -26,21 +26,21 @@ import { universe } from '../vm/Universe.js';
 
 import { SString } from '../vmobjects/SString.js';
 
-function _concat(frame, args) {
+function _concat(_frame, args) {
   const argument = args[1];
   return universe.newString(args[0].getEmbeddedString()
         + argument.getEmbeddedString());
 }
 
-function _asSymbol(frame, args) {
+function _asSymbol(_frame, args) {
   return universe.symbolFor(args[0].getEmbeddedString());
 }
 
-function _length(frame, args) {
+function _length(_frame, args) {
   return universe.newInteger(args[0].getEmbeddedString().length);
 }
 
-function _equals(frame, args) {
+function _equals(_frame, args) {
   const op1 = args[1];
   const op2 = args[0];
   if (op1 instanceof SString) {
@@ -51,7 +51,7 @@ function _equals(frame, args) {
   return universe.falseObject;
 }
 
-function _substring(frame, args) {
+function _substring(_frame, args) {
   const end = args[2];
   const start = args[1];
 
@@ -65,7 +65,7 @@ function _substring(frame, args) {
   return universe.newString(string.substring(s, e));
 }
 
-function _hashcode(frame, args) {
+function _hashcode(_frame, args) {
   const s = args[0].getEmbeddedString();
 
   // hash code from: http://stackoverflow.com/a/7616484/916546
@@ -83,7 +83,7 @@ function _hashcode(frame, args) {
   return universe.newInteger(hash);
 }
 
-function _isWhiteSpace(frame, args) {
+function _isWhiteSpace(_frame, args) {
   const s = args[0].getEmbeddedString();
 
   if (s.match(/^\s+$/) !== null) {
@@ -92,7 +92,7 @@ function _isWhiteSpace(frame, args) {
   return universe.falseObject;
 }
 
-function _isLetters(frame, args) {
+function _isLetters(_frame, args) {
   const s = args[0].getEmbeddedString();
 
   if (RegExp(/^\p{L}+$/, 'u').test(s)) {
@@ -101,7 +101,7 @@ function _isLetters(frame, args) {
   return universe.falseObject;
 }
 
-function _isDigits(frame, args) {
+function _isDigits(_frame, args) {
   const s = args[0].getEmbeddedString();
 
   if (s.match(/^\d+$/) !== null) {

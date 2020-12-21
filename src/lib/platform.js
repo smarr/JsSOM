@@ -63,7 +63,7 @@ if (typeof global === 'undefined' || process.browser) {
     _stdout(`<span style='color:red';>${msg}<br/></span>`);
   };
 
-  _exitInterpreter = (errorCode) => { };
+  _exitInterpreter = (_errorCode) => { };
 
   _isBrowser = true;
 } else {

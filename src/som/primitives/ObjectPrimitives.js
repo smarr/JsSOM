@@ -26,7 +26,7 @@ import { universe } from '../vm/Universe.js';
 import { SObject } from '../vmobjects/SObject.js';
 import { SArray } from '../vmobjects/SArray.js';
 
-function _equals(frame, args) {
+function _equals(_frame, args) {
   const op1 = args[1];
   const op2 = args[0];
   if (op1 === op2) {
@@ -35,7 +35,7 @@ function _equals(frame, args) {
   return universe.falseObject;
 }
 
-function _hashcode(frame, args) {
+function _hashcode(_frame, args) {
   const rcvr = args[0];
   let hash = rcvr.hash;
   if (hash === undefined) {
@@ -45,7 +45,7 @@ function _hashcode(frame, args) {
   return universe.newInteger(hash);
 }
 
-function _objectSize(frame, args) {
+function _objectSize(_frame, args) {
   let size = 0;
   const rcvr = args[0];
   if (rcvr instanceof SObject) {
@@ -72,7 +72,7 @@ function _performInSuperclass(frame, args) {
   return invokable.invoke(frame, [rcvr]);
 }
 
-function _performWithArguments(frame, args) {
+function _performWithArguments(_frame, args) {
   const directArgs = args[2].getIndexableFields();
   const selector = args[1];
   const rcvr = args[0];
@@ -82,32 +82,32 @@ function _performWithArguments(frame, args) {
   return invokable.invoke(rcvr, newArgs);
 }
 
-function _instVarAt(frame, args) {
+function _instVarAt(_frame, args) {
   const idx = args[1];
   return args[0].getField(idx.getEmbeddedInteger() - 1);
 }
 
-function _instVarAtPut(frame, args) {
+function _instVarAtPut(_frame, args) {
   const val = args[2];
   const idx = args[1];
   args[0].setField(idx.getEmbeddedInteger() - 1, val);
   return val;
 }
 
-function _instVarNamed(frame, args) {
+function _instVarNamed(_frame, args) {
   const rcvr = args[0];
   const i = rcvr.getFieldIndex(args[1]);
   return rcvr.getField(i);
 }
 
-function _halt(frame, args) {
+function _halt(_frame, args) {
   universe.println('BREAKPOINT');
   // eslint-disable-next-line no-debugger
   debugger;
   return args[0];
 }
 
-function _class(frame, args) {
+function _class(_frame, args) {
   return args[0].getClass();
 }
 class ObjectPrimitives extends Primitives {

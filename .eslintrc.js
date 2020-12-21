@@ -27,5 +27,6 @@ module.exports = {
     'class-methods-use-this': 'off',
     'prefer-destructuring': 'off',
     'no-continue': 'off',
+    'no-unused-vars': ['error', { varsIgnorePattern: /$_/ }],
   },
 };

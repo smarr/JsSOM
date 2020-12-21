@@ -25,11 +25,11 @@ import { Primitives } from './Primitives.js';
 
 import { universe } from '../vm/Universe.js';
 
-function _holder(frame, args) {
+function _holder(_frame, args) {
   return args[0].getHolder();
 }
 
-function _signature(frame, args) {
+function _signature(_frame, args) {
   return args[0].getSignature();
 }
 

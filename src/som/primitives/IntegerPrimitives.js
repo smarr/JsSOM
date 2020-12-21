@@ -36,11 +36,11 @@ function toNumber(val) {
   return val.getEmbeddedInteger();
 }
 
-function _asString(frame, args) {
+function _asString(_frame, args) {
   return args[0].primAsString();
 }
 
-function _sqrt(frame, args) {
+function _sqrt(_frame, args) {
   const res = Math.sqrt(args[0].getEmbeddedInteger());
   if (res === Math.floor(res)) {
     return universe.newInteger(Math.floor(res));
@@ -48,52 +48,52 @@ function _sqrt(frame, args) {
   return universe.newDouble(res);
 }
 
-function _atRandom(frame, args) {
+function _atRandom(_frame, args) {
   return universe.newInteger(Math.floor(args[0].getEmbeddedInteger()
         * Math.random()));
 }
 
-function _plus(frame, args) {
+function _plus(_frame, args) {
   return args[0].primAdd(args[1]);
 }
 
-function _minus(frame, args) {
+function _minus(_frame, args) {
   return args[0].primSubtract(args[1]);
 }
 
-function _mult(frame, args) {
+function _mult(_frame, args) {
   return args[0].primMultiply(args[1]);
 }
 
-function _doubleDiv(frame, args) {
+function _doubleDiv(_frame, args) {
   return args[0].primDoubleDiv(args[1]);
 }
 
-function _intDiv(frame, args) {
+function _intDiv(_frame, args) {
   return args[0].primIntDiv(args[1]);
 }
 
-function _mod(frame, args) {
+function _mod(_frame, args) {
   return args[0].primModulo(args[1]);
 }
 
-function _and(frame, args) {
+function _and(_frame, args) {
   return args[0].primAnd(args[1]);
 }
 
-function _equals(frame, args) {
+function _equals(_frame, args) {
   return args[0].primEquals(args[1]);
 }
 
-function _equalsEquals(frame, args) {
+function _equalsEquals(_frame, args) {
   return args[0].primEquals(args[1]);
 }
 
-function _lessThan(frame, args) {
+function _lessThan(_frame, args) {
   return args[0].primLessThan(args[1]);
 }
 
-function _fromString(frame, args) {
+function _fromString(_frame, args) {
   const param = args[1];
   if (!(param instanceof SString)) {
     return universe.nilObject;
@@ -102,7 +102,7 @@ function _fromString(frame, args) {
   return universe.newInteger(intVal);
 }
 
-function _leftShift(frame, args) {
+function _leftShift(_frame, args) {
   const r = toNumber(args[1]);
   const l = toNumber(args[0]);
 
@@ -115,29 +115,29 @@ function _leftShift(frame, args) {
   return universe.newInteger(result);
 }
 
-function _bitXor(frame, args) {
+function _bitXor(_frame, args) {
   const right = toNumber(args[1]);
   const left = toNumber(args[0]);
 
   return universe.newInteger(left ^ right);
 }
 
-function _rem(frame, args) {
+function _rem(_frame, args) {
   const right = args[1];
   const left = args[0];
   return universe.newInteger(left.getEmbeddedInteger()
         % right.getEmbeddedInteger());
 }
 
-function _as32BitUnsignedValue(frame, args) {
+function _as32BitUnsignedValue(_frame, args) {
   return args[0].prim32BitUnsignedValue();
 }
 
-function _as32BitSignedValue(frame, args) {
+function _as32BitSignedValue(_frame, args) {
   return args[0].prim32BitSignedValue();
 }
 
-function _unsignedRightShift(frame, args) {
+function _unsignedRightShift(_frame, args) {
   const right = toNumber(args[1]);
   const left = toNumber(args[0]);
   return universe.newInteger(left >>> right);
