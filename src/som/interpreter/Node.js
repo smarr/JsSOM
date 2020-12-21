@@ -45,9 +45,12 @@ export class Node {
     const { parent } = this;
     let replaced = false;
 
+    // eslint-disable-next-line guard-for-in
     for (const prop in parent) {
-      if (prop.indexOf('child_') >= 0) {
-        if (prop.indexOf('children_') >= 0) { // an array with child nodes
+      const isChild = prop.indexOf('child_') >= 0;
+      const isChildren = prop.indexOf('children_') >= 0;
+      if (isChild || isChildren) {
+        if (isChildren) { // an array with child nodes
           const children = parent[prop];
           for (const i in children) {
             if (children[i] === this) {
