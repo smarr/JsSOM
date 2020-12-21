@@ -19,22 +19,22 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { SAbstractObject } from './SAbstractObject.js';
 import { universe } from '../vm/Universe.js';
 
 export class SString extends SAbstractObject {
-    constructor(value) {
-        super();
-        this.value = value;
-    }
+  constructor(value) {
+    super();
+    this.value = value;
+  }
 
-    getEmbeddedString() {
-        return this.value;
-    }
+  getEmbeddedString() {
+    return this.value;
+  }
 
-    getClass() {
-        return universe.stringClass;
-    }
+  getClass() {
+    return universe.stringClass;
+  }
 }

@@ -19,61 +19,62 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 export class Node {
-    constructor(source) {
-        this.parent = null;
-        this.source = source;
+  constructor(source) {
+    this.parent = null;
+    this.source = source;
+  }
+
+  getSource() { return this.source; }
+
+  adopt(nodeOrNodes) {
+    if (nodeOrNodes instanceof Array) {
+      // eslint-disable-next-line guard-for-in
+      for (const i in nodeOrNodes) {
+        nodeOrNodes[i].parent = this;
+      }
+    } else {
+      nodeOrNodes.parent = this;
     }
+    return nodeOrNodes;
+  }
 
-    getSource() { return this.source; };
+  replace(newNode) {
+    const { parent } = this;
+    let replaced = false;
 
-    adopt(nodeOrNodes) {
-        if (nodeOrNodes instanceof Array) {
-            for (var i in nodeOrNodes) {
-                nodeOrNodes[i].parent = this;
+    for (const prop in parent) {
+      if (prop.indexOf('child_') >= 0) {
+        if (prop.indexOf('children_') >= 0) { // an array with child nodes
+          const children = parent[prop];
+          for (const i in children) {
+            if (children[i] === this) {
+              children[i] = newNode;
+              replaced = true;
+              break;
             }
-        } else {
-            nodeOrNodes.parent = this;
+          }
         }
-        return nodeOrNodes;
+        if (!replaced) { // just a simple child node
+          if (parent[prop] === this) {
+            parent[prop] = newNode;
+            replaced = true;
+            break;
+          }
+        }
+      }
     }
 
-    replace(newNode) {
-        const parent = this.parent;
-        let replaced = false;
-
-        for (const prop in parent) {
-            if (prop.indexOf("child_") >= 0) {
-                if (prop.indexOf("children_") >= 0) { // an array with child nodes
-                    const children = parent[prop];
-                    for (const i in children) {
-                        if (children[i] === this) {
-                            children[i] = newNode;
-                            replaced = true;
-                            break;
-                        }
-                    }
-                }
-                if (!replaced) { // just a simple child node
-                    if (parent[prop] === this) {
-                        parent[prop] = newNode;
-                        replaced = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (!replaced && this.parent != null) {
-            // eslint-disable-next-line no-debugger
-            debugger; // node was not replaced???
-        }
-        return newNode;
+    if (!replaced && this.parent != null) {
+      // eslint-disable-next-line no-debugger
+      debugger; // node was not replaced???
     }
+    return newNode;
+  }
 
-    isSuperNode() {
-        return false;
-    }
+  isSuperNode() {
+    return false;
+  }
 }

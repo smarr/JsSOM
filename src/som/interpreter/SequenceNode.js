@@ -19,20 +19,20 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { Node } from './Node.js';
 
 export class SequenceNode extends Node {
-    constructor(expressions, source) {
-        super(source);
-        this.children_exprs = expressions;
-    }
+  constructor(expressions, source) {
+    super(source);
+    this.children_exprs = expressions;
+  }
 
-    execute(frame) {
-        for (let i = 0; i < this.children_exprs.length - 1; i++) {
-            this.children_exprs[i].execute(frame);
-        }
-        return this.children_exprs[this.children_exprs.length - 1].execute(frame);
+  execute(frame) {
+    for (let i = 0; i < this.children_exprs.length - 1; i += 1) {
+      this.children_exprs[i].execute(frame);
     }
+    return this.children_exprs[this.children_exprs.length - 1].execute(frame);
+  }
 }

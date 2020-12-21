@@ -1,11 +1,11 @@
-//@ts-check
-"use strict";
+// @ts-check
+
 import { existsSync, readFileSync } from 'fs';
 
 export function getFile(path, file) {
-    const name = path + '/' + file;
-    if (!existsSync(name)) {
-        return null;
-    }
-    return readFileSync(name, {encoding: 'utf-8'});
+  const name = `${path}/${file}`;
+  if (!existsSync(name)) {
+    return null;
+  }
+  return readFileSync(name, { encoding: 'utf-8' });
 }

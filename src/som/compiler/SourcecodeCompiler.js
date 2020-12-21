@@ -19,8 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { getFile } from '../../lib/core-lib.js';
 import { IllegalStateException } from '../../lib/exceptions.js';
 
@@ -28,43 +28,45 @@ import { ClassGenerationContext } from './ClassGenerationContext.js';
 
 import { Parser } from './Parser.js';
 
-function compile(parser, systemClass) {
-    var cgc = new ClassGenerationContext();
+function compile(parser, systemClass, universe) {
+  const cgc = new ClassGenerationContext();
 
-    var result = systemClass;
-    // try {
-        parser.classdef(cgc);
-    //} catch (pe) {
-    //    universe.errorExit(pe.toString());
-    //}
+  let result = systemClass;
+  try {
+    parser.classdef(cgc);
+  } catch (pe) {
+    universe.errorExit(pe.toString());
+  }
 
-    if (systemClass == null) {
-        result = cgc.assemble();
-    } else {
-        cgc.assembleSystemClass(result);
-    }
+  if (systemClass == null) {
+    result = cgc.assemble(universe);
+  } else {
+    cgc.assembleSystemClass(result, universe);
+  }
 
-    return result;
+  return result;
 }
 
-export function compileClassFile(path, file, systemClass) {
-    var source = getFile(path, file + ".som");
-    if (source == null) {
-        return null;
-    }
+export function compileClassFile(path, file, systemClass, universe) {
+  const source = getFile(path, `${file}.som`);
+  if (source == null) {
+    return null;
+  }
 
-    var result = compile(new Parser(source, path + '/' + file + '.som'), systemClass);
+  const result = compile(
+    new Parser(source, `${path}/${file}.som`), systemClass, universe,
+  );
 
-    var cname  = result.getName();
-    var cnameC = cname.getString();
+  const cname = result.getName();
+  const cnameC = cname.getString();
 
-    if (file != cnameC) {
-        throw new IllegalStateException("File name " + file
-            + " does not match class name " + cnameC);
-    }
-    return result;
+  if (file !== cnameC) {
+    throw new IllegalStateException(`File name ${file
+    } does not match class name ${cnameC}`);
+  }
+  return result;
 }
 
-export function compileClassString(stmt, systemClass) {
-    return compile(new Parser(stmt, '$string'), systemClass);
+export function compileClassString(stmt, systemClass, universe) {
+  return compile(new Parser(stmt, '$string'), systemClass, universe);
 }

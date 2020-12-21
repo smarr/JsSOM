@@ -19,54 +19,54 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { SAbstractObject } from './SAbstractObject.js';
 
 import { universe } from '../vm/Universe.js';
 
 export class SArray extends SAbstractObject {
-    constructor(length, values) {
-        super();
-        this.length = length;
-        this.indexableFields = (values != null) ? values : new Array(length);
+  constructor(length, values) {
+    super();
+    this.length = length;
+    this.indexableFields = (values != null) ? values : new Array(length);
 
-        if (values == null) {
-            for (let i = 0; i < length; i++) {
-                this.indexableFields[i] = universe.nilObject;
-            }
-        }
+    if (values == null) {
+      for (let i = 0; i < length; i += 1) {
+        this.indexableFields[i] = universe.nilObject;
+      }
     }
+  }
 
-    getIndexableField(idx) {
-        return this.indexableFields[idx];
-    }
+  getIndexableField(idx) {
+    return this.indexableFields[idx];
+  }
 
-    setIndexableField(idx, value) {
-        this.indexableFields[idx] = value;
-    }
+  setIndexableField(idx, value) {
+    this.indexableFields[idx] = value;
+  }
 
-    getIndexableFields() {
-        return this.indexableFields;
-    }
+  getIndexableFields() {
+    return this.indexableFields;
+  }
 
-    getNumberOfIndexableFields() {
-        return this.length;
-    }
+  getNumberOfIndexableFields() {
+    return this.length;
+  }
 
-    copyIndexableFields(to) {
-        for (let i = 0; i < length; i++) {
-            to.setIndexableField(i, this.indexableFields[i]);
-        }
+  copyIndexableFields(to) {
+    for (let i = 0; i < this.length; i += 1) {
+      to.setIndexableField(i, this.indexableFields[i]);
     }
+  }
 
-    copyAndExtendWith(value) {
-        const result = new SArray(length + 1);
-        this.copyIndexableFields(result);
-        result.setIndexableField(length, value);
-    }
+  copyAndExtendWith(value) {
+    const result = new SArray(this.length + 1);
+    this.copyIndexableFields(result);
+    result.setIndexableField(this.length, value);
+  }
 
-    getClass() {
-        return universe.arrayClass;
-    }
+  getClass() {
+    return universe.arrayClass;
+  }
 }

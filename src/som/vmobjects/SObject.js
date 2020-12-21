@@ -19,45 +19,45 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { SAbstractObject } from './SAbstractObject.js';
 import { universe } from '../vm/Universe.js';
 
 export class SObject extends SAbstractObject {
-    constructor(instanceClass, numFields) {
-        super();
+  constructor(instanceClass, numFields) {
+    super();
 
-        this.clazz = instanceClass;
-        this.objectFields = new Array((instanceClass === null) ?
-                numFields : instanceClass.getNumberOfInstanceFields());
+    this.clazz = instanceClass;
+    this.objectFields = new Array((instanceClass === null)
+      ? numFields : instanceClass.getNumberOfInstanceFields());
 
-        for (var i = 0; i < this.objectFields.length; i++) {
-            this.objectFields[i] = universe.nilObject;
-        }
+    for (let i = 0; i < this.objectFields.length; i += 1) {
+      this.objectFields[i] = universe.nilObject;
     }
+  }
 
-    getNumberOfFields() {
-        return this.objectFields.length;
-    }
+  getNumberOfFields() {
+    return this.objectFields.length;
+  }
 
-    setClass(value) {
-        this.clazz = value;
-    }
+  setClass(value) {
+    this.clazz = value;
+  }
 
-    getClass() {
-        return this.clazz;
-    }
+  getClass() {
+    return this.clazz;
+  }
 
-    getFieldIndex(fieldNameSymbol) {
-        return this.clazz.lookupFieldIndex(fieldNameSymbol);
-    }
+  getFieldIndex(fieldNameSymbol) {
+    return this.clazz.lookupFieldIndex(fieldNameSymbol);
+  }
 
-    getField(index) {
-        return this.objectFields[index];
-    }
+  getField(index) {
+    return this.objectFields[index];
+  }
 
-    setField(idx, value) {
-        this.objectFields[idx] = value;
-    }
+  setField(idx, value) {
+    this.objectFields[idx] = value;
+  }
 }

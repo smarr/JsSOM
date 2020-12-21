@@ -1,22 +1,20 @@
-//@ts-check
-"use strict";
+// @ts-check
 import { loadCoreLib } from '../core-lib-data.js';
 
 const somCoreLibData = loadCoreLib();
 
 export function getFile(path, file) {
-    var current = somCoreLibData["core-lib"];
+  let current = somCoreLibData['core-lib'];
 
-    path.split("/").forEach(function (e) {
-        if (current == undefined) {
-            return null;
-        }
-        current = current[e];
-    });
-
-    if (current == undefined || current[file] == undefined) {
-        return null;
-    } else {
-        return current[file];
+  for (const e of path.split('/')) {
+    if (current === undefined) {
+      break;
     }
+    current = current[e];
+  }
+
+  if (current === undefined || current[file] === undefined) {
+    return null;
+  }
+  return current[file];
 }

@@ -19,46 +19,46 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { universe } from '../vm/Universe.js';
 
 export class Frame {
-    constructor(args, numTemps) {
-        this.temps = new Array(numTemps);
-        this.onStack = true;
+  constructor(args, numTemps) {
+    this.temps = new Array(numTemps);
+    this.onStack = true;
 
-        for (let i = 0; i < numTemps; i++) {
-            this.temps[i] = universe.nilObject;
-        }
-        this.args = args;
+    for (let i = 0; i < numTemps; i += 1) {
+      this.temps[i] = universe.nilObject;
     }
+    this.args = args;
+  }
 
-    getReceiver() {
-        return this.args[0];
-    }
+  getReceiver() {
+    return this.args[0];
+  }
 
-    getArgument(idx) {
-        return this.args[idx];
-    }
+  getArgument(idx) {
+    return this.args[idx];
+  }
 
-    setArgument(idx, val) {
-        this.args[idx] = val;
-    }
+  setArgument(idx, val) {
+    this.args[idx] = val;
+  }
 
-    getTemp(idx) {
-        return this.temps[idx];
-    }
+  getTemp(idx) {
+    return this.temps[idx];
+  }
 
-    setTemp(idx, value) {
-        this.temps[idx] = value;
-    }
+  setTemp(idx, value) {
+    this.temps[idx] = value;
+  }
 
-    isOnStack() {
-        return this.onStack;
-    }
+  isOnStack() {
+    return this.onStack;
+  }
 
-    dropFromStack() {
-        this.onStack = false;
-    }
+  dropFromStack() {
+    this.onStack = false;
+  }
 }

@@ -19,61 +19,63 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
-import { createArgumentRead, createArgumentWrite, createSuperRead, createVariableRead, createVariableWrite } from '../interpreter/NodeFactory.js';
+// @ts-check
+import {
+  createArgumentRead, createArgumentWrite, createSuperRead, createVariableRead, createVariableWrite,
+} from '../interpreter/NodeFactory.js';
 
 export class Argument {
-    constructor(name, index) {
-        this.name = name;
-        this.index = index;
-    }
+  constructor(name, index) {
+    this.name = name;
+    this.index = index;
+  }
 
-    toString() {
-        return "Argument(" + this.name + ")";
-    }
+  toString() {
+    return `Argument(${this.name})`;
+  }
 
-    isSelf() {
-        return "self" === this.name || "$blockSelf" === this.name;
-    }
+  isSelf() {
+    return this.name === 'self' || this.name === '$blockSelf';
+  }
 
-    getReadNode(contextLevel, source) {
-        return createArgumentRead(this, contextLevel, source);
-    }
+  getReadNode(contextLevel, source) {
+    return createArgumentRead(this, contextLevel, source);
+  }
 
-    getWriteNode(contextLevel, valueExpr, source) {
-        return createArgumentWrite(this, contextLevel, valueExpr, source);
-    }
+  getWriteNode(contextLevel, valueExpr, source) {
+    return createArgumentWrite(this, contextLevel, valueExpr, source);
+  }
 
-    getSuperReadNode(contextLevel, holderClass, classSide, source) {
-        return createSuperRead(
-            this, contextLevel, holderClass, classSide, source);
-    }
+  getSuperReadNode(contextLevel, holderClass, classSide, source) {
+    return createSuperRead(
+      this, contextLevel, holderClass, classSide, source,
+    );
+  }
 
-    getIndex() {
-        return this.index;
-    }
+  getIndex() {
+    return this.index;
+  }
 }
 
 export class Local {
-    constructor(name, index) {
-        this.name = name;
-        this.index = index;
-    }
+  constructor(name, index) {
+    this.name = name;
+    this.index = index;
+  }
 
-    getIndex() {
-        return this.index;
-    }
+  getIndex() {
+    return this.index;
+  }
 
-    toString() {
-        return "Local(" + this.name + ")";
-    }
+  toString() {
+    return `Local(${this.name})`;
+  }
 
-    getReadNode(contextLevel, source) {
-        return createVariableRead(this, contextLevel, source);
-    }
+  getReadNode(contextLevel, source) {
+    return createVariableRead(this, contextLevel, source);
+  }
 
-    getWriteNode(contextLevel, valueExpr, source) {
-        return createVariableWrite(this, contextLevel, valueExpr, source);
-    }
+  getWriteNode(contextLevel, valueExpr, source) {
+    return createVariableWrite(this, contextLevel, valueExpr, source);
+  }
 }

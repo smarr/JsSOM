@@ -19,8 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { assert } from '../../lib/assert.js';
 
 import { SAbstractObject } from './SAbstractObject.js';
@@ -28,49 +28,49 @@ import { SAbstractObject } from './SAbstractObject.js';
 import { universe } from '../vm/Universe.js';
 
 function computeSignatureString(numberOfArguments) {
-    // Compute the signature string
-    let signatureString = "value";
-    if (numberOfArguments > 1) { signatureString += ":"; }
+  // Compute the signature string
+  let signatureString = 'value';
+  if (numberOfArguments > 1) { signatureString += ':'; }
 
-    // Add extra value: selector elements if necessary
-    for (let i = 2; i < numberOfArguments; i++) {
-        signatureString += "with:";
-    }
-    return signatureString;
+  // Add extra value: selector elements if necessary
+  for (let i = 2; i < numberOfArguments; i += 1) {
+    signatureString += 'with:';
+  }
+  return signatureString;
 }
 
 function _value(frame, args) {
-    const rcvrBlock = args[0];
-    return rcvrBlock.getMethod().invoke(frame, args);
+  const rcvrBlock = args[0];
+  return rcvrBlock.getMethod().invoke(frame, args);
 }
 
 export function getBlockEvaluationPrimitive(numberOfArguments, rcvrClass) {
-    const sig = universe.symbolFor(computeSignatureString(numberOfArguments));
-    return universe.newPrimitive(sig, _value, rcvrClass);
+  const sig = universe.symbolFor(computeSignatureString(numberOfArguments));
+  return universe.newPrimitive(sig, _value, rcvrClass);
 }
 
 export class SBlock extends SAbstractObject {
-    constructor(blockMethod, context) {
-        super();
-        this.blockClass = universe.blockClasses[blockMethod.getNumberOfArguments()];
-        this.context = context;
-        this.blockMethod = blockMethod;
-    }
+  constructor(blockMethod, context) {
+    super();
+    this.blockClass = universe.blockClasses[blockMethod.getNumberOfArguments()];
+    this.context = context;
+    this.blockMethod = blockMethod;
+  }
 
-    getClass() {
-        return this.blockClass;
-    }
+  getClass() {
+    return this.blockClass;
+  }
 
-    getMethod() {
-        return this.blockMethod;
-    }
+  getMethod() {
+    return this.blockMethod;
+  }
 
-    getContext() {
-        return this.context;
-    }
+  getContext() {
+    return this.context;
+  }
 
-    getOuterSelf() {
-        assert(this.context != null);
-        return this.context.getReceiver();
-    }
+  getOuterSelf() {
+    assert(this.context != null);
+    return this.context.getReceiver();
+  }
 }

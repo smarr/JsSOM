@@ -19,44 +19,44 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { assert } from '../../lib/assert.js';
 
 import { Node } from './Node.js';
-import { GenericDispatchNode } from './DispatchNode.js';
-import { UninitializedSuperDispatchNode } from './DispatchNode.js';
+import { GenericDispatchNode, UninitializedSuperDispatchNode } from './DispatchNode.js';
 
 export class MessageSendNode extends Node {
-    constructor(selector, argumentNodes, source) {
-        super(source);
-        this.selector = selector;
-        this.children_arguments = this.adopt(argumentNodes);
+  constructor(selector, argumentNodes, source) {
+    super(source);
+    this.selector = selector;
+    this.children_arguments = this.adopt(argumentNodes);
 
-        if (argumentNodes[0].isSuperNode()) {
-            this.child_dispatch = this.adopt(new UninitializedSuperDispatchNode(
-                selector, argumentNodes[0].getHolderClass(),
-                argumentNodes[0].isClassSide()));
-        } else {
-            this.child_dispatch = this.adopt(new GenericDispatchNode(selector));
-        }
+    if (argumentNodes[0].isSuperNode()) {
+      this.child_dispatch = this.adopt(new UninitializedSuperDispatchNode(
+        selector, argumentNodes[0].getHolderClass(),
+        argumentNodes[0].isClassSide(),
+      ));
+    } else {
+      this.child_dispatch = this.adopt(new GenericDispatchNode(selector));
     }
+  }
 
-    execute(frame) {
-        const args = this.evaluateArguments(frame);
-        return this.child_dispatch.executeDispatch(frame, args);
-    }
+  execute(frame) {
+    const args = this.evaluateArguments(frame);
+    return this.child_dispatch.executeDispatch(frame, args);
+  }
 
-    evaluateArguments(frame) {
-        const args = new Array(this.children_arguments.length);
-        for (let i = 0; i < this.children_arguments.length; i++) {
-            args[i] = this.children_arguments[i].execute(frame);
-            assert(args[i] != null);
-        }
-        return args;
+  evaluateArguments(frame) {
+    const args = new Array(this.children_arguments.length);
+    for (let i = 0; i < this.children_arguments.length; i += 1) {
+      args[i] = this.children_arguments[i].execute(frame);
+      assert(args[i] != null);
     }
+    return args;
+  }
 
-    toString() {
-        return "MsgSend(" + this.selector.getString() + ")";
-    }
+  toString() {
+    return `MsgSend(${this.selector.getString()})`;
+  }
 }

@@ -19,121 +19,127 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
-import { universe } from '../vm/Universe.js';
+// @ts-check
 
 export class ClassGenerationContext {
-    constructor() {
-        this.name = null;
-        this.superName = null;
-        this.classSide = false;
-        this.instanceFields = new Array();
-        this.instanceMethods = new Array();
-        this.classFields = new Array();
-        this.classMethods = new Array();
-    }
+  constructor() {
+    this.name = null;
+    this.superName = null;
+    this.classSide = false;
+    this.instanceFields = [];
+    this.instanceMethods = [];
+    this.classFields = [];
+    this.classMethods = [];
+  }
 
-    setName(symbol) {
-        this.name = symbol;
-    }
+  setName(symbol) {
+    this.name = symbol;
+  }
 
-    getName() {
-        return this.name;
-    }
+  getName() {
+    return this.name;
+  }
 
-    setSuperName(symbol) {
-        this.superName = symbol;
-    }
+  setSuperName(symbol) {
+    this.superName = symbol;
+  }
 
-    setInstanceFieldsOfSuper(fieldNames) {
-        this.instanceFields = this.instanceFields.concat(fieldNames.getIndexableFields());
-    }
+  setInstanceFieldsOfSuper(fieldNames) {
+    this.instanceFields = this.instanceFields.concat(fieldNames.getIndexableFields());
+  }
 
-    setClassFieldsOfSuper(fieldNames) {
-        this.classFields = this.classFields.concat(fieldNames.getIndexableFields());
-    }
+  setClassFieldsOfSuper(fieldNames) {
+    this.classFields = this.classFields.concat(fieldNames.getIndexableFields());
+  }
 
-    addInstanceMethod(method) {
-        this.instanceMethods.push(method);
-    }
+  addInstanceMethod(method) {
+    this.instanceMethods.push(method);
+  }
 
-    setClassSide(bool) {
-        this.classSide = bool;
-    }
+  setClassSide(bool) {
+    this.classSide = bool;
+  }
 
-    addClassMethod(method) {
-        this.classMethods.push(method);
-    }
+  addClassMethod(method) {
+    this.classMethods.push(method);
+  }
 
-    addInstanceField(symbol) {
-        this.instanceFields.push(symbol);
-    }
+  addInstanceField(symbol) {
+    this.instanceFields.push(symbol);
+  }
 
-    addClassField(symbol) {
-        this.classFields.push(symbol);
-    }
+  addClassField(symbol) {
+    this.classFields.push(symbol);
+  }
 
-    hasField(symbol) {
-        return (this.classSide ? this.classFields : this.instanceFields).
-            indexOf(symbol) != -1;
-    }
+  hasField(symbol) {
+    return (this.classSide ? this.classFields : this.instanceFields)
+      .indexOf(symbol) !== -1;
+  }
 
-    getFieldIndex(symbol) {
-        return (this.classSide ? this.classFields : this.instanceFields).
-            indexOf(symbol);
-    }
+  getFieldIndex(symbol) {
+    return (this.classSide ? this.classFields : this.instanceFields)
+      .indexOf(symbol);
+  }
 
-    isClassSide() {
-        return this.classSide;
-    }
+  isClassSide() {
+    return this.classSide;
+  }
 
-    assemble() {
-        const ccName = this.name.getString() + " class";
+  assemble(universe) {
+    const ccName = `${this.name.getString()} class`;
 
-        // Load the super class
-        const superClass = universe.loadClass(this.superName);
-        const resultClass = universe.newClass(universe.metaclassClass);
+    // Load the super class
+    const superClass = universe.loadClass(this.superName);
+    const resultClass = universe.newClass(universe.metaclassClass);
 
-        // Initialize the class of the resulting class
-        resultClass.setInstanceFields(
-            universe.newArrayFrom(this.classFields.slice()));
-        resultClass.setInstanceInvokables(
-            universe.newArrayFrom(this.classMethods.slice()));
-        resultClass.setName(universe.symbolFor(ccName));
+    // Initialize the class of the resulting class
+    resultClass.setInstanceFields(
+      universe.newArrayFrom(this.classFields.slice()),
+    );
+    resultClass.setInstanceInvokables(
+      universe.newArrayFrom(this.classMethods.slice()),
+    );
+    resultClass.setName(universe.symbolFor(ccName));
 
-        const superMClass = superClass.getClass();
-        resultClass.setSuperClass(superMClass);
+    const superMClass = superClass.getClass();
+    resultClass.setSuperClass(superMClass);
 
-        // Allocate the resulting class
-        const result = universe.newClass(resultClass);
+    // Allocate the resulting class
+    const result = universe.newClass(resultClass);
 
-        // Initialize the resulting class
-        result.setName(this.name);
-        result.setSuperClass(superClass);
-        result.setInstanceFields(
-            universe.newArrayFrom(this.instanceFields.slice()));
-        result.setInstanceInvokables(
-            universe.newArrayFrom(this.instanceMethods.slice()));
+    // Initialize the resulting class
+    result.setName(this.name);
+    result.setSuperClass(superClass);
+    result.setInstanceFields(
+      universe.newArrayFrom(this.instanceFields.slice()),
+    );
+    result.setInstanceInvokables(
+      universe.newArrayFrom(this.instanceMethods.slice()),
+    );
 
-        return result;
-    }
+    return result;
+  }
 
-    assembleSystemClass(systemClass) {
-        systemClass.setInstanceInvokables(
-            universe.newArrayFrom(this.instanceMethods.slice()));
-        systemClass.setInstanceFields(
-            universe.newArrayFrom(this.instanceFields.slice()));
+  assembleSystemClass(systemClass, universe) {
+    systemClass.setInstanceInvokables(
+      universe.newArrayFrom(this.instanceMethods.slice()),
+    );
+    systemClass.setInstanceFields(
+      universe.newArrayFrom(this.instanceFields.slice()),
+    );
 
-        // class-bound == class-instance-bound
-        var superMClass = systemClass.getClass();
-        superMClass.setInstanceInvokables(
-            universe.newArrayFrom(this.classMethods.slice()));
-        superMClass.setInstanceFields(
-            universe.newArrayFrom(this.classFields.slice()));
-    }
+    // class-bound == class-instance-bound
+    const superMClass = systemClass.getClass();
+    superMClass.setInstanceInvokables(
+      universe.newArrayFrom(this.classMethods.slice()),
+    );
+    superMClass.setInstanceFields(
+      universe.newArrayFrom(this.classFields.slice()),
+    );
+  }
 
-    toString() {
-        return "ClassGenC(" + this.name.getString() + ")";
-    }
+  toString() {
+    return `ClassGenC(${this.name.getString()})`;
+  }
 }

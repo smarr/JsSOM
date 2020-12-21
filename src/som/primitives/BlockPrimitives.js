@@ -19,8 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { RuntimeException } from '../../lib/exceptions.js';
 
 import { Primitives } from './Primitives.js';
@@ -28,35 +28,30 @@ import { Primitives } from './Primitives.js';
 import { universe } from '../vm/Universe.js';
 
 function _restart(_frame, _args) {
-    throw new RuntimeException("Restart primitive is not supported, #whileTrue:"
-        + " and #whileTrue: are intrisified so that #restart "
-        + "is not needed.");
+  throw new RuntimeException('Restart primitive is not supported, #whileTrue:'
+        + ' and #whileTrue: are intrisified so that #restart '
+        + 'is not needed.');
 }
 
 function _whileTrue(frame, args) {
-    var conditionBlock = args[0];
-    var bodyBlock = args[1];
+  const conditionBlock = args[0];
+  const bodyBlock = args[1];
 
-    var cond = conditionBlock.getMethod().invoke(frame, [conditionBlock]);
+  let cond = conditionBlock.getMethod().invoke(frame, [conditionBlock]);
 
-    while (cond === universe.trueObject) {
-        bodyBlock.getMethod().invoke(frame, [bodyBlock]);
-        cond = conditionBlock.getMethod().invoke(frame, [conditionBlock]);
-    }
+  while (cond === universe.trueObject) {
+    bodyBlock.getMethod().invoke(frame, [bodyBlock]);
+    cond = conditionBlock.getMethod().invoke(frame, [conditionBlock]);
+  }
 
-    return universe.nilObject;
+  return universe.nilObject;
 }
 
-
 class BlockPrimitives extends Primitives {
-    constructor() {
-        super();
-    }
-
-    installPrimitives() {
-        this.installInstancePrimitive("restart", _restart);
-        this.installInstancePrimitive("whileTrue:", _whileTrue);
-    }
+  installPrimitives() {
+    this.installInstancePrimitive('restart', _restart);
+    this.installInstancePrimitive('whileTrue:', _whileTrue);
+  }
 }
 
 export const prims = BlockPrimitives;

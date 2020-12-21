@@ -19,59 +19,58 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { SString } from './SString.js';
 import { universe } from '../vm/Universe.js';
 
 export class SSymbol extends SString {
-    constructor(value) {
-        super(value);
-        this.numberOfSignatureArguments = this.determineNumberOfSignatureArguments();
+  constructor(value) {
+    super(value);
+    this.numberOfSignatureArguments = this.determineNumberOfSignatureArguments();
+  }
+
+  getClass() {
+    return universe.symbolClass;
+  }
+
+  getString() {
+    // Get the string associated to this symbol
+    return this.value;
+  }
+
+  determineNumberOfSignatureArguments() {
+    // Check for binary signature
+    if (this.isBinarySignature()) {
+      return 2;
+    }
+    // Count the colons in the signature string
+    let numberOfColons = 0;
+
+    // Iterate through every character in the signature string
+    for (let i = 0; i < this.value.length; i += 1) {
+      if (this.value.charAt(i) === ':') { numberOfColons += 1; }
     }
 
-    getClass() {
-        return universe.symbolClass;
+    // The number of arguments is equal to the number of colons plus one
+    return numberOfColons + 1;
+  }
+
+  toString() {
+    return `#${this.value}`;
+  }
+
+  getNumberOfSignatureArguments() {
+    return this.numberOfSignatureArguments;
+  }
+
+  isBinarySignature() {
+    // Check the individual characters of the string
+    for (const c in this.value) {
+      if (c !== '~' && c !== '&' && c !== '|' && c !== '*' && c !== '/' && c !== '@'
+                && c !== '+' && c !== '-' && c !== '=' && c !== '>' && c !== '<'
+                && c !== ',' && c !== '%' && c !== '\\') { return false; }
     }
-
-    getString() {
-        // Get the string associated to this symbol
-        return this.value;
-    }
-
-    determineNumberOfSignatureArguments() {
-        // Check for binary signature
-        if (this.isBinarySignature()) {
-            return 2;
-        } else {
-            // Count the colons in the signature string
-            let numberOfColons = 0;
-
-            // Iterate through every character in the signature string
-            for (var i = 0; i < this.value.length; i++) {
-                if (this.value.charAt(i) == ':') { numberOfColons++; }
-            }
-
-            // The number of arguments is equal to the number of colons plus one
-            return numberOfColons + 1;
-        }
-    }
-
-    toString() {
-        return "#" + this.value;
-    }
-
-    getNumberOfSignatureArguments() {
-        return this.numberOfSignatureArguments;
-    }
-
-    isBinarySignature() {
-        // Check the individual characters of the string
-        for (var c in this.value) {
-            if (c != '~' && c != '&' && c != '|' && c != '*' && c != '/' && c != '@'
-                && c != '+' && c != '-' && c != '=' && c != '>' && c != '<'
-                && c != ',' && c != '%' && c != '\\') { return false; }
-        }
-        return true;
-    }
+    return true;
+  }
 }

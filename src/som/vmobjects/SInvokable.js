@@ -19,93 +19,93 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { SAbstractObject } from './SAbstractObject.js';
 import { Frame } from '../interpreter/Frame.js';
 import { universe } from '../vm/Universe.js';
 
 class SInvokable extends SAbstractObject {
-    constructor(signature, holder) {
-        super();
-        this.holder = holder;
-        this.signature = signature;
-    }
+  constructor(signature, holder) {
+    super();
+    this.holder = holder;
+    this.signature = signature;
+  }
 
-    getHolder() {
-        return this.holder;
-    }
+  getHolder() {
+    return this.holder;
+  }
 
-    setHolder(value) {
-        this.holder = value;
-    }
+  setHolder(value) {
+    this.holder = value;
+  }
 
-    getSignature() {
-        return this.signature;
-    }
+  getSignature() {
+    return this.signature;
+  }
 
-    getNumberOfArguments() {
-        return this.signature.getNumberOfSignatureArguments();
-    }
+  getNumberOfArguments() {
+    return this.signature.getNumberOfSignatureArguments();
+  }
 }
 
 export class SMethod extends SInvokable {
-    constructor(signature, sourceSection, bodyNode, numberOfTemps) {
-        super(signature, null);
-        this.sourceSection = sourceSection;
-        this.bodyNode = bodyNode;
-        this.numberOfTemps = numberOfTemps;
+  constructor(signature, sourceSection, bodyNode, numberOfTemps) {
+    super(signature, null);
+    this.sourceSection = sourceSection;
+    this.bodyNode = bodyNode;
+    this.numberOfTemps = numberOfTemps;
+  }
+
+  getClass() {
+    return universe.methodClass;
+  }
+
+  isPrimitive() {
+    return false;
+  }
+
+  invoke(frame, args) {
+    const newFrame = new Frame(args, this.numberOfTemps);
+    return this.bodyNode.execute(newFrame, args);
+  }
+
+  toString() {
+    const holder = this.holder;
+    if (holder == null) {
+      return `Method(nil>>${this.signature.toString()})`;
     }
 
-    getClass() {
-        return universe.methodClass;
-    }
-
-    isPrimitive() {
-        return false;
-    }
-
-    invoke(frame, args) {
-        const newFrame = new Frame(args, this.numberOfTemps);
-        return this.bodyNode.execute(newFrame, args);
-    }
-
-    toString() {
-        const holder = this.holder;
-        if (holder == null) {
-            return "Method(nil>>" + this.signature.toString() + ")";
-        }
-
-        return "Method(" + holder.getName().getString() + ">>" +
-            this.signature.toString() + ")";
-    }
+    return `Method(${holder.getName().getString()}>>${
+      this.signature.toString()})`;
+  }
 }
 
 export class SPrimitive extends SInvokable {
-    constructor(signature, primFun, holder) {
-        super(signature, holder);
-        this.primFun = primFun;
+  constructor(signature, primFun, holder) {
+    super(signature, holder);
+    this.primFun = primFun;
+  }
+
+  getClass() {
+    return universe.primitiveClass;
+  }
+
+  isPrimitive() {
+    return true;
+  }
+
+  invoke(frame, args) {
+    return this.primFun(frame, args);
+  }
+
+  toString() {
+    const holder = this.holder;
+    if (holder == null) {
+      return `Primitive(nil>>${this.signature.toString()})`;
     }
 
-    getClass() {
-        return universe.primitiveClass;
-    }
-
-    isPrimitive() {
-        return true;
-    }
-
-    invoke(frame, args) {
-        return this.primFun(frame, args);
-    }
-
-    toString() {
-        const holder = this.holder;
-        if (holder == null) {
-            return "Primitive(nil>>" + this.signature.toString() + ")";
-        }
-
-        return "Primitive(" + holder.getName().getString() + ">>" +
-            this.signature.toString() + ")";
-    }
+    return `Primitive(${holder.getName().getString()}>>${
+      this.signature.toString()})`;
+  }
 }

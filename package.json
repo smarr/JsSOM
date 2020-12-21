@@ -14,6 +14,9 @@
   "license": "MIT",
   "devDependencies": {
     "chai": "^4.2.0",
+    "eslint": "^7.16.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
     "mocha": "^8.2.1"
   },
   "scripts": {
@@ -21,11 +24,9 @@
     "browserify:main": "cp -r src/. build",
     "browserify:som-core": "./libs/jsify-core-lib.py core-lib > build/core-lib-data.js",
     "browserify:core-lib-loader": "cp build/lib/core-lib-browser.js build/lib/core-lib.js",
-
     "clean": "rm -Rf build/*.js",
     "clobber": "rm -Rf build/",
     "core-lib": "git submodule update --init --recursive",
-
     "test": "mocha -t 3000 -u bdd ./tests/som/"
   },
   "type": "module"

@@ -19,87 +19,82 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { Primitives } from './Primitives.js';
 import { universe } from '../vm/Universe.js';
 import { getMillisecondTicks, intOrBigInt } from '../../lib/platform.js';
 
 function _load(_frame, args) {
-    var symbol = args[1];
-    var result = universe.loadClass(symbol);
-    return (result != null) ? result : universe.nilObject;
+  const symbol = args[1];
+  const result = universe.loadClass(symbol);
+  return (result != null) ? result : universe.nilObject;
 }
 
 function _exit(_frame, args) {
-    var error = args[1];
-    return universe.exit(error.getEmbeddedInteger());
+  const error = args[1];
+  return universe.exit(error.getEmbeddedInteger());
 }
 
 function _global(_frame, args) {
-    var symbol = args[1];
-    var result = universe.getGlobal(symbol);
-    return (result != null) ? result : universe.nilObject;
+  const symbol = args[1];
+  const result = universe.getGlobal(symbol);
+  return (result != null) ? result : universe.nilObject;
 }
 
 function _hasGlobal(_frame, args) {
-    if (universe.hasGlobal(args[1])) {
-        return universe.trueObject;
-    } else {
-        return universe.falseObject;
-    }
+  if (universe.hasGlobal(args[1])) {
+    return universe.trueObject;
+  }
+  return universe.falseObject;
 }
 
 function _globalPut(_frame, args) {
-    var value = args[2];
-    var symbol = args[1];
-    universe.setGlobal(symbol, value);
-    return value;
+  const value = args[2];
+  const symbol = args[1];
+  universe.setGlobal(symbol, value);
+  return value;
 }
 
 function _printString(_frame, args) {
-    var str = args[1];
-    universe.print(str.getEmbeddedString());
-    return args[0];
+  const str = args[1];
+  universe.print(str.getEmbeddedString());
+  return args[0];
 }
 
 function _printNewline(_frame, args) {
-    universe.println("");
-    return args[0];
+  universe.println('');
+  return args[0];
 }
 
 function _time(_frame, _args) {
-    var diff = getMillisecondTicks() - universe.startTime;
-    return intOrBigInt(diff, universe);
+  const diff = getMillisecondTicks() - universe.startTime;
+  return intOrBigInt(diff, universe);
 }
 
 function _ticks(_frame, _args) {
-    var diff = getMillisecondTicks() - universe.startTime;
-    return intOrBigInt(diff * 1000, universe);
+  const diff = getMillisecondTicks() - universe.startTime;
+  return intOrBigInt(diff * 1000, universe);
 }
 
 function _fullGC(_frame, _args) {
-    /* not general way to do that in JS */
-    return universe.falseObject;
+  /* not general way to do that in JS */
+  return universe.falseObject;
 }
 
 class SystemPrimitives extends Primitives {
-    constructor() {
-        super();
-    }
-
-    installPrimitives() {
-        this.installInstancePrimitive("load:", _load);
-        this.installInstancePrimitive("exit:", _exit);
-        this.installInstancePrimitive("hasGlobal:", _hasGlobal);
-        this.installInstancePrimitive("global:", _global);
-        this.installInstancePrimitive("global:put:", _globalPut);
-        this.installInstancePrimitive("printString:", _printString);
-        this.installInstancePrimitive("printNewline", _printNewline);
-        this.installInstancePrimitive("time", _time);
-        this.installInstancePrimitive("ticks", _ticks);
-        this.installInstancePrimitive("fullGC", _fullGC);
-    }
+  installPrimitives() {
+    this.installInstancePrimitive('load:', _load);
+    this.installInstancePrimitive('exit:', _exit);
+    this.installInstancePrimitive('hasGlobal:', _hasGlobal);
+    this.installInstancePrimitive('global:', _global);
+    this.installInstancePrimitive('global:put:', _globalPut);
+    this.installInstancePrimitive('printString:', _printString);
+    this.installInstancePrimitive('printNewline', _printNewline);
+    this.installInstancePrimitive('time', _time);
+    this.installInstancePrimitive('ticks', _ticks);
+    this.installInstancePrimitive('fullGC', _fullGC);
+  }
 }
 
 export const prims = SystemPrimitives;

@@ -19,51 +19,52 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-//@ts-check
-"use strict";
+// @ts-check
+
 import { universe } from './Universe.js';
 
 import { compileClassString } from '../compiler/SourcecodeCompiler.js';
 
 export class Shell {
+  start() {
+    let counter = 0;
+    let it = universe.nilObject;
+    universe.println('SOM Shell. Type "quit" to exit.\n');
+    universe.setAvoidExit(true);
+    universe.print('---> ');
 
-    start() {
-        var counter = 0;
-        var it = universe.nilObject;
-        universe.println("SOM Shell. Type \"quit\" to exit.\n");
-        universe.setAvoidExit(true);
-        universe.print("---> ");
+    process.stdin.setEncoding('utf8');
+    process.stdin.on('readable', () => {
+      try {
+        // Read a statement from the keyboard
+        const stmt = process.stdin.read();
+        if (stmt == null) { return; }
 
-        process.stdin.setEncoding('utf8');
-        process.stdin.on('readable', function () {
-            try {
-                // Read a statement from the keyboard
-                var stmt = process.stdin.read();
-                if (stmt == null) { return; }
+        if (stmt === 'quit' || stmt === 'quit\n') {
+          process.exit(0);
+        }
 
-                if (stmt == "quit" || stmt == "quit\n") {
-                    process.exit(0);
-                }
+        counter += 1;
 
-                // Generate a temporary class with a run method
-                var stmtClass = "Shell_Class_" + counter++ + " = ( run: it = ( | tmp | tmp := ("
-                    + stmt + " ). 'it = ' print. ^tmp println ) )";
+        // Generate a temporary class with a run method
+        const stmtClass = `Shell_Class_${counter} = ( run: it = ( | tmp | tmp := (${
+          stmt} ). 'it = ' print. ^tmp println ) )`;
 
-                // Compile and load the newly generated class
-                var myClass = compileClassString(stmtClass, null);
-                if (myClass != null) {
-                    var myObject = universe.newInstance(myClass);
-                    // Lookup the run: method
-                    var shellMethod = myClass.
-                        lookupInvokable(universe.symbolFor("run:"));
+        // Compile and load the newly generated class
+        const myClass = compileClassString(stmtClass, null, universe);
+        if (myClass != null) {
+          const myObject = universe.newInstance(myClass);
+          // Lookup the run: method
+          const shellMethod = myClass
+            .lookupInvokable(universe.symbolFor('run:'));
 
-                    // Invoke the run method
-                    it = shellMethod.invoke(null, [myObject, it]);
-                    universe.print("---> ");
-                }
-            } catch (e) {
-                universe.errorPrintln("Caught exception: " + e.toString());
-            }
-        });
-    }
+          // Invoke the run method
+          it = shellMethod.invoke(null, [myObject, it]);
+          universe.print('---> ');
+        }
+      } catch (e) {
+        universe.errorPrintln(`Caught exception: ${e.toString()}`);
+      }
+    });
+  }
 }
