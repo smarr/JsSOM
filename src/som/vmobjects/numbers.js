@@ -176,6 +176,8 @@ function asFloat(obj) {
     return obj.getEmbeddedDouble();
   } if (obj instanceof SInteger) {
     return obj.getEmbeddedInteger();
+  } if (obj instanceof SBigInteger) {
+    return Number(obj.getEmbeddedBigInteger());
   }
   throw new RuntimeException(`Cannot coerce ${obj} to Double!`);
 }
@@ -296,7 +298,7 @@ export class SBigInteger extends SAbstractObject {
     } else if (right instanceof SDouble) {
       return universe.newDouble(Number(this.bigIntVal) * right.getEmbeddedDouble());
     } else {
-      result = this.bigIntVal * right.getEmbeddedInteger();
+      result = this.bigIntVal * BigInt(right.getEmbeddedInteger());
     }
     return universe.newBigInteger(result);
   }

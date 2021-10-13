@@ -21,7 +21,7 @@
 */
 // @ts-check
 
-import { isInIntRange } from '../../lib/platform.js';
+import { intOrBigInt, isInIntRange } from '../../lib/platform.js';
 
 import { SBigInteger } from '../vmobjects/numbers.js';
 import { Primitives } from './Primitives.js';
@@ -98,8 +98,9 @@ function _fromString(_frame, args) {
   if (!(param instanceof SString)) {
     return universe.nilObject;
   }
-  const intVal = parseInt(param.getEmbeddedString(), 10);
-  return universe.newInteger(intVal);
+
+  const i = BigInt(param.getEmbeddedString());
+  return intOrBigInt(i, universe);
 }
 
 function _leftShift(_frame, args) {
@@ -143,6 +144,10 @@ function _unsignedRightShift(_frame, args) {
   return universe.newInteger(left >>> right);
 }
 
+function _asDouble(_frame, args) {
+  return universe.newDouble(toNumber(args[0]));
+}
+
 class IntegerPrimitives extends Primitives {
   installPrimitives() {
     this.installInstancePrimitive('asString', _asString);
@@ -165,6 +170,8 @@ class IntegerPrimitives extends Primitives {
 
     this.installInstancePrimitive('as32BitUnsignedValue', _as32BitUnsignedValue);
     this.installInstancePrimitive('as32BitSignedValue', _as32BitSignedValue);
+
+    this.installInstancePrimitive('asDouble', _asDouble);
 
     this.installClassPrimitive('fromString:', _fromString);
   }

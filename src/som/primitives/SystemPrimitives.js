@@ -24,6 +24,7 @@
 import { Primitives } from './Primitives.js';
 import { universe } from '../vm/Universe.js';
 import { getMillisecondTicks, intOrBigInt } from '../../lib/platform.js';
+import { getFileByName } from '../../lib/core-lib.js';
 
 function _load(_frame, args) {
   const symbol = args[1];
@@ -67,6 +68,18 @@ function _printNewline(_frame, args) {
   return args[0];
 }
 
+function _errorPrint(_frame, args) {
+  const str = args[1];
+  universe.errorPrint(str.getEmbeddedString());
+  return args[0];
+}
+
+function _errorPrintln(_frame, args) {
+  const str = args[1];
+  universe.errorPrintln(str.getEmbeddedString());
+  return args[0];
+}
+
 function _time(_frame, _args) {
   const diff = getMillisecondTicks() - universe.startTime;
   return intOrBigInt(diff, universe);
@@ -82,15 +95,28 @@ function _fullGC(_frame, _args) {
   return universe.falseObject;
 }
 
+function _loadFile(_frame, args) {
+  const fileName = args[1];
+  const str = fileName.getEmbeddedString();
+  const content = getFileByName(str);
+  if (content === null) {
+    return universe.nilObject;
+  }
+  return universe.newString(content);
+}
+
 class SystemPrimitives extends Primitives {
   installPrimitives() {
     this.installInstancePrimitive('load:', _load);
+    this.installInstancePrimitive('loadFile:', _loadFile);
     this.installInstancePrimitive('exit:', _exit);
     this.installInstancePrimitive('hasGlobal:', _hasGlobal);
     this.installInstancePrimitive('global:', _global);
     this.installInstancePrimitive('global:put:', _globalPut);
     this.installInstancePrimitive('printString:', _printString);
     this.installInstancePrimitive('printNewline', _printNewline);
+    this.installInstancePrimitive('errorPrint:', _errorPrint);
+    this.installInstancePrimitive('errorPrintln:', _errorPrintln);
     this.installInstancePrimitive('time', _time);
     this.installInstancePrimitive('ticks', _ticks);
     this.installInstancePrimitive('fullGC', _fullGC);

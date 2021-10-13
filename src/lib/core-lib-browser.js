@@ -19,3 +19,22 @@ export function getFile(path, file) {
   }
   return current[file];
 }
+
+export function getFileByName(filename) {
+  let current = somCoreLibData['core-lib'];
+
+  const path = filename.split('/');
+  const file = path.pop();
+
+  for (const e of path) {
+    if (current === undefined) {
+      break;
+    }
+    current = current[e];
+  }
+
+  if (current === undefined || current[file] === undefined) {
+    return null;
+  }
+  return current[file];
+}
