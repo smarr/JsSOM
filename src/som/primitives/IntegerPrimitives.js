@@ -21,7 +21,7 @@
 */
 // @ts-check
 
-import { isInIntRange } from '../../lib/platform.js';
+import { intOrBigInt, isInIntRange } from '../../lib/platform.js';
 
 import { SBigInteger } from '../vmobjects/numbers.js';
 import { Primitives } from './Primitives.js';
@@ -98,8 +98,9 @@ function _fromString(_frame, args) {
   if (!(param instanceof SString)) {
     return universe.nilObject;
   }
-  const intVal = parseInt(param.getEmbeddedString(), 10);
-  return universe.newInteger(intVal);
+
+  const i = BigInt(param.getEmbeddedString());
+  return intOrBigInt(i, universe);
 }
 
 function _leftShift(_frame, args) {
