@@ -144,6 +144,10 @@ function _unsignedRightShift(_frame, args) {
   return universe.newInteger(left >>> right);
 }
 
+function _asDouble(_frame, args) {
+  return universe.newDouble(toNumber(args[0]));
+}
+
 class IntegerPrimitives extends Primitives {
   installPrimitives() {
     this.installInstancePrimitive('asString', _asString);
@@ -166,6 +170,8 @@ class IntegerPrimitives extends Primitives {
 
     this.installInstancePrimitive('as32BitUnsignedValue', _as32BitUnsignedValue);
     this.installInstancePrimitive('as32BitSignedValue', _as32BitSignedValue);
+
+    this.installInstancePrimitive('asDouble', _asDouble);
 
     this.installClassPrimitive('fromString:', _fromString);
   }
