@@ -22,6 +22,7 @@
 // @ts-check
 
 import { Node } from './Node.js';
+import { SBlock } from '../vmobjects/SBlock.js';
 import { universe } from '../vm/Universe.js';
 
 export class UninitializedGlobalReadNode extends Node {
@@ -31,7 +32,10 @@ export class UninitializedGlobalReadNode extends Node {
   }
 
   executeUnknownGlobal(frame) {
-    const self = frame.getReceiver();
+    let self = frame.getReceiver();
+    while (self instanceof SBlock) {
+      self = self.getOuterSelf();
+    }
     return self.sendUnknownGlobal(this.globalName, frame);
   }
 
