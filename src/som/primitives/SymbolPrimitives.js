@@ -29,8 +29,18 @@ function _asString(_frame, args) {
   return universe.newString(args[0].getString());
 }
 
+function _equals(_frame, args) {
+  const op1 = args[1];
+  const op2 = args[0];
+  if (op1 === op2) {
+    return universe.trueObject;
+  }
+  return universe.falseObject;
+}
+
 class SymbolPrimitives extends Primitives {
   installPrimitives() {
+    this.installInstancePrimitive('=', _equals, true);
     this.installInstancePrimitive('asString', _asString);
   }
 }
