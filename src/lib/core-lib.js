@@ -9,3 +9,10 @@ export function getFile(path, file) {
   }
   return readFileSync(name, { encoding: 'utf-8' });
 }
+
+export function getFileByName(filename) {
+  if (!existsSync(filename)) {
+    return null;
+  }
+  return readFileSync(filename, { encoding: 'utf-8' });
+}
