@@ -67,6 +67,18 @@ function _printNewline(_frame, args) {
   return args[0];
 }
 
+function _errorPrint(_frame, args) {
+  const str = args[1];
+  universe.errorPrint(str.getEmbeddedString());
+  return args[0];
+}
+
+function _errorPrintln(_frame, args) {
+  const str = args[1];
+  universe.errorPrintln(str.getEmbeddedString());
+  return args[0];
+}
+
 function _time(_frame, _args) {
   const diff = getMillisecondTicks() - universe.startTime;
   return intOrBigInt(diff, universe);
@@ -91,6 +103,8 @@ class SystemPrimitives extends Primitives {
     this.installInstancePrimitive('global:put:', _globalPut);
     this.installInstancePrimitive('printString:', _printString);
     this.installInstancePrimitive('printNewline', _printNewline);
+    this.installInstancePrimitive('errorPrint:', _errorPrint);
+    this.installInstancePrimitive('errorPrintln:', _errorPrintln);
     this.installInstancePrimitive('time', _time);
     this.installInstancePrimitive('ticks', _ticks);
     this.installInstancePrimitive('fullGC', _fullGC);
