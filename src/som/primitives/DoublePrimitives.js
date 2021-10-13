@@ -84,6 +84,10 @@ function _cos(_frame, args) {
 function _positiveInfinity(_frame, _args) {
   return universe.newDouble(Number.POSITIVE_INFINITY);
 }
+
+function _fromString(_frame, args) {
+  return universe.newDouble(parseFloat(args[1].getEmbeddedString()));
+}
 class DoublePrimitives extends Primitives {
   installPrimitives() {
     this.installInstancePrimitive('asInteger', _asInteger);
@@ -101,6 +105,7 @@ class DoublePrimitives extends Primitives {
     this.installInstancePrimitive('cos', _cos);
 
     this.installClassPrimitive('PositiveInfinity', _positiveInfinity);
+    this.installClassPrimitive('fromString:', _fromString);
   }
 }
 
