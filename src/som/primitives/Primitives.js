@@ -25,7 +25,7 @@ import { universe } from '../vm/Universe.js';
 
 export function constructEmptyPrimitive(signature) {
   function _empty(_frame, _args) {
-    universe.errorPrintln(`Warning: undefined primitive ${
+    universe.errorExit(`Warning: undefined primitive ${
       signature.getString()} called`);
   }
   return universe.newPrimitive(signature, _empty, null);
