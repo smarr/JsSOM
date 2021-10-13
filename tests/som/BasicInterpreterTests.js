@@ -56,6 +56,11 @@ const tests = [
   ['IfTrueIfFalse', 'test2', 33, integerClass],
   ['IfTrueIfFalse', 'test3', 4, integerClass],
 
+  ['IfTrueIfFalse', 'testIfTrueTrueResult', 'Integer', classClass],
+  ['IfTrueIfFalse', 'testIfTrueFalseResult', 'Nil', classClass],
+  ['IfTrueIfFalse', 'testIfFalseTrueResult', 'Nil', classClass],
+  ['IfTrueIfFalse', 'testIfFalseFalseResult', 'Integer', classClass],
+
   ['CompilerSimplification', 'testReturnConstantSymbol', 'constant', symbolClass],
   ['CompilerSimplification', 'testReturnConstantInt', 42, integerClass],
   ['CompilerSimplification', 'testReturnSelf', 'CompilerSimplification', classClass],
@@ -78,8 +83,14 @@ const tests = [
   ['BlockInlining', 'testOneLevelInliningWithLocalShadowTrue', 2, integerClass],
   ['BlockInlining', 'testOneLevelInliningWithLocalShadowFalse', 1, integerClass],
 
+  ['BlockInlining', 'testShadowDoesntStoreWrongLocal', 33, integerClass],
+  ['BlockInlining', 'testShadowDoesntReadUnrelated', 'Nil', classClass],
+
   ['BlockInlining', 'testBlockNestedInIfTrue', 2, integerClass],
   ['BlockInlining', 'testBlockNestedInIfFalse', 42, integerClass],
+
+  ['BlockInlining', 'testStackDisciplineTrue', 1, integerClass],
+  ['BlockInlining', 'testStackDisciplineFalse', 2, integerClass],
 
   ['BlockInlining', 'testDeepNestedInlinedIfTrue', 3, integerClass],
   ['BlockInlining', 'testDeepNestedInlinedIfFalse', 42, integerClass],
@@ -103,7 +114,7 @@ const tests = [
 
   ['BinaryOperation', 'test', 3 + 8, integerClass],
 
-  ['NumberOfTests', 'numberOfTests', 57, integerClass],
+  ['NumberOfTests', 'numberOfTests', 65, integerClass],
 ];
 
 function assertEqualsSomValue(expectedValue, expectedType, actualValue) {
