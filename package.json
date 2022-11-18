@@ -17,7 +17,7 @@
     "eslint": "7.32.0",
     "eslint-config-airbnb-base": "14.2.1",
     "eslint-plugin-import": "2.25.2",
-    "mocha": "8.2.1"
+    "mocha": "10.1.0"
   },
   "scripts": {
     "browserify": "mkdir -p build && npm run core-lib && npm run browserify:main && npm run browserify:som-core && npm run browserify:core-lib-loader",
