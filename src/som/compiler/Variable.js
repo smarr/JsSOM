@@ -47,9 +47,7 @@ export class Argument {
   }
 
   getSuperReadNode(contextLevel, holderClass, classSide, source) {
-    return createSuperRead(
-      this, contextLevel, holderClass, classSide, source,
-    );
+    return createSuperRead(this, contextLevel, holderClass, classSide, source);
   }
 
   getIndex() {

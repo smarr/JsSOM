@@ -66,9 +66,7 @@ export function createVariableRead(local, contextLevel, source) {
 
 export function createSuperRead(variable, contextLevel, holderClass, classSide, source) {
   assert(holderClass instanceof SSymbol);
-  return new SuperReadNode(
-    holderClass, classSide, contextLevel, variable, source,
-  );
+  return new SuperReadNode(holderClass, classSide, contextLevel, variable, source);
 }
 
 export function createVariableWrite(variable, contextLevel, exp, source) {

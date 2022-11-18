@@ -47,9 +47,10 @@ export class Primitives {
     const signature = universe.symbolFor(selector);
 
     // Install the given primitive as an instance primitive in the holder class
-    this.holder.addInstancePrimitive(universe.newPrimitive(
-      signature, primFun, this.holder,
-    ), suppressWarning);
+    this.holder.addInstancePrimitive(
+      universe.newPrimitive(signature, primFun, this.holder),
+      suppressWarning,
+    );
   }
 
   installClassPrimitive(selector, primFun) {
@@ -57,9 +58,9 @@ export class Primitives {
 
     // Install the given primitive as an instance primitive in the class of
     // the holder class
-    this.holder.getClass().addInstancePrimitive(universe.newPrimitive(
-      signature, primFun, this.holder,
-    ));
+    this.holder.getClass().addInstancePrimitive(
+      universe.newPrimitive(signature, primFun, this.holder),
+    );
   }
 
   getEmptyPrimitive(selector) {

@@ -53,9 +53,7 @@ export function compileClassFile(path, file, systemClass, universe) {
     return null;
   }
 
-  const result = compile(
-    new Parser(source, `${path}/${file}.som`), systemClass, universe,
-  );
+  const result = compile(new Parser(source, `${path}/${file}.som`), systemClass, universe);
 
   const cname = result.getName();
   const cnameC = cname.getString();

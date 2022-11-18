@@ -67,9 +67,7 @@ export class SInteger extends SAbstractObject {
 
   primAdd(right) {
     if (right instanceof SBigInteger) {
-      return intOrBigInt(
-        right.getEmbeddedBigInteger() + BigInt(this.intVal), universe,
-      );
+      return intOrBigInt(right.getEmbeddedBigInteger() + BigInt(this.intVal), universe);
     } if (right instanceof SDouble) {
       return this.toDouble().primAdd(right);
     }
@@ -79,9 +77,7 @@ export class SInteger extends SAbstractObject {
 
   primSubtract(right) {
     if (right instanceof SBigInteger) {
-      return intOrBigInt(
-        BigInt(this.intVal) - right.getEmbeddedBigInteger(), universe,
-      );
+      return intOrBigInt(BigInt(this.intVal) - right.getEmbeddedBigInteger(), universe);
     } if (right instanceof SDouble) {
       return this.toDouble().primSubtract(right);
     }
@@ -91,9 +87,7 @@ export class SInteger extends SAbstractObject {
 
   primMultiply(right) {
     if (right instanceof SBigInteger) {
-      return intOrBigInt(
-        right.getEmbeddedBigInteger().multiply(this.intVal), universe,
-      );
+      return intOrBigInt(right.getEmbeddedBigInteger().multiply(this.intVal), universe);
     } if (right instanceof SDouble) {
       return this.toDouble().primMultiply(right);
     }
