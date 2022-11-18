@@ -20,8 +20,9 @@
 * THE SOFTWARE.
 */
 // @ts-check
-class AssertionFailedException {
+class AssertionFailedException extends Error {
   constructor() {
+    super();
     // Use V8's native method if available, otherwise fallback
     if ('captureStackTrace' in Error) {
       Error.captureStackTrace(this, AssertionFailedException);
