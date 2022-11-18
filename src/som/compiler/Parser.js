@@ -255,7 +255,10 @@ export class Parser {
 
   getSource(coord) {
     return new SourceSection(
-      'method', coord.startLine, coord.startColumn, coord.charIndex,
+      'method',
+      coord.startLine,
+      coord.startColumn,
+      coord.charIndex,
       this.lexer.getNumberOfCharactersRead() - coord.charIndex,
     );
   }
@@ -433,9 +436,13 @@ export class Parser {
     const coord = this.getCoordinate();
 
     if (!isIdentifier(this.sym)) {
-      throw new ParseError('Assignments should always target variables or'
+      throw new ParseError(
+        'Assignments should always target variables or'
                 + ' fields, but found instead a %(found)s',
-      Sym.Identifier, this);
+        Sym.Identifier,
+
+        this,
+      );
     }
     const variable = this.assignment();
 
@@ -530,9 +537,7 @@ export class Parser {
   unaryMessage(receiver) {
     const coord = this.getCoordinate();
     const selector = this.unarySelector();
-    return createMessageSend(
-      selector, [receiver], this.getSource(coord),
-    );
+    return createMessageSend(selector, [receiver], this.getSource(coord));
   }
 
   binaryMessage(mgenc, receiver) {
@@ -540,9 +545,7 @@ export class Parser {
     const msg = this.binarySelector();
     const operand = this.binaryOperand(mgenc);
 
-    return createMessageSend(
-      msg, [receiver, operand], this.getSource(coord),
-    );
+    return createMessageSend(msg, [receiver, operand], this.getSource(coord));
   }
 
   binaryOperand(mgenc) {
@@ -572,9 +575,7 @@ export class Parser {
 
     const msg = universe.symbolFor(kw);
 
-    return createMessageSend(
-      msg, args.slice(), this.getSource(coord),
-    );
+    return createMessageSend(msg, args.slice(), this.getSource(coord));
   }
 
   formula(mgenc) {

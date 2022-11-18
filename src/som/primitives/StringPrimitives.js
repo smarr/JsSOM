@@ -95,7 +95,7 @@ function _isWhiteSpace(_frame, args) {
 function _isLetters(_frame, args) {
   const s = args[0].getEmbeddedString();
 
-  if (RegExp(/^\p{L}+$/, 'u').test(s)) {
+  if (/^\p{L}+$/u.test(s)) {
     return universe.trueObject;
   }
   return universe.falseObject;

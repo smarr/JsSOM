@@ -282,8 +282,12 @@ class Universe {
       const cpEntry = this.classPath[i];
 
       // Load the class from a file and return the loaded class
-      const result = compileClassFile(cpEntry, name.getString(),
-        systemClass, this);
+      const result = compileClassFile(
+        cpEntry,
+        name.getString(),
+        systemClass,
+        this,
+      );
       if (result == null) {
         continue; // continue searching in the class path
       }

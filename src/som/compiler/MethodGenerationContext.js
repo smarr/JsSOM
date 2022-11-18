@@ -80,16 +80,23 @@ export class MethodGenerationContext {
     }
 
     // return the method - the holder field is to be set later on!
-    return universe.newMethod(this.signature,
+    return universe.newMethod(
+      this.signature,
       this.getSourceSectionForMethod(sourceSection),
-      body, this.locals.length);
+      body,
+      this.locals.length,
+    );
   }
 
   getSourceSectionForMethod(ssBody) {
     return new SourceSection(
       `${this.holderGenc.getName().getString()}>>${this.signature.toString()}`,
-      ssBody.startLine(), ssBody.startColumn(),
-      ssBody.charIndex(), ssBody.length(),
+      ssBody.startLine(),
+
+      ssBody.startColumn(),
+      ssBody.charIndex(),
+
+      ssBody.length(),
     );
   }
 
@@ -179,7 +186,11 @@ export class MethodGenerationContext {
     const self = this.getVariable('self');
     return self.getSuperReadNode(
       this.getOuterSelfContextLevel(),
-      this.holderGenc.getName(), this.holderGenc.isClassSide(), source,
+      this.holderGenc.getName(),
+
+      this.holderGenc.isClassSide(),
+
+      source,
     );
   }
 
@@ -190,29 +201,33 @@ export class MethodGenerationContext {
 
   getLocalWriteNode(variableName, valExpr, source) {
     const variable = this.getVariable(variableName);
-    return variable.getWriteNode(this.getContextLevel(variableName),
-      valExpr, source);
+    return variable.getWriteNode(
+      this.getContextLevel(variableName),
+      valExpr,
+
+      source,
+    );
   }
 
   getNonLocalReturn(expr, source) {
     this.makeCatchNonLocalReturn();
-    return factory.createNonLocalReturn(
-      expr, this.getOuterSelfContextLevel(), source,
-    );
+    return factory.createNonLocalReturn(expr, this.getOuterSelfContextLevel(), source);
   }
 
   getSelfRead(source) {
-    return this.getVariable('self').getReadNode(
-      this.getContextLevel('self'), source,
-    );
+    return this.getVariable('self').getReadNode(this.getContextLevel('self'), source);
   }
 
   getObjectFieldRead(fieldName, source) {
     if (!this.holderGenc.hasField(fieldName)) {
       return null;
     }
-    return factory.createFieldRead(this.getSelfRead(source),
-      this.holderGenc.getFieldIndex(fieldName), source);
+    return factory.createFieldRead(
+      this.getSelfRead(source),
+      this.holderGenc.getFieldIndex(fieldName),
+
+      source,
+    );
   }
 
   getGlobalRead(varName, source) {
@@ -224,8 +239,12 @@ export class MethodGenerationContext {
       return null;
     }
 
-    return factory.createFieldWrite(this.getSelfRead(source), exp,
-      this.holderGenc.getFieldIndex(fieldName), source);
+    return factory.createFieldWrite(
+      this.getSelfRead(source),
+      exp,
+      this.holderGenc.getFieldIndex(fieldName),
+      source,
+    );
   }
 
   /**

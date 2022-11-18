@@ -34,7 +34,8 @@ export class MessageSendNode extends Node {
 
     if (argumentNodes[0].isSuperNode()) {
       this.child_dispatch = this.adopt(new UninitializedSuperDispatchNode(
-        selector, argumentNodes[0].getHolderClass(),
+        selector,
+        argumentNodes[0].getHolderClass(),
         argumentNodes[0].isClassSide(),
       ));
     } else {
