@@ -96,7 +96,7 @@ class ParseErrorWithSymbolList extends ParseError {
 
 const singleOpSyms = [Sym.Not, Sym.And, Sym.Or, Sym.Star, Sym.Div,
   Sym.Mod, Sym.Plus, Sym.Equal, Sym.More, Sym.Less,
-  Sym.Comma, Sym.At, Sym.Per, Sym.NONE];
+  Sym.Comma, Sym.At, Sym.Per, Sym.Minus, Sym.NONE];
 
 const binaryOpSyms = [Sym.Or, Sym.Comma, Sym.Minus, Sym.Equal, Sym.Not,
   Sym.And, Sym.Or, Sym.Star, Sym.Div, Sym.Mod,
@@ -331,11 +331,7 @@ export class Parser {
   binarySelector() {
     const s = this.text;
 
-    if (this.accept(Sym.Or)) { /* noop */
-    } else if (this.accept(Sym.Comma)) { /* noop */
-    } else if (this.accept(Sym.Minus)) { /* noop */
-    } else if (this.accept(Sym.Equal)) { /* noop */
-    } else if (this.acceptOneOf(singleOpSyms)) { /* noop */
+    if (this.acceptOneOf(singleOpSyms)) { /* noop */
     } else if (this.accept(Sym.OperatorSequence)) { /* noop */
     } else { this.expect(Sym.NONE); }
 
