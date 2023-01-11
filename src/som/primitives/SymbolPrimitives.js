@@ -24,6 +24,7 @@
 import { Primitives } from './Primitives.js';
 
 import { universe } from '../vm/Universe.js';
+import { SString } from '../vmobjects/SString.js';
 
 function _asString(_frame, args) {
   return universe.newString(args[0].getString());
@@ -33,6 +34,10 @@ function _equals(_frame, args) {
   const op1 = args[1];
   const op2 = args[0];
   if (op1 === op2) {
+    return universe.trueObject;
+  }
+
+  if (op1 instanceof SString && op1.getEmbeddedString() === op2.getEmbeddedString()) {
     return universe.trueObject;
   }
   return universe.falseObject;
