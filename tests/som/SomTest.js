@@ -19,10 +19,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-import chai from 'chai';
+import { expect } from 'chai';
 import { universe } from '../../src/som/vm/Universe.js';
-
-const expect = chai.expect;
 
 const tests = [
   'ClassStructure',
