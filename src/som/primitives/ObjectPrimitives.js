@@ -91,7 +91,7 @@ function _instVarAtPut(_frame, args) {
   const val = args[2];
   const idx = args[1];
   args[0].setField(idx.getEmbeddedInteger() - 1, val);
-  return val;
+  return args[0];
 }
 
 function _instVarNamed(_frame, args) {
