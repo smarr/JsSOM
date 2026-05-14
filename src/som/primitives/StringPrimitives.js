@@ -28,8 +28,7 @@ import { SString } from '../vmobjects/SString.js';
 
 function _concat(_frame, args) {
   const argument = args[1];
-  return universe.newString(args[0].getEmbeddedString()
-        + argument.getEmbeddedString());
+  return universe.newString(args[0].getEmbeddedString() + argument.getEmbeddedString());
 }
 
 function _asSymbol(_frame, args) {
@@ -69,15 +68,17 @@ function _hashcode(_frame, args) {
   const s = args[0].getEmbeddedString();
 
   // hash code from: http://stackoverflow.com/a/7616484/916546
-  let hash = 0; let i; let chr; let
-    len;
+  let hash = 0;
+  let i;
+  let chr;
+  let len;
   if (s.length === 0) {
     return universe.newInteger(hash);
   }
 
   for (i = 0, len = s.length; i < len; i += 1) {
     chr = s.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
+    hash = (hash << 5) - hash + chr;
     hash |= 0; // Convert to 32bit integer
   }
   return universe.newInteger(hash);

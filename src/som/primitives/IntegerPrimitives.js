@@ -59,8 +59,7 @@ function _sqrt(_frame, args) {
 }
 
 function _atRandom(_frame, args) {
-  return universe.newInteger(Math.floor(args[0].getEmbeddedInteger()
-        * Math.random()));
+  return universe.newInteger(Math.floor(args[0].getEmbeddedInteger() * Math.random()));
 }
 
 function _plus(_frame, args) {
@@ -118,7 +117,7 @@ function _leftShift(_frame, args) {
   const l = toNumber(args[0]);
 
   const result = l << r;
-  if (Math.floor(l) !== l || !isInIntRange(result) || !isInIntRange(l * (2 ** r))) {
+  if (Math.floor(l) !== l || !isInIntRange(result) || !isInIntRange(l * 2 ** r)) {
     let big = BigInt(l);
     big *= BigInt(2 ** r);
     return universe.newBigInteger(big);
@@ -139,13 +138,11 @@ function _bitXor(_frame, args) {
   }
 
   if (left instanceof SBigInteger && right instanceof SBigInteger) {
-    return universe.newBigInteger(left.getEmbeddedBigInteger()
-        ^ right.getEmbeddedBigInteger());
+    return universe.newBigInteger(left.getEmbeddedBigInteger() ^ right.getEmbeddedBigInteger());
   }
 
   if (left instanceof SBigInteger && right instanceof SInteger) {
-    return intOrBigInt(left.getEmbeddedBigInteger()
-        ^ BigInt(right.getEmbeddedInteger()), universe);
+    return intOrBigInt(left.getEmbeddedBigInteger() ^ BigInt(right.getEmbeddedInteger()), universe);
   }
 
   return notYetImplemented();
@@ -154,8 +151,7 @@ function _bitXor(_frame, args) {
 function _rem(_frame, args) {
   const right = args[1];
   const left = args[0];
-  return universe.newInteger(left.getEmbeddedInteger()
-        % right.getEmbeddedInteger());
+  return universe.newInteger(left.getEmbeddedInteger() % right.getEmbeddedInteger());
 }
 
 function _as32BitUnsignedValue(_frame, args) {

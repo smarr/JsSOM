@@ -38,7 +38,9 @@ export class Shell {
       try {
         // Read a statement from the keyboard
         const stmt = process.stdin.read();
-        if (stmt == null) { return; }
+        if (stmt == null) {
+          return;
+        }
 
         if (stmt === 'quit' || stmt === 'quit\n') {
           process.exit(0);
@@ -48,15 +50,15 @@ export class Shell {
 
         // Generate a temporary class with a run method
         const stmtClass = `Shell_Class_${counter} = ( run: it = ( | tmp | tmp := (${
-          stmt} ). 'it = ' print. ^tmp println ) )`;
+          stmt
+        } ). 'it = ' print. ^tmp println ) )`;
 
         // Compile and load the newly generated class
         const myClass = compileClassString(stmtClass, null, universe);
         if (myClass != null) {
           const myObject = universe.newInstance(myClass);
           // Lookup the run: method
-          const shellMethod = myClass
-            .lookupInvokable(universe.symbolFor('run:'));
+          const shellMethod = myClass.lookupInvokable(universe.symbolFor('run:'));
 
           // Invoke the run method
           it = shellMethod.invoke(null, [myObject, it]);

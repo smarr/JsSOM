@@ -29,8 +29,7 @@ export class SObject extends SAbstractObject {
     super();
 
     this.clazz = instanceClass;
-    this.objectFields = new Array((instanceClass === null)
-      ? numFields : instanceClass.getNumberOfInstanceFields());
+    this.objectFields = new Array(instanceClass === null ? numFields : instanceClass.getNumberOfInstanceFields());
 
     for (let i = 0; i < this.objectFields.length; i += 1) {
       this.objectFields[i] = universe.nilObject;

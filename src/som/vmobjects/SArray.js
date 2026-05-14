@@ -28,7 +28,7 @@ export class SArray extends SAbstractObject {
   constructor(length, values) {
     super();
     this.length = length;
-    this.indexableFields = (values != null) ? values : new Array(length);
+    this.indexableFields = values != null ? values : new Array(length);
 
     if (values == null) {
       for (let i = 0; i < length; i += 1) {

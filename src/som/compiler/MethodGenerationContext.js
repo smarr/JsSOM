@@ -84,7 +84,7 @@ export class MethodGenerationContext {
       this.signature,
       this.getSourceSectionForMethod(sourceSection),
       body,
-      this.locals.length,
+      this.locals.length
     );
   }
 
@@ -96,7 +96,7 @@ export class MethodGenerationContext {
       ssBody.startColumn(),
       ssBody.charIndex(),
 
-      ssBody.length(),
+      ssBody.length()
     );
   }
 
@@ -154,8 +154,7 @@ export class MethodGenerationContext {
   }
 
   getContextLevel(varName) {
-    if (this.localNames.indexOf(varName) !== -1
-            || this.argNames.indexOf(varName) !== -1) {
+    if (this.localNames.indexOf(varName) !== -1 || this.argNames.indexOf(varName) !== -1) {
       return 0;
     }
 
@@ -190,7 +189,7 @@ export class MethodGenerationContext {
 
       this.holderGenc.isClassSide(),
 
-      source,
+      source
     );
   }
 
@@ -205,7 +204,7 @@ export class MethodGenerationContext {
       this.getContextLevel(variableName),
       valExpr,
 
-      source,
+      source
     );
   }
 
@@ -226,7 +225,7 @@ export class MethodGenerationContext {
       this.getSelfRead(source),
       this.holderGenc.getFieldIndex(fieldName),
 
-      source,
+      source
     );
   }
 
@@ -239,18 +238,13 @@ export class MethodGenerationContext {
       return null;
     }
 
-    return factory.createFieldWrite(
-      this.getSelfRead(source),
-      exp,
-      this.holderGenc.getFieldIndex(fieldName),
-      source,
-    );
+    return factory.createFieldWrite(this.getSelfRead(source), exp, this.holderGenc.getFieldIndex(fieldName), source);
   }
 
   /**
-     * @returns {Number} of explicit arguments,
-     *         i.e., excluding the implicit 'self' argument
-     */
+   * @returns {Number} of explicit arguments,
+   *         i.e., excluding the implicit 'self' argument
+   */
   getNumberOfArguments() {
     return this.args.length;
   }

@@ -30,7 +30,9 @@ import { universe } from '../vm/Universe.js';
 function computeSignatureString(numberOfArguments) {
   // Compute the signature string
   let signatureString = 'value';
-  if (numberOfArguments > 1) { signatureString += ':'; }
+  if (numberOfArguments > 1) {
+    signatureString += ':';
+  }
 
   // Add extra value: selector elements if necessary
   for (let i = 2; i < numberOfArguments; i += 1) {

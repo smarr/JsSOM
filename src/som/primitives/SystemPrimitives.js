@@ -29,7 +29,7 @@ import { getFileByName } from '../../lib/core-lib.js';
 function _load(_frame, args) {
   const symbol = args[1];
   const result = universe.loadClass(symbol);
-  return (result != null) ? result : universe.nilObject;
+  return result != null ? result : universe.nilObject;
 }
 
 function _exit(_frame, args) {
@@ -40,7 +40,7 @@ function _exit(_frame, args) {
 function _global(_frame, args) {
   const symbol = args[1];
   const result = universe.getGlobal(symbol);
-  return (result != null) ? result : universe.nilObject;
+  return result != null ? result : universe.nilObject;
 }
 
 function _hasGlobal(_frame, args) {

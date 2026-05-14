@@ -50,7 +50,7 @@ const prims = {
   Primitive: PrimitivePrims,
   String: StringPrims,
   Symbol: SymbolPrims,
-  System: SystemPrims,
+  System: SystemPrims
 };
 
 export class SClass extends SObject {
@@ -131,7 +131,9 @@ export class SClass extends SObject {
   lookupInvokable(selector) {
     // Lookup invokable and return if found
     let invokable = this.invokablesTable.get(selector);
-    if (invokable != null) { return invokable; }
+    if (invokable != null) {
+      return invokable;
+    }
 
     // Lookup invokable with given signature in array of instance invokables
     const num = this.getNumberOfInstanceInvokables();
@@ -164,14 +166,16 @@ export class SClass extends SObject {
     const num = this.getNumberOfInstanceFields();
     for (let i = num - 1; i >= 0; i -= 1) {
       // Return the current index if the name matches
-      if (fieldName === this.getInstanceFieldName(i)) { return i; }
+      if (fieldName === this.getInstanceFieldName(i)) {
+        return i;
+      }
     }
     return -1; // Field not found
   }
 
   /**
-     * @param {SInvokable} invokable
-     */
+   * @param {SInvokable} invokable
+   */
   addInstanceInvokable(invokable) {
     // Add the given invokable to the array of instance invokables
     const num = this.getNumberOfInstanceInvokables();
@@ -193,8 +197,7 @@ export class SClass extends SObject {
   addInstancePrimitive(value, suppressWarning) {
     if (this.addInstanceInvokable(value) && suppressWarning !== true) {
       universe.print(`Warning: Primitive ${value.getSignature().getString()}`);
-      universe.println(` is not in class definition for class ${
-        this.getName().getString()}`);
+      universe.println(` is not in class definition for class ${this.getName().getString()}`);
     }
   }
 
@@ -226,12 +229,11 @@ export class SClass extends SObject {
       const Primitives = prims[this.name.getString()];
 
       if (Primitives !== undefined) {
-        (new Primitives())
-          .installPrimitivesIn(this);
+        new Primitives().installPrimitivesIn(this);
       } else if (displayWarning) {
         universe.println(`Primitives class ${this.name.getString()} not found`);
       }
-    } catch (Error) {
+    } catch (_e) {
       // NO OP, class does not have primitive
     }
   }

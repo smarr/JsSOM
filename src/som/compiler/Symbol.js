@@ -54,7 +54,8 @@ const symStrings = [
   'Identifier',
   'Keyword',
   'KeywordSequence',
-  'OperatorSequence'];
+  'OperatorSequence'
+];
 
 export const Sym = {
   NONE: 0,
@@ -93,5 +94,5 @@ export const Sym = {
 
   toString(sym) {
     return symStrings[sym];
-  },
+  }
 };

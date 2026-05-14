@@ -76,8 +76,7 @@ export class SMethod extends SInvokable {
       return `Method(nil>>${this.signature.toString()})`;
     }
 
-    return `Method(${holder.getName().getString()}>>${
-      this.signature.toString()})`;
+    return `Method(${holder.getName().getString()}>>${this.signature.toString()})`;
   }
 }
 
@@ -105,7 +104,6 @@ export class SPrimitive extends SInvokable {
       return `Primitive(nil>>${this.signature.toString()})`;
     }
 
-    return `Primitive(${holder.getName().getString()}>>${
-      this.signature.toString()})`;
+    return `Primitive(${holder.getName().getString()}>>${this.signature.toString()})`;
   }
 }

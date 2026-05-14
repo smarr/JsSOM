@@ -38,9 +38,7 @@ function _atPut(_frame, args) {
 }
 
 function _length(_frame, args) {
-  return universe.newInteger(
-    args[0].getNumberOfIndexableFields(),
-  );
+  return universe.newInteger(args[0].getNumberOfIndexableFields());
 }
 
 function _new(_frame, args) {
@@ -53,7 +51,8 @@ function _doIndexes(_frame, args) {
   const blockMethod = block.getMethod();
 
   const length = args[0].getNumberOfIndexableFields();
-  for (let i = 1; i <= length; i += 1) { // i is propagated to Smalltalk, so, start with 1
+  for (let i = 1; i <= length; i += 1) {
+    // i is propagated to Smalltalk, so, start with 1
     blockMethod.invoke(_frame, [block, universe.newInteger(i)]);
   }
   return args[0];
@@ -64,7 +63,8 @@ function _do(frame, args) {
   const blockMethod = block.getMethod();
 
   const length = args[0].getNumberOfIndexableFields();
-  for (let i = 0; i < length; i += 1) { // array is zero indexed
+  for (let i = 0; i < length; i += 1) {
+    // array is zero indexed
     blockMethod.invoke(frame, [block, args[0].getIndexableField(i)]);
   }
   return args[0];

@@ -112,7 +112,7 @@ const tests = [
 
   ['BinaryOperation', 'test', 3 + 8, integerClass],
 
-  ['NumberOfTests', 'numberOfTests', 65, integerClass],
+  ['NumberOfTests', 'numberOfTests', 65, integerClass]
 ];
 
 function assertEqualsSomValue(expectedValue, expectedType, actualValue) {
@@ -143,7 +143,7 @@ describe('BasicInterpreterTests', () => {
     const expectedResultType = test[3];
 
     it(`should pass ${testClass}>>#${testMethod}`, () => {
-      // eslint-disable-next-line no-unused-expressions
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       expect(universe).not.to.be.null;
 
       universe.setAvoidExit(true);

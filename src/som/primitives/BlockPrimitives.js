@@ -28,9 +28,11 @@ import { Primitives } from './Primitives.js';
 import { universe } from '../vm/Universe.js';
 
 function _restart(_frame, _args) {
-  throw new RuntimeException('Restart primitive is not supported, #whileTrue:'
-        + ' and #whileTrue: are intrisified so that #restart '
-        + 'is not needed.');
+  throw new RuntimeException(
+    'Restart primitive is not supported, #whileTrue:' +
+      ' and #whileTrue: are intrisified so that #restart ' +
+      'is not needed.'
+  );
 }
 
 function _whileTrue(frame, args) {

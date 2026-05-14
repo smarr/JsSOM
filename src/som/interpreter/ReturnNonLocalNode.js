@@ -30,9 +30,13 @@ export class ReturnException {
     this.targetFrame = targetFrame;
   }
 
-  hasReachedTarget(current) { return current === this.targetFrame; }
+  hasReachedTarget(current) {
+    return current === this.targetFrame;
+  }
 
-  getResult() { return this.result; }
+  getResult() {
+    return this.result;
+  }
 }
 
 export class ReturnNonLocalNode extends ContextualNode {

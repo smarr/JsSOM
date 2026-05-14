@@ -33,9 +33,7 @@ function _asString(_frame, args) {
 }
 
 function _sqrt(_frame, args) {
-  return universe.newDouble(
-    Math.sqrt(args[0].getEmbeddedDouble()),
-  );
+  return universe.newDouble(Math.sqrt(args[0].getEmbeddedDouble()));
 }
 
 function _plus(_frame, args) {

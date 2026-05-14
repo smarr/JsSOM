@@ -27,7 +27,7 @@ class AssertionFailedException extends Error {
     if ('captureStackTrace' in Error) {
       Error.captureStackTrace(this, AssertionFailedException);
     } else {
-      this.stack = (new Error()).stack;
+      this.stack = new Error().stack;
     }
   }
 }

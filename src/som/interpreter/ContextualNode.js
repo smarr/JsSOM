@@ -34,7 +34,9 @@ export class ContextualNode extends Node {
   }
 
   determineContext(frame) {
-    if (this.contextLevel === 0) { return frame; }
+    if (this.contextLevel === 0) {
+      return frame;
+    }
 
     let self = frame.getReceiver();
     let i = this.contextLevel - 1;

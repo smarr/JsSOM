@@ -50,7 +50,9 @@ export class SSymbol extends SString {
 
     // Iterate through every character in the signature string
     for (let i = 0; i < this.value.length; i += 1) {
-      if (this.value.charAt(i) === ':') { numberOfColons += 1; }
+      if (this.value.charAt(i) === ':') {
+        numberOfColons += 1;
+      }
     }
 
     // The number of arguments is equal to the number of colons plus one
@@ -68,7 +70,9 @@ export class SSymbol extends SString {
   isBinarySignature() {
     // Check the individual characters of the string
     for (const c in this.value) {
-      if (!isOperator(c)) { return false; }
+      if (!isOperator(c)) {
+        return false;
+      }
     }
     return true;
   }

@@ -63,7 +63,7 @@ if (typeof global === 'undefined' || process.browser) {
     _stdout(`<span style='color:red';>${msg}<br/></span>`);
   };
 
-  _exitInterpreter = (_errorCode) => { };
+  _exitInterpreter = (_errorCode) => {};
 
   _isBrowser = true;
 } else {
@@ -73,8 +73,12 @@ if (typeof global === 'undefined' || process.browser) {
     return timeTuple[0] * 1000 + timeTuple[1] / 1000000;
   };
 
-  _stdout = (msg) => { process.stdout.write(msg); };
-  _stderr = (msg) => { process.stderr.write(msg); };
+  _stdout = (msg) => {
+    process.stdout.write(msg);
+  };
+  _stderr = (msg) => {
+    process.stderr.write(msg);
+  };
 
   _stdoutnl = (msg) => {
     process.stdout.write(`${msg}\n`);

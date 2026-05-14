@@ -9,11 +9,19 @@ export class SourceSection {
     this._length = length;
   }
 
-  startLine() { return this._startLine; }
+  startLine() {
+    return this._startLine;
+  }
 
-  startColumn() { return this._startColumn; }
+  startColumn() {
+    return this._startColumn;
+  }
 
-  charIndex() { return this._charIndex; }
+  charIndex() {
+    return this._charIndex;
+  }
 
-  length() { return this._length; }
+  length() {
+    return this._length;
+  }
 }

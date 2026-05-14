@@ -27,11 +27,13 @@ export class IllegalStateException {
     if ('captureStackTrace' in Error) {
       Error.captureStackTrace(this, IllegalStateException);
     } else {
-      this.stack = (new Error()).stack;
+      this.stack = new Error().stack;
     }
   }
 
-  getMessage() { return this.msg; }
+  getMessage() {
+    return this.msg;
+  }
 }
 
 export class RuntimeException {
@@ -42,9 +44,11 @@ export class RuntimeException {
     if ('captureStackTrace' in Error) {
       Error.captureStackTrace(this, RuntimeException);
     } else {
-      this.stack = (new Error()).stack;
+      this.stack = new Error().stack;
     }
   }
 
-  getMessage() { return this.msg; }
+  getMessage() {
+    return this.msg;
+  }
 }

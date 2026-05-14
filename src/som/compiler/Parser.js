@@ -29,7 +29,11 @@ import { MethodGenerationContext } from './MethodGenerationContext.js';
 import { SourceSection } from './SourceSection.js';
 
 import {
-  createGlobalRead, createSequence, createBlockNode, createMessageSend, createLiteralNode,
+  createGlobalRead,
+  createSequence,
+  createBlockNode,
+  createMessageSend,
+  createLiteralNode
 } from '../interpreter/NodeFactory.js';
 
 import { universe } from '../vm/Universe.js';
@@ -94,14 +98,44 @@ class ParseErrorWithSymbolList extends ParseError {
   }
 }
 
-const singleOpSyms = [Sym.Not, Sym.And, Sym.Or, Sym.Star, Sym.Div,
-  Sym.Mod, Sym.Plus, Sym.Equal, Sym.More, Sym.Less,
-  Sym.Comma, Sym.At, Sym.Per, Sym.Minus, Sym.NONE];
+const singleOpSyms = [
+  Sym.Not,
+  Sym.And,
+  Sym.Or,
+  Sym.Star,
+  Sym.Div,
+  Sym.Mod,
+  Sym.Plus,
+  Sym.Equal,
+  Sym.More,
+  Sym.Less,
+  Sym.Comma,
+  Sym.At,
+  Sym.Per,
+  Sym.Minus,
+  Sym.NONE
+];
 
-const binaryOpSyms = [Sym.Or, Sym.Comma, Sym.Minus, Sym.Equal, Sym.Not,
-  Sym.And, Sym.Or, Sym.Star, Sym.Div, Sym.Mod,
-  Sym.Plus, Sym.Equal, Sym.More, Sym.Less, Sym.Comma,
-  Sym.At, Sym.Per, Sym.NONE];
+const binaryOpSyms = [
+  Sym.Or,
+  Sym.Comma,
+  Sym.Minus,
+  Sym.Equal,
+  Sym.Not,
+  Sym.And,
+  Sym.Or,
+  Sym.Star,
+  Sym.Div,
+  Sym.Mod,
+  Sym.Plus,
+  Sym.Equal,
+  Sym.More,
+  Sym.Less,
+  Sym.Comma,
+  Sym.At,
+  Sym.Per,
+  Sym.NONE
+];
 
 const keywordSelectorSyms = [Sym.Keyword, Sym.KeywordSequence];
 
@@ -134,8 +168,7 @@ export class Parser {
   }
 
   toString() {
-    return `Parser(${this.fileName}, ${
-      this.getCoordinate().toString()})`;
+    return `Parser(${this.fileName}, ${this.getCoordinate().toString()})`;
   }
 
   getCoordinate() {
@@ -152,25 +185,29 @@ export class Parser {
     this.expect(Sym.NewTerm);
     this.instanceFields(cgenc);
 
-    while (isIdentifier(this.sym) || this.sym === Sym.Keyword
-            || this.sym === Sym.OperatorSequence || this.symIn(binaryOpSyms)) {
+    while (
+      isIdentifier(this.sym) ||
+      this.sym === Sym.Keyword ||
+      this.sym === Sym.OperatorSequence ||
+      this.symIn(binaryOpSyms)
+    ) {
       const mgenc = new MethodGenerationContext(cgenc, null, false);
       const methodBody = this.method(mgenc);
-      cgenc.addInstanceMethod(
-        mgenc.assemble(methodBody, this.lastMethodsSourceSection),
-      );
+      cgenc.addInstanceMethod(mgenc.assemble(methodBody, this.lastMethodsSourceSection));
     }
 
     if (this.accept(Sym.Separator)) {
       cgenc.setClassSide(true);
       this.classFields(cgenc);
-      while (isIdentifier(this.sym) || this.sym === Sym.Keyword
-                || this.sym === Sym.OperatorSequence || this.symIn(binaryOpSyms)) {
+      while (
+        isIdentifier(this.sym) ||
+        this.sym === Sym.Keyword ||
+        this.sym === Sym.OperatorSequence ||
+        this.symIn(binaryOpSyms)
+      ) {
         const mgenc = new MethodGenerationContext(cgenc, null, false);
         const methodBody = this.method(mgenc);
-        cgenc.addClassMethod(
-          mgenc.assemble(methodBody, this.lastMethodsSourceSection),
-        );
+        cgenc.addClassMethod(mgenc.assemble(methodBody, this.lastMethodsSourceSection));
       }
     }
     this.expect(Sym.EndTerm);
@@ -190,8 +227,7 @@ export class Parser {
     if (superName.getString() !== 'nil') {
       const superClass = universe.loadClass(superName);
       if (superClass === null) {
-        throw new ParseError(`Super class ${superName.getString()
-        } could not be loaded`, Sym.NONE, this);
+        throw new ParseError(`Super class ${superName.getString()} could not be loaded`, Sym.NONE, this);
       }
 
       cgenc.setInstanceFieldsOfSuper(superClass.getInstanceFields());
@@ -220,17 +256,23 @@ export class Parser {
   }
 
   expect(s) {
-    if (this.accept(s)) { return true; }
+    if (this.accept(s)) {
+      return true;
+    }
 
-    throw new ParseError('Unexpected symbol. Expected %(expected)s, but found '
-            + '%(found)s', s, this);
+    throw new ParseError('Unexpected symbol. Expected %(expected)s, but found ' + '%(found)s', s, this);
   }
 
   expectOneOf(ss) {
-    if (this.acceptOneOf(ss)) { return true; }
+    if (this.acceptOneOf(ss)) {
+      return true;
+    }
 
-    throw new ParseErrorWithSymbolList('Unexpected symbol. Expected one of '
-            + '%(expected)s, but found %(found)s', ss, this);
+    throw new ParseErrorWithSymbolList(
+      'Unexpected symbol. Expected one of ' + '%(expected)s, but found %(found)s',
+      ss,
+      this
+    );
   }
 
   instanceFields(cgenc) {
@@ -259,7 +301,7 @@ export class Parser {
       coord.startLine,
       coord.startColumn,
       coord.charIndex,
-      this.lexer.getNumberOfCharactersRead() - coord.charIndex,
+      this.lexer.getNumberOfCharactersRead() - coord.charIndex
     );
   }
 
@@ -308,8 +350,7 @@ export class Parser {
     do {
       kw += this.keyword();
       mgenc.addArgumentIfAbsent(this.argument());
-    }
-    while (this.sym === Sym.Keyword);
+    } while (this.sym === Sym.Keyword);
 
     mgenc.setSignature(universe.symbolFor(kw.toString()));
   }
@@ -331,9 +372,13 @@ export class Parser {
   binarySelector() {
     const s = this.text;
 
-    if (this.acceptOneOf(singleOpSyms)) { /* noop */
-    } else if (this.accept(Sym.OperatorSequence)) { /* noop */
-    } else { this.expect(Sym.NONE); }
+    if (this.acceptOneOf(singleOpSyms)) {
+      /* noop */
+    } else if (this.accept(Sym.OperatorSequence)) {
+      /* noop */
+    } else {
+      this.expect(Sym.NONE);
+    }
 
     return universe.symbolFor(s);
   }
@@ -375,14 +420,15 @@ export class Parser {
     const coord = this.getCoordinate();
     const expressions = [];
 
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       if (this.accept(Sym.Exit)) {
         expressions.push(this.result(mgenc));
         return this.createSequenceNode(coord, expressions);
-      } if (this.sym === Sym.EndBlock) {
+      }
+      if (this.sym === Sym.EndBlock) {
         return this.createSequenceNode(coord, expressions);
-      } if (this.sym === Sym.EndTerm) {
+      }
+      if (this.sym === Sym.EndTerm) {
         // the end of the method has been found (EndTerm) - make it implicitly
         // return "self"
         const self = this.variableRead(mgenc, 'self', this.getSource(this.getCoordinate()));
@@ -398,7 +444,8 @@ export class Parser {
   createSequenceNode(coord, expressions) {
     if (expressions.length === 0) {
       return createGlobalRead(universe.symbolFor('nil'), this.getSource(coord));
-    } if (expressions.length === 1) {
+    }
+    if (expressions.length === 1) {
       return expressions[0];
     }
     return createSequence(expressions.slice(), this.getSource(coord));
@@ -433,11 +480,10 @@ export class Parser {
 
     if (!isIdentifier(this.sym)) {
       throw new ParseError(
-        'Assignments should always target variables or'
-                + ' fields, but found instead a %(found)s',
+        'Assignments should always target variables or' + ' fields, but found instead a %(found)s',
         Sym.Identifier,
 
-        this,
+        this
       );
     }
     const variable = this.assignment();
@@ -462,8 +508,12 @@ export class Parser {
 
   evaluation(mgenc) {
     let exp = this.primary(mgenc);
-    if (isIdentifier(this.sym) || this.sym === Sym.Keyword
-            || this.sym === Sym.OperatorSequence || this.symIn(binaryOpSyms)) {
+    if (
+      isIdentifier(this.sym) ||
+      this.sym === Sym.Keyword ||
+      this.sym === Sym.OperatorSequence ||
+      this.symIn(binaryOpSyms)
+    ) {
       exp = this.messages(mgenc, exp);
     }
     return exp;
@@ -566,8 +616,7 @@ export class Parser {
     do {
       kw += this.keyword();
       args.push(this.formula(mgenc));
-    }
-    while (this.sym === Sym.Keyword);
+    } while (this.sym === Sym.Keyword);
 
     const msg = universe.symbolFor(kw);
 
@@ -646,9 +695,12 @@ export class Parser {
 
     try {
       i = BigInt(this.text);
-    } catch (e) {
-      throw new ParseError(`${'Could not parse integer. Expected a number '
-                + "but got '"}${this.text}'`, Sym.NONE, this);
+    } catch (_e) {
+      throw new ParseError(
+        `Could not parse integer. Expected a number but got '${this.text}'`,
+        Sym.NONE,
+        this
+      );
     }
 
     if (isNegative) {
@@ -662,8 +714,11 @@ export class Parser {
   literalDouble(isNegative) {
     let d = parseFloat(this.text);
     if (Number.isNaN(d)) {
-      throw new ParseError(`${'Could not parse double. Expected a number '
-                + "but got '"}${this.text}'`, Sym.NONE, this);
+      throw new ParseError(
+        `Could not parse double. Expected a number but got '${this.text}'`,
+        Sym.NONE,
+        this
+      );
     }
 
     if (isNegative) {
@@ -703,7 +758,8 @@ export class Parser {
   selector() {
     if (this.sym === Sym.OperatorSequence || this.symIn(singleOpSyms)) {
       return this.binarySelector();
-    } if (this.sym === Sym.Keyword || this.sym === Sym.KeywordSequence) {
+    }
+    if (this.sym === Sym.Keyword || this.sym === Sym.KeywordSequence) {
       return this.keywordSelector();
     }
     return this.unarySelector();
@@ -758,8 +814,7 @@ export class Parser {
     do {
       this.expect(Sym.Colon);
       mgenc.addArgumentIfAbsent(this.argument());
-    }
-    while (this.sym === Sym.Colon);
+    } while (this.sym === Sym.Colon);
   }
 
   variableRead(mgenc, variableName, source) {
@@ -798,9 +853,11 @@ export class Parser {
     if (fieldWrite !== null) {
       return fieldWrite;
     }
-    throw new RuntimeException(`${'Neither a variable nor a field found '
-                + 'in current scope that is named '}${variableName
-    }. Arguments are read-only.`);
+    throw new RuntimeException(
+      `${'Neither a variable nor a field found ' + 'in current scope that is named '}${
+        variableName
+      }. Arguments are read-only.`
+    );
   }
 
   getSymbolFromLexer() {

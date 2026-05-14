@@ -33,11 +33,13 @@ export class MessageSendNode extends Node {
     this.children_arguments = this.adopt(argumentNodes);
 
     if (argumentNodes[0].isSuperNode()) {
-      this.child_dispatch = this.adopt(new UninitializedSuperDispatchNode(
-        selector,
-        argumentNodes[0].getHolderClass(),
-        argumentNodes[0].isClassSide(),
-      ));
+      this.child_dispatch = this.adopt(
+        new UninitializedSuperDispatchNode(
+          selector,
+          argumentNodes[0].getHolderClass(),
+          argumentNodes[0].isClassSide()
+        )
+      );
     } else {
       this.child_dispatch = this.adopt(new GenericDispatchNode(selector));
     }

@@ -29,9 +29,23 @@ function isIdentifierChar(c) {
 }
 
 export function isOperator(c) {
-  return c === '~' || c === '&' || c === '|' || c === '*' || c === '/' || c === '@'
-    || c === '+' || c === '-' || c === '=' || c === '>' || c === '<'
-    || c === ',' || c === '%' || c === '\\' || c === '@';
+  return (
+    c === '~' ||
+    c === '&' ||
+    c === '|' ||
+    c === '*' ||
+    c === '/' ||
+    c === '@' ||
+    c === '+' ||
+    c === '-' ||
+    c === '=' ||
+    c === '>' ||
+    c === '<' ||
+    c === ',' ||
+    c === '%' ||
+    c === '\\' ||
+    c === '@'
+  );
 }
 
 class LexerState {
@@ -73,11 +87,17 @@ class SourceCoordinate {
     this._charIndex = charIndex;
   }
 
-  get startLine() { return this._startLine; }
+  get startLine() {
+    return this._startLine;
+  }
 
-  get startColumn() { return this._startColumn; }
+  get startColumn() {
+    return this._startColumn;
+  }
 
-  get charIndex() { return this._charIndex; }
+  get charIndex() {
+    return this._charIndex;
+  }
 
   toString() {
     return `SrcCoord(line: ${this._startLine}, col: ${this._startColumn})`;
@@ -96,7 +116,7 @@ export class Lexer {
     return new SourceCoordinate(
       this.state.lineNumber,
       this.state.linePos + 1,
-      this.state.charsRead + this.state.linePos,
+      this.state.charsRead + this.state.linePos
     );
   }
 
@@ -125,9 +145,7 @@ export class Lexer {
       }
       this.skipWhiteSpace();
       this.skipComment();
-    }
-    while (this.endOfLine() || /\s/.test(this.currentChar())
-            || this.currentChar() === '"');
+    } while (this.endOfLine() || /\s/.test(this.currentChar()) || this.currentChar() === '"');
 
     if (this.currentChar() === '\'') {
       this.lexString();
@@ -204,9 +222,7 @@ export class Lexer {
       this.state.text += this.bufchar(this.state.linePos);
       this.state.linePos += 1;
 
-      if (!sawDecimalMark
-                && this.currentChar() === '.'
-                && /\d/.test(this.bufchar(this.state.linePos + 1))) {
+      if (!sawDecimalMark && this.currentChar() === '.' && /\d/.test(this.bufchar(this.state.linePos + 1))) {
         this.state.sym = Sym.Double;
         this.state.text += this.bufchar(this.state.linePos);
         this.state.linePos += 1;
@@ -218,14 +234,30 @@ export class Lexer {
     const current = this.currentChar();
 
     switch (current) {
-      case 't': this.state.text += '\t'; break;
-      case 'b': this.state.text += '\b'; break;
-      case 'n': this.state.text += '\n'; break;
-      case 'r': this.state.text += '\r'; break;
-      case 'f': this.state.text += '\f'; break;
-      case '\'': this.state.text += "'"; break;
-      case '\\': this.state.text += '\\'; break;
-      case '0': this.state.text += '\0'; break;
+      case 't':
+        this.state.text += '\t';
+        break;
+      case 'b':
+        this.state.text += '\b';
+        break;
+      case 'n':
+        this.state.text += '\n';
+        break;
+      case 'r':
+        this.state.text += '\r';
+        break;
+      case 'f':
+        this.state.text += '\f';
+        break;
+      case '\'':
+        this.state.text += '\'';
+        break;
+      case '\\':
+        this.state.text += '\\';
+        break;
+      case '0':
+        this.state.text += '\0';
+        break;
       default:
         throw new Error(`Unsupported escape sequence \\${current}`);
     }
@@ -248,7 +280,9 @@ export class Lexer {
 
     while (this.currentChar() !== '\'') {
       while (this.endOfLine()) {
-        if (!this.readNextLine()) { return; }
+        if (!this.readNextLine()) {
+          return;
+        }
         this.state.text += '\n';
       }
       if (this.currentChar() !== '\'') {
@@ -337,10 +371,14 @@ export class Lexer {
   }
 
   readNextLine() {
-    if (this.state.lineNumber >= this.fileLines.length) { return false; }
+    if (this.state.lineNumber >= this.fileLines.length) {
+      return false;
+    }
 
     let charCntOldLine = this.state.line.length;
-    if (this.state.lineNumber > 0) { charCntOldLine += 1; } // add +1 for line break
+    if (this.state.lineNumber > 0) {
+      charCntOldLine += 1;
+    } // add +1 for line break
     this.state.line = this.fileLines[this.state.lineNumber];
     this.state.charsRead = charCntOldLine;
     this.state.lineNumber += 1;
@@ -373,7 +411,9 @@ export class Lexer {
       do {
         this.state.linePos += 1;
         while (this.endOfLine()) {
-          if (!this.readNextLine()) { return; }
+          if (!this.readNextLine()) {
+            return;
+          }
         }
       } while (this.currentChar() !== '"');
       this.state.linePos += 1;

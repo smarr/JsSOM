@@ -27,11 +27,12 @@ export class Node {
     this.source = source;
   }
 
-  getSource() { return this.source; }
+  getSource() {
+    return this.source;
+  }
 
   adopt(nodeOrNodes) {
     if (nodeOrNodes instanceof Array) {
-      // eslint-disable-next-line guard-for-in
       for (const i in nodeOrNodes) {
         nodeOrNodes[i].parent = this;
       }
@@ -45,12 +46,12 @@ export class Node {
     const { parent } = this;
     let replaced = false;
 
-    // eslint-disable-next-line guard-for-in
     for (const prop in parent) {
       const isChild = prop.indexOf('child_') >= 0;
       const isChildren = prop.indexOf('children_') >= 0;
       if (isChild || isChildren) {
-        if (isChildren) { // an array with child nodes
+        if (isChildren) {
+          // an array with child nodes
           const children = parent[prop];
           for (const i in children) {
             if (children[i] === this) {
@@ -60,7 +61,8 @@ export class Node {
             }
           }
         }
-        if (!replaced) { // just a simple child node
+        if (!replaced) {
+          // just a simple child node
           if (parent[prop] === this) {
             parent[prop] = newNode;
             replaced = true;

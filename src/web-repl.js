@@ -27,7 +27,8 @@ export function handleReplInput(e) {
     replInvokeCnt += 1;
 
     const stmt = `Shell_Class_${replInvokeCnt} = ( run: it = ( | tmp | tmp := (${
-      input} ). 'it = ' print. ^tmp println ) )`;
+      input
+    } ). 'it = ' print. ^tmp println ) )`;
     const myClass = compileClassString(stmt, null, universe);
     const myObject = universe.newInstance(myClass);
     const shellMethod = myClass.lookupInvokable(universe.symbolFor('run:'));

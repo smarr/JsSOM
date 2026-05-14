@@ -43,7 +43,8 @@ const tests = [
   'String',
   'Symbol',
   'System',
-  'Vector'];
+  'Vector'
+];
 
 describe('SomTests', () => {
   for (const test of tests) {

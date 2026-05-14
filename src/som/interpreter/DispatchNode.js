@@ -67,9 +67,7 @@ export class UninitializedSuperDispatchNode extends Node {
 
   executeDispatch(frame, args) {
     const lookupClass = this.getLookupClass();
-    // eslint-disable-next-line no-use-before-define
-    return this.replace(new CachedSuperDispatchNode(this.selector, lookupClass))
-      .executeDispatch(frame, args);
+    return this.replace(new CachedSuperDispatchNode(this.selector, lookupClass)).executeDispatch(frame, args);
   }
 }
 

@@ -59,8 +59,7 @@ export function compileClassFile(path, file, systemClass, universe) {
   const cnameC = cname.getString();
 
   if (file !== cnameC) {
-    throw new IllegalStateException(`File name ${file
-    } does not match class name ${cnameC}`);
+    throw new IllegalStateException(`File name ${file} does not match class name ${cnameC}`);
   }
   return result;
 }

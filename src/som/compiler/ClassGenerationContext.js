@@ -73,13 +73,11 @@ export class ClassGenerationContext {
   }
 
   hasField(symbol) {
-    return (this.classSide ? this.classFields : this.instanceFields)
-      .indexOf(symbol) !== -1;
+    return (this.classSide ? this.classFields : this.instanceFields).indexOf(symbol) !== -1;
   }
 
   getFieldIndex(symbol) {
-    return (this.classSide ? this.classFields : this.instanceFields)
-      .indexOf(symbol);
+    return (this.classSide ? this.classFields : this.instanceFields).indexOf(symbol);
   }
 
   isClassSide() {
@@ -94,12 +92,8 @@ export class ClassGenerationContext {
     const resultClass = universe.newClass(universe.metaclassClass);
 
     // Initialize the class of the resulting class
-    resultClass.setInstanceFields(
-      universe.newArrayFrom(this.classFields.slice()),
-    );
-    resultClass.setInstanceInvokables(
-      universe.newArrayFrom(this.classMethods.slice()),
-    );
+    resultClass.setInstanceFields(universe.newArrayFrom(this.classFields.slice()));
+    resultClass.setInstanceInvokables(universe.newArrayFrom(this.classMethods.slice()));
     resultClass.setName(universe.symbolFor(ccName));
 
     const superMClass = superClass.getClass();
@@ -111,32 +105,20 @@ export class ClassGenerationContext {
     // Initialize the resulting class
     result.setName(this.name);
     result.setSuperClass(superClass);
-    result.setInstanceFields(
-      universe.newArrayFrom(this.instanceFields.slice()),
-    );
-    result.setInstanceInvokables(
-      universe.newArrayFrom(this.instanceMethods.slice()),
-    );
+    result.setInstanceFields(universe.newArrayFrom(this.instanceFields.slice()));
+    result.setInstanceInvokables(universe.newArrayFrom(this.instanceMethods.slice()));
 
     return result;
   }
 
   assembleSystemClass(systemClass, universe) {
-    systemClass.setInstanceInvokables(
-      universe.newArrayFrom(this.instanceMethods.slice()),
-    );
-    systemClass.setInstanceFields(
-      universe.newArrayFrom(this.instanceFields.slice()),
-    );
+    systemClass.setInstanceInvokables(universe.newArrayFrom(this.instanceMethods.slice()));
+    systemClass.setInstanceFields(universe.newArrayFrom(this.instanceFields.slice()));
 
     // class-bound == class-instance-bound
     const superMClass = systemClass.getClass();
-    superMClass.setInstanceInvokables(
-      universe.newArrayFrom(this.classMethods.slice()),
-    );
-    superMClass.setInstanceFields(
-      universe.newArrayFrom(this.classFields.slice()),
-    );
+    superMClass.setInstanceInvokables(universe.newArrayFrom(this.classMethods.slice()));
+    superMClass.setInstanceFields(universe.newArrayFrom(this.classFields.slice()));
   }
 
   toString() {

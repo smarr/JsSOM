@@ -43,9 +43,7 @@ export class UninitializedGlobalReadNode extends Node {
     // Get the global from the universe
     const assoc = universe.getGlobalsAssociation(this.globalName);
     if (assoc != null) {
-      // eslint-disable-next-line no-use-before-define
-      return this.replace(new CachedGlobalReadNode(assoc, this.source))
-        .execute(frame);
+      return this.replace(new CachedGlobalReadNode(assoc, this.source)).execute(frame);
     }
     return this.executeUnknownGlobal(frame);
   }
