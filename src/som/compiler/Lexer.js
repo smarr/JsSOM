@@ -147,7 +147,7 @@ export class Lexer {
       this.skipComment();
     } while (this.endOfLine() || /\s/.test(this.currentChar()) || this.currentChar() === '"');
 
-    if (this.currentChar() === '\'') {
+    if (this.currentChar() === "'") {
       this.lexString();
     } else if (this.currentChar() === '[') {
       this.match(Sym.NewBlock);
@@ -249,8 +249,8 @@ export class Lexer {
       case 'f':
         this.state.text += '\f';
         break;
-      case '\'':
-        this.state.text += '\'';
+      case "'":
+        this.state.text += "'";
         break;
       case '\\':
         this.state.text += '\\';
@@ -278,14 +278,14 @@ export class Lexer {
     this.state.set(Sym.STString, '');
     this.state.linePos += 1;
 
-    while (this.currentChar() !== '\'') {
+    while (this.currentChar() !== "'") {
       while (this.endOfLine()) {
         if (!this.readNextLine()) {
           return;
         }
         this.state.text += '\n';
       }
-      if (this.currentChar() !== '\'') {
+      if (this.currentChar() !== "'") {
         this.lexStringChar();
       }
     }

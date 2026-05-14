@@ -33,8 +33,10 @@
     "clobber": "rm -Rf build/",
     "core-lib": "git submodule update --init --recursive",
     "test": "mocha -t 3000 -u bdd ./tests/som/",
-    "lint": "eslint src tests",
+    "lint": "npm run lint-check && npm run format-check",
+    "lint-check": "eslint src tests",
     "format": "prettier --config .prettierrc --write src tests",
+    "format-check": "prettier --config .prettierrc --check src tests",
     "deploy-som-st": "npm run browserify && mkdir -p ../som-st.github.io/jssom && cp -r build/. ../som-st.github.io/jssom"
   },
   "type": "module"

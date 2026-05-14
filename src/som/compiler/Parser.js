@@ -696,11 +696,7 @@ export class Parser {
     try {
       i = BigInt(this.text);
     } catch (_e) {
-      throw new ParseError(
-        `Could not parse integer. Expected a number but got '${this.text}'`,
-        Sym.NONE,
-        this
-      );
+      throw new ParseError(`Could not parse integer. Expected a number but got '${this.text}'`, Sym.NONE, this);
     }
 
     if (isNegative) {
@@ -714,11 +710,7 @@ export class Parser {
   literalDouble(isNegative) {
     let d = parseFloat(this.text);
     if (Number.isNaN(d)) {
-      throw new ParseError(
-        `Could not parse double. Expected a number but got '${this.text}'`,
-        Sym.NONE,
-        this
-      );
+      throw new ParseError(`Could not parse double. Expected a number but got '${this.text}'`, Sym.NONE, this);
     }
 
     if (isNegative) {

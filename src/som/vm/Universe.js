@@ -323,8 +323,8 @@ class Universe {
       throw new IllegalStateException(
         `${systemClass.getName().getString()} class could not be loaded. ` +
           'It is likely that the class path has not been initialized properly. ' +
-          'Please set system property \'system.class.path\' or ' +
-          'pass the \'-cp\' command-line parameter.'
+          "Please set system property 'system.class.path' or " +
+          "pass the '-cp' command-line parameter."
       );
     }
     this.loadPrimitives(result, true);

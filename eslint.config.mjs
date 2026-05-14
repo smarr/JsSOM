@@ -42,7 +42,8 @@ export default defineConfig([
         'error',
         'single',
         {
-          allowTemplateLiterals: true
+          allowTemplateLiterals: true,
+          avoidEscape: true
         }
       ],
 
