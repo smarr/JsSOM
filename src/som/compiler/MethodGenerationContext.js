@@ -1,24 +1,24 @@
 /*
-* Copyright (c) 2014 Stefan Marr, mail@stefan-marr.de
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in
-* all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-* THE SOFTWARE.
-*/
+ * Copyright (c) 2014 Stefan Marr, mail@stefan-marr.de
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 // @ts-check
 
 import { IllegalStateException } from '../../lib/exceptions.js';
@@ -84,7 +84,7 @@ export class MethodGenerationContext {
       this.signature,
       this.getSourceSectionForMethod(sourceSection),
       body,
-      this.locals.length,
+      this.locals.length
     );
   }
 
@@ -96,7 +96,7 @@ export class MethodGenerationContext {
       ssBody.startColumn(),
       ssBody.charIndex(),
 
-      ssBody.length(),
+      ssBody.length()
     );
   }
 
@@ -154,8 +154,7 @@ export class MethodGenerationContext {
   }
 
   getContextLevel(varName) {
-    if (this.localNames.indexOf(varName) !== -1
-            || this.argNames.indexOf(varName) !== -1) {
+    if (this.localNames.indexOf(varName) !== -1 || this.argNames.indexOf(varName) !== -1) {
       return 0;
     }
 
@@ -190,7 +189,7 @@ export class MethodGenerationContext {
 
       this.holderGenc.isClassSide(),
 
-      source,
+      source
     );
   }
 
@@ -205,7 +204,7 @@ export class MethodGenerationContext {
       this.getContextLevel(variableName),
       valExpr,
 
-      source,
+      source
     );
   }
 
@@ -226,7 +225,7 @@ export class MethodGenerationContext {
       this.getSelfRead(source),
       this.holderGenc.getFieldIndex(fieldName),
 
-      source,
+      source
     );
   }
 
@@ -239,18 +238,13 @@ export class MethodGenerationContext {
       return null;
     }
 
-    return factory.createFieldWrite(
-      this.getSelfRead(source),
-      exp,
-      this.holderGenc.getFieldIndex(fieldName),
-      source,
-    );
+    return factory.createFieldWrite(this.getSelfRead(source), exp, this.holderGenc.getFieldIndex(fieldName), source);
   }
 
   /**
-     * @returns {Number} of explicit arguments,
-     *         i.e., excluding the implicit 'self' argument
-     */
+   * @returns {Number} of explicit arguments,
+   *         i.e., excluding the implicit 'self' argument
+   */
   getNumberOfArguments() {
     return this.args.length;
   }

@@ -1,25 +1,24 @@
-/* eslint-disable no-use-before-define */
 /*
-* Copyright (c) 2014-2019 Stefan Marr, mail@stefan-marr.de
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in
-* all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-* THE SOFTWARE.
-*/
+ * Copyright (c) 2014-2019 Stefan Marr, mail@stefan-marr.de
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 // @ts-check
 
 import { RuntimeException } from '../../lib/exceptions.js';
@@ -68,7 +67,8 @@ export class SInteger extends SAbstractObject {
   primAdd(right) {
     if (right instanceof SBigInteger) {
       return intOrBigInt(right.getEmbeddedBigInteger() + BigInt(this.intVal), universe);
-    } if (right instanceof SDouble) {
+    }
+    if (right instanceof SDouble) {
       return this.toDouble().primAdd(right);
     }
     const r = right.getEmbeddedInteger();
@@ -78,7 +78,8 @@ export class SInteger extends SAbstractObject {
   primSubtract(right) {
     if (right instanceof SBigInteger) {
       return intOrBigInt(BigInt(this.intVal) - right.getEmbeddedBigInteger(), universe);
-    } if (right instanceof SDouble) {
+    }
+    if (right instanceof SDouble) {
       return this.toDouble().primSubtract(right);
     }
     const r = right.getEmbeddedInteger();
@@ -88,7 +89,8 @@ export class SInteger extends SAbstractObject {
   primMultiply(right) {
     if (right instanceof SBigInteger) {
       return intOrBigInt(right.getEmbeddedBigInteger().multiply(this.intVal), universe);
-    } if (right instanceof SDouble) {
+    }
+    if (right instanceof SDouble) {
       return this.toDouble().primMultiply(right);
     }
     const r = right.getEmbeddedInteger();
@@ -111,7 +113,8 @@ export class SInteger extends SAbstractObject {
     if (right instanceof SBigInteger) {
       const result = BigInt(this.intVal).divide(right.getEmbeddedBigInteger());
       return universe.newBigInteger(result);
-    } if (right instanceof SDouble) {
+    }
+    if (right instanceof SDouble) {
       return this.toDouble().primIntDiv(right);
     }
     const result = Math.floor(this.intVal / right.getEmbeddedInteger());
@@ -122,7 +125,8 @@ export class SInteger extends SAbstractObject {
     if (right instanceof SBigInteger) {
       const result = BigInt(this.intVal).mod(right.getEmbeddedBigInteger());
       return universe.newBigInteger(result);
-    } if (right instanceof SDouble) {
+    }
+    if (right instanceof SDouble) {
       return this.toDouble().primModulo(right);
     }
     const r = right.getEmbeddedInteger();
@@ -157,7 +161,7 @@ export class SInteger extends SAbstractObject {
     } else {
       result = false;
     }
-    return (result) ? universe.trueObject : universe.falseObject;
+    return result ? universe.trueObject : universe.falseObject;
   }
 
   prim32BitUnsignedValue() {
@@ -174,9 +178,11 @@ export class SInteger extends SAbstractObject {
 function asFloat(obj) {
   if (obj instanceof SDouble) {
     return obj.getEmbeddedDouble();
-  } if (obj instanceof SInteger) {
+  }
+  if (obj instanceof SInteger) {
     return obj.getEmbeddedInteger();
-  } if (obj instanceof SBigInteger) {
+  }
+  if (obj instanceof SBigInteger) {
     return Number(obj.getEmbeddedBigInteger());
   }
   throw new RuntimeException(`Cannot coerce ${obj} to Double!`);
@@ -234,11 +240,11 @@ export class SDouble extends SAbstractObject {
   }
 
   primEquals(right) {
-    return (this.doubleVal === asFloat(right)) ? universe.trueObject : universe.falseObject;
+    return this.doubleVal === asFloat(right) ? universe.trueObject : universe.falseObject;
   }
 
   primLessThan(right) {
-    return (this.doubleVal < asFloat(right)) ? universe.trueObject : universe.falseObject;
+    return this.doubleVal < asFloat(right) ? universe.trueObject : universe.falseObject;
   }
 }
 
@@ -267,7 +273,7 @@ export class SBigInteger extends SAbstractObject {
     } else {
       result = this.bigIntVal < right.getEmbeddedBigInteger();
     }
-    return (result) ? universe.trueObject : universe.falseObject;
+    return result ? universe.trueObject : universe.falseObject;
   }
 
   primAsString() {
@@ -277,7 +283,8 @@ export class SBigInteger extends SAbstractObject {
   primAdd(right) {
     if (right instanceof SBigInteger) {
       return universe.newBigInteger(right.getEmbeddedBigInteger() + this.bigIntVal);
-    } if (right instanceof SDouble) {
+    }
+    if (right instanceof SDouble) {
       return universe.newDouble(Number(this.bigIntVal) + right.getEmbeddedDouble());
     }
     return intOrBigInt(this.bigIntVal + BigInt(right.getEmbeddedInteger()), universe);
@@ -368,7 +375,7 @@ export class SBigInteger extends SAbstractObject {
     } else {
       result = false;
     }
-    return (result) ? universe.trueObject : universe.falseObject;
+    return result ? universe.trueObject : universe.falseObject;
   }
 
   prim32BitUnsignedValue() {

@@ -1,31 +1,37 @@
 /*
-* Copyright (c) 2014 Stefan Marr, mail@stefan-marr.de
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in
-* all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-* THE SOFTWARE.
-*/
+ * Copyright (c) 2014 Stefan Marr, mail@stefan-marr.de
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 // @ts-check
 
 import { assert } from '../../lib/assert.js';
 import { IllegalStateException } from '../../lib/exceptions.js';
 
 import {
-  getMillisecondTicks, isBrowser, stderr, stderrnl, stdout, stdoutnl, exitInterpreter,
+  getMillisecondTicks,
+  isBrowser,
+  stderr,
+  stderrnl,
+  stdout,
+  stdoutnl,
+  exitInterpreter
 } from '../../lib/platform.js';
 
 import { Shell } from './Shell.js';
@@ -47,11 +53,17 @@ class Association {
     this.value = valueObj;
   }
 
-  getKey() { return this.key; }
+  getKey() {
+    return this.key;
+  }
 
-  getValue() { return this.value; }
+  getValue() {
+    return this.value;
+  }
 
-  setValue(v) { this.value = v; }
+  setValue(v) {
+    this.value = v;
+  }
 }
 
 class ExitException {
@@ -59,7 +71,9 @@ class ExitException {
     this.exitCode = exitCode;
   }
 
-  getExitCode() { return this.exitCode; }
+  getExitCode() {
+    return this.exitCode;
+  }
 }
 
 function printUsageAndExit() {
@@ -131,9 +145,7 @@ class Universe {
       this.exit(1);
     }
 
-    return [(parentPath === null) ? '' : parentPath,
-      nameParts[0],
-      nameParts.length > 1 ? nameParts[1] : ''];
+    return [parentPath === null ? '' : parentPath, nameParts[0], nameParts.length > 1 ? nameParts[1] : ''];
   }
 
   handleArguments(args) {
@@ -164,7 +176,8 @@ class Universe {
     for (let i = 0; i < remainingArgs.length; i += 1) {
       const split = this.getPathClassExt(remainingArgs[i]);
 
-      if (split[0] !== '') { // there was a path
+      if (split[0] !== '') {
+        // there was a path
         this.classPath.unshift(split[0]);
       }
       remainingArgs[i] = split[1];
@@ -183,7 +196,9 @@ class Universe {
     assert(typeof string === 'string' || string instanceof String);
     // Lookup the symbol in the symbol table
     const result = this.symbolTable[string];
-    if (result != null) { return result; }
+    if (result != null) {
+      return result;
+    }
 
     return this.newSymbol(string);
   }
@@ -236,7 +251,9 @@ class Universe {
   }
 
   loadPrimitives(result, isSystemClass) {
-    if (result == null) { return; }
+    if (result == null) {
+      return;
+    }
 
     // Load primitives if class defines them, or try to load optional
     // primitives defined for system classes.
@@ -266,7 +283,9 @@ class Universe {
   loadClass(name) {
     // Check if the requested class is already in the dictionary of globals
     let result = this.getGlobal(name);
-    if (result != null) { return result; }
+    if (result != null) {
+      return result;
+    }
 
     result = this.loadClassFor(name, null);
 
@@ -282,12 +301,7 @@ class Universe {
       const cpEntry = this.classPath[i];
 
       // Load the class from a file and return the loaded class
-      const result = compileClassFile(
-        cpEntry,
-        name.getString(),
-        systemClass,
-        this,
-      );
+      const result = compileClassFile(cpEntry, name.getString(), systemClass, this);
       if (result == null) {
         continue; // continue searching in the class path
       }
@@ -306,17 +320,20 @@ class Universe {
     const result = this.loadClassFor(systemClass.getName(), systemClass);
 
     if (result === null) {
-      throw new IllegalStateException(`${systemClass.getName().getString()
-      } class could not be loaded. `
-                + 'It is likely that the class path has not been initialized properly. '
-                + 'Please set system property \'system.class.path\' or '
-                + 'pass the \'-cp\' command-line parameter.');
+      throw new IllegalStateException(
+        `${systemClass.getName().getString()} class could not be loaded. ` +
+          'It is likely that the class path has not been initialized properly. ' +
+          "Please set system property 'system.class.path' or " +
+          "pass the '-cp' command-line parameter."
+      );
     }
     this.loadPrimitives(result, true);
   }
 
   initializeObjectSystem() {
-    if (this.objectSystemInitialized) { return; }
+    if (this.objectSystemInitialized) {
+      return;
+    }
 
     // Setup the class reference for the nil object
     this.nilObject.setClass(this.nilClass);
@@ -414,8 +431,7 @@ class Universe {
     }
 
     // Lookup the initialize invokable on the system class
-    const initialize = this.systemClass
-      .lookupInvokable(this.symbolFor('initialize:'));
+    const initialize = this.systemClass.lookupInvokable(this.symbolFor('initialize:'));
     const somArgs = this.newArrayWithStrings(args);
 
     return initialize.invoke(null, [this.systemObject, somArgs]);
@@ -432,8 +448,7 @@ class Universe {
     const clazz = this.loadClass(this.symbolFor(className));
 
     // Lookup the initialize invokable on the system class
-    const initialize = clazz.getClass()
-      .lookupInvokable(this.symbolFor(selector));
+    const initialize = clazz.getClass().lookupInvokable(this.symbolFor(selector));
 
     if (initialize === null) {
       throw new Error(`Lookup of ${selector} in ${className} failed. Can't be executed.`);
@@ -461,7 +476,6 @@ class Universe {
         return e;
       }
       if ('getMessage' in e) {
-        // eslint-disable-next-line no-console
         console.error(e.getMessage());
       }
       throw e;

@@ -1,5 +1,5 @@
 // @ts-check
-// eslint-disable-next-line import/no-unresolved
+// @ts-expect-error - this file is generated during the build process
 import { loadCoreLib } from '../core-lib-data.js';
 
 const somCoreLibData = loadCoreLib();

@@ -13,11 +13,16 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "chai": "5.1.1",
-    "eslint": "8.57.0",
-    "eslint-config-airbnb-base": "15.0.0",
-    "eslint-plugin-import": "2.31.0",
-    "mocha": "10.7.3"
+    "chai": "6.2.2",
+    "@eslint/js": "10.0.1",
+    "eslint": "10.2.1",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-jest": "29.15.2",
+    "eslint-plugin-prettier": "5.5.5",
+    "globals": "17.6.0",
+    "typescript-eslint": "8.59.3",
+    "prettier": "3.8.3",
+    "mocha": "12.0.0-beta-9.3"
   },
   "scripts": {
     "browserify": "mkdir -p build && npm run core-lib && npm run browserify:main && npm run browserify:som-core && npm run browserify:core-lib-loader",
@@ -28,42 +33,11 @@
     "clobber": "rm -Rf build/",
     "core-lib": "git submodule update --init --recursive",
     "test": "mocha -t 3000 -u bdd ./tests/som/",
-    "lint": "eslint src tests",
+    "lint": "npm run lint-check && npm run format-check",
+    "lint-check": "eslint src tests",
+    "format": "prettier --config .prettierrc --write src tests",
+    "format-check": "prettier --config .prettierrc --check src tests",
     "deploy-som-st": "npm run browserify && mkdir -p ../som-st.github.io/jssom && cp -r build/. ../som-st.github.io/jssom"
   },
-  "type": "module",
-  "eslintConfig": {
-    "env": {
-      "browser": true,
-      "es2021": true,
-      "node": true
-    },
-    "extends": [ "airbnb-base" ],
-    "globals": {
-      "process": "readonly",
-      "global": "readonly",
-      "BigInt": "readonly",
-      "describe": "readonly",
-      "it": "readonly"
-    },
-    "parserOptions": {
-      "ecmaVersion": 12,
-      "sourceType": "module"
-    },
-    "rules": {
-      "max-classes-per-file": "off",
-      "import/prefer-default-export": "off",
-      "import/extensions": "off",
-      "import/no-cycle": "off",
-      "import/named": "off",
-      "no-restricted-syntax": "off",
-      "no-underscore-dangle": "off",
-      "no-bitwise": "off",
-      "no-param-reassign": "off",
-      "class-methods-use-this": "off",
-      "prefer-destructuring": "off",
-      "no-continue": "off",
-      "no-unused-vars": ["error", { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_" }]
-    }
-  }
+  "type": "module"
 }
