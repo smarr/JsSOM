@@ -9,7 +9,7 @@ before_script:
   
 jssom:
   stage: test-benchmark
-  tags: [yuria]
+  tags: [kent-yuria]
   script:
     - ./som.sh -cp ./Smalltalk ./TestSuite/TestHarness.som
     - npm install .
