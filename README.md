@@ -49,8 +49,9 @@ details. To build JsSOM, you'll further need PyYAML.
 Build Status
 ------------
 
-Thanks to Travis CI, all commits of this repository are tested.
-The current build status is: [![Build Status](https://travis-ci.org/SOM-st/JsSOM.png?branch=master)](https://travis-ci.org/SOM-st/JsSOM)
+This repo has CI setups for GitLab CI and GitHub Actions.
+
+[![Build Status](https://github.com/SOM-st/JsSOM/actions/workflows/ci.yml/badge.svg)](https://github.com/SOM-st/JsSOM/actions)
 
  [SOM-st]: http://som-st.github.io
  [github]: http://github.com/SOM-st/
